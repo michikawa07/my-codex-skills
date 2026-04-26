@@ -1,6 +1,6 @@
-# codex-config
+# codex-skills
 
-Personal Codex configuration shared across machines.
+Personal Codex skills shared across machines.
 
 This repository keeps user-authored skills in one Git-managed location. Each
 machine can point Codex at `./skills` with a symlink, then update with `git pull`.
@@ -49,4 +49,3 @@ git pull
 
 Because Codex reads the symlinked `skills/` directory, no copy step is needed
 after pulling changes.
-
