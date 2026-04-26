@@ -1,0 +1,4 @@
+interface:
+  display_name: "Empirical Prompt Tuning"
+  short_description: "Evaluate prompts with fresh agents"
+  default_prompt: "Use $empirical-prompt-tuning to evaluate this prompt or skill with fresh agents and refine unclear instructions."

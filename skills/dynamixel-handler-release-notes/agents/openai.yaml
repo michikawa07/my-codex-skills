@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dynamixel Handler Release Notes"
+  short_description: "Match published DynamixelHandler releases"
+  default_prompt: "Use $dynamixel-handler-release-notes to draft a public DynamixelHandler_ GitHub release body that matches the repository's published release-note style."
