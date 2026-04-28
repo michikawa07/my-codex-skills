@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate IEEE Response Letter"
+  short_description: "Create IEEE responseLetter.tex from review summary"
+  default_prompt: "Use $generate-ieee-response-letter to create an IEEE responseLetter.tex skeleton from review_summary.md."
