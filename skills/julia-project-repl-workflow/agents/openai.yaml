@@ -1,0 +1,4 @@
+interface:
+  display_name: "Julia Project REPL Workflow"
+  short_description: "Use one persistent Julia REPL per project"
+  default_prompt: "Use $julia-project-repl-workflow for Julia work in this repository."

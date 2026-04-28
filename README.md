@@ -10,6 +10,7 @@ machine can point Codex at `./skills` with a symlink, then update with `git pull
 - `skills/empirical-prompt-tuning`: prompt and skill evaluation workflow
 - `skills/dynamixel-handler-release-notes`: DynamixelHandler_ release note workflow
 - `skills/generate-ieee-response-letter`: IEEE response letter skeleton generation workflow
+- `skills/julia-project-repl-workflow`: persistent Julia REPL workflow for Julia projects
 
 ## Install On A Machine
 
