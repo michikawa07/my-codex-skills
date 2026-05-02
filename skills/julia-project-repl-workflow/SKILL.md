@@ -41,6 +41,33 @@ source ~/.bashrc && julia --banner=no -q
 
 Use `tty=true` when starting the REPL.
 
+### WSL With Existing Windows Julia
+
+If WSL `julia` is unavailable or Juliaup fails because it is trying to write configuration or lock files through Windows environment variables such as `APPDATA`, do not install or repair a separate WSL Julia unless the user explicitly asks for that.
+
+When the user prefers the existing Windows Julia environment, launch the Windows Julia executable directly from WSL instead of using `cmd.exe`, `powershell.exe`, or the WindowsApps App Execution Alias. Do not hard-code a user-specific Julia path in instructions or project files. First discover the executable:
+
+```bash
+command -v julia.exe
+find /mnt/c/Users -path '*/.julia/juliaup/julia-*/bin/julia.exe' -print -quit
+```
+
+Then start the discovered executable from the chosen repository/project root:
+
+```bash
+<discovered-julia.exe> --project=. --banner=no -q --color=no
+```
+
+Run this from the chosen repository/project root with `tty=true`, then continue to use the same PTY session with `write_stdin`.
+
+If Julia starts in a different working directory because of Windows startup configuration, correct it inside the same REPL:
+
+```julia
+cd(dirname(Base.active_project()))
+```
+
+Then verify the active project as usual.
+
 ## Verify The Active Project
 
 After startup, verify the active project when project activation matters:
