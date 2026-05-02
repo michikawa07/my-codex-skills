@@ -1,0 +1,4 @@
+interface:
+  display_name: "Julia Coding"
+  short_description: "Write and review Julia code idiomatically"
+  default_prompt: "Use $julia-coding to write, read, and improve Julia code idiomatically."
