@@ -1,0 +1,3 @@
+interface:
+  display_name: "TODO / ARCHIVE Consensus"
+  short_description: "Maintain TODO.md as a current plan and ARCHIVE.md as completed context."
