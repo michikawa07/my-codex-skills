@@ -1,0 +1,4 @@
+interface:
+  display_name: "Typst to TeX Converter"
+  short_description: "Convert Typst manuscripts to TeX"
+  default_prompt: "Use $typst-to-tex-converter to convert a Typst manuscript into TeX while preserving source meaning and adapting to the destination TeX style."
