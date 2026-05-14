@@ -20,11 +20,13 @@ from pathlib import Path
 
 KEY_CMD_RE = re.compile(r"\\(label|ref|eqref|figref|tabref|secref|subref|cite)\{([^{}]*)\}")
 FORBIDDEN_UNITS_RE = re.compile(r"\\(?:meter|per|degree|newton|radian|milli)\b")
-ACTIVE_TYPST_RE = re.compile(r"(#(?:qty|unit|subpar_grid|figure)\b|(?<![\\A-Za-z0-9_.-])@[A-Za-z][A-Za-z0-9_.:-]*|<[A-Za-z][A-Za-z0-9_:-]+>)")
+ACTIVE_TYPST_RE = re.compile(r"(#(?:qty|unit|subpar_grid|figure)\b|(?<![\\A-Za-z0-9_.-])@[A-Za-z0-9][A-Za-z0-9_.:-]*|<[A-Za-z][A-Za-z0-9_:-]+>)")
+FALLBACK_RE = re.compile(r"FIXME\s+typst-to-tex:")
 CJK_RE = re.compile(r"[\u3040-\u30ff\u3400-\u9fff]")
 CJK_SUPPORT_RE = re.compile(r"CJKutf8|\\begin\{CJK|xeCJK|luatexja|pLaTeX|upLaTeX", re.I)
 NOTE_RE = re.compile(r"#(?:l|r)note\[[^\]]*\]")
 PACKAGE_RE = re.compile(r"\\usepackage(?:\[[^\]]*\])?\{([^{}]+)\}")
+DOCUMENTCLASS_RE = re.compile(r"\\documentclass(?:\[[^\]]*\])?\{([^{}]+)\}")
 RAW_TYPST_MATH_RE = re.compile(
     r"(?<!\\)\b(?:alpha|beta|gamma|delta|theta|omega|tau|pi)(?:_[A-Za-z]|\b)"
     r"|(?<!\\)\b(?:integral|dots|tilde\.eq|plus\.minus|dd)\b"
@@ -110,6 +112,60 @@ def source_active_notes(lines: list[str]) -> list[str]:
     return notes
 
 
+def source_math_let_definitions(lines: list[str]) -> set[str]:
+    definitions: set[str] = set()
+    for line in lines:
+        active = typst_active_part(line)
+        if re.match(r"\s*#let\s+[A-Za-z][A-Za-z0-9_]*\s*=", active):
+            definitions.add(active.strip())
+    return definitions
+
+
+def source_multiline_caption_stats(lines: list[str]) -> tuple[int, int]:
+    block_count = 0
+    comment_count = 0
+    idx = 0
+    while idx < len(lines):
+        active = typst_active_part(lines[idx])
+        if re.search(r"caption\s*:\s*\[", active) and "]" not in active.split("[", 1)[1]:
+            block_count += 1
+            idx += 1
+            while idx < len(lines):
+                if "//" in lines[idx]:
+                    comment_count += 1
+                if "]" in typst_active_part(lines[idx]):
+                    break
+                idx += 1
+        idx += 1
+    return block_count, comment_count
+
+
+def tex_multiline_caption_stats(lines: list[str]) -> tuple[int, int]:
+    block_count = 0
+    comment_count = 0
+    in_caption = False
+    brace_depth = 0
+    for line in lines:
+        active = active_part(line)
+        if not in_caption:
+            match = re.search(r"\\caption(?:\[[^\]]*\])?\{", active)
+            if not match:
+                continue
+            tail = active[match.end():]
+            brace_depth = 1 + tail.count("{") - tail.count("}")
+            if brace_depth > 0:
+                in_caption = True
+                block_count += 1
+            continue
+
+        if is_comment_line(line):
+            comment_count += 1
+        brace_depth += active.count("{") - active.count("}")
+        if brace_depth <= 0:
+            in_caption = False
+    return block_count, comment_count
+
+
 def normalize_heading(text: str) -> str:
     text = re.sub(r"<[A-Za-z][A-Za-z0-9_:-]+>", "", text)
     text = re.sub(r"\\[A-Za-z]+\*?(?:\[[^\]]*\])?", "", text)
@@ -161,6 +217,19 @@ def tex_active_body_text(lines: list[str]) -> str:
 
 def tex_full_text_without_comments(lines: list[str]) -> str:
     return "\n".join(active_part(line) for line in lines)
+
+
+def documentclass_name(text: str) -> str | None:
+    match = DOCUMENTCLASS_RE.search(text)
+    return match.group(1) if match else None
+
+
+def normalized_command(text: str, command: str) -> str | None:
+    match = re.search(rf"\\{command}\s*(?:\{{[^{{}}]*\}}\s*){{2}}", text)
+    if not match:
+        return None
+    args = re.findall(r"\{([^{}]*)\}", match.group(0))
+    return "|".join(re.sub(r"\s+", " ", arg).strip() for arg in args)
 
 
 def has_nonempty_command_arg(text: str, command: str) -> bool:
@@ -263,6 +332,11 @@ def main() -> int:
     failures: list[str] = []
     warnings: list[str] = []
 
+    fallback_markers = [(idx + 1, line.strip()) for idx, line in enumerate(tex_lines) if FALLBACK_RE.search(line)]
+    if fallback_markers:
+        failures.append(f"unresolved fallback markers remain: {len(fallback_markers)}")
+        warnings.extend(f"fallback marker line: {line_no}: {line}" for line_no, line in fallback_markers[:10])
+
     source_comments = [c for c in source_comment_texts(source_lines) if c]
     output_comments = tex_comment_texts(tex_lines)
     source_comment_counts = Counter(source_comments)
@@ -303,6 +377,19 @@ def main() -> int:
         failures.append(f"missing active Typst note comments: {len(missing_notes)} / {len(source_notes)}")
         warnings.extend(f"missing note: {note}" for note in missing_notes[:10])
 
+    output_source_notes = [comment for comment in output_comments if NOTE_RE.fullmatch(comment)]
+    extra_notes = Counter(output_source_notes) - Counter(source_notes)
+    if extra_notes:
+        failures.append(f"extra Typst note comments not present as active source notes: {sum(extra_notes.values())}")
+        warnings.extend(f"extra note comment: {note}" for note in list(extra_notes)[:10])
+
+    source_lets = source_math_let_definitions(source_lines)
+    output_let_notes = [comment for comment in output_comments if comment.startswith("Source-local definition converted")]
+    if output_let_notes and not source_lets:
+        failures.append("extra source-local-definition comment without source definition")
+    elif output_let_notes:
+        failures.append("source-local definitions should become TeX mechanisms, not explanatory output comments")
+
     source_heading_list = source_headings(source_lines)
     tex_heading_list = tex_headings(tex_lines)
     if source_heading_list != tex_heading_list:
@@ -312,9 +399,14 @@ def main() -> int:
                 warnings.append(f"heading mismatch {idx}: source={source_heading!r} output={tex_heading!r}")
                 break
 
-    missing_active_labels = sorted(source_active_labels(source_lines) - tex_active_labels(tex_lines))
+    source_labels = source_active_labels(source_lines)
+    output_labels = tex_active_labels(tex_lines)
+    missing_active_labels = sorted(source_labels - output_labels)
     if missing_active_labels:
         failures.append(f"missing active labels: {', '.join(missing_active_labels[:10])}")
+    extra_active_labels = sorted(output_labels - source_labels)
+    if extra_active_labels:
+        failures.append(f"extra active labels not present in source: {', '.join(extra_active_labels[:10])}")
 
     active_typst = [(idx + 1, line.strip()) for idx, line in enumerate(active_lines) if ACTIVE_TYPST_RE.search(line)]
     if active_typst:
@@ -339,6 +431,10 @@ def main() -> int:
     if forbidden_units:
         failures.append(f"forbidden siunitx unit macros: {len(forbidden_units)}")
 
+    degree_quantities = re.findall(r"\\SI\{[^{}]+\}\{deg\}", "\n".join(active_lines))
+    if degree_quantities:
+        failures.append(f"angle quantities should use \\ang, not raw deg SI: {len(degree_quantities)}")
+
     if "#bibliography" in "\n".join(source_lines):
         active_bib = re.search(r"^\s*\\bibliographystyle\{|^\s*\\bibliography\{", "\n".join(active_lines), re.M)
         if not active_bib:
@@ -346,6 +442,9 @@ def main() -> int:
 
     if CJK_RE.search("\n".join(source_lines)) and CJK_RE.search("\n".join(active_lines)) and not CJK_SUPPORT_RE.search(tex_text):
         failures.append("active CJK text present without explicit CJK engine/package support")
+
+    if CJK_RE.search("\n".join(source_lines)) and "CJKutf8" in tex_text and r"\begin{CJK}{" in tex_text:
+        failures.append("CJKutf8 output uses non-star CJK environment; use CJK* unless TeX evidence requires non-star CJK")
 
     child_to_parent = subfigure_parent_map(tex_lines)
     active_text = "\n".join(active_lines)
@@ -361,6 +460,17 @@ def main() -> int:
     if active_subfloats and r"\captionsetup[subfloat]" not in tex_text:
         failures.append("active subfloat output lacks required subfloat caption setup")
 
+    source_block_captions, source_block_caption_comments = source_multiline_caption_stats(source_lines)
+    tex_block_captions, tex_block_caption_comments = tex_multiline_caption_stats(tex_lines)
+    if source_block_captions and tex_block_captions != source_block_captions:
+        failures.append(
+            f"caption block line-shape mismatch: source_multiline={source_block_captions} output_multiline={tex_block_captions}"
+        )
+    if source_block_caption_comments and tex_block_caption_comments != source_block_caption_comments:
+        failures.append(
+            f"caption block comment placement mismatch: source_inside={source_block_caption_comments} output_inside={tex_block_caption_comments}"
+        )
+
     active_escaped_math = re.findall(r"\b[A-Za-z]+\\_[A-Za-z0-9]+", active_text)
     if active_escaped_math:
         failures.append(f"escaped math identifiers in active text: {len(active_escaped_math)}")
@@ -373,6 +483,10 @@ def main() -> int:
     if raw_typst_math:
         failures.append(f"raw Typst math tokens remain in active body: {len(raw_typst_math)} line(s)")
         warnings.extend(f"raw math token line: {line_no}: {line}" for line_no, line in raw_typst_math[:10])
+
+    cases_with_rendered_commas = re.findall(r"\\begin\{cases\}.*?,\s*\\\\", active_body, flags=re.S)
+    if "cases(" in "\n".join(source_lines) and cases_with_rendered_commas:
+        failures.append(f"Typst case separators rendered as equation punctuation: {len(cases_with_rendered_commas)}")
 
     unresolved_math_lets = [
         name for name in sorted(source_math_let_names(source_lines))
@@ -412,6 +526,15 @@ def main() -> int:
     if args.tex_evidence:
         evidence_text = args.tex_evidence.read_text(encoding="utf-8", errors="replace")
         output_full_text = tex_full_text_without_comments(tex_lines)
+        evidence_class = documentclass_name(evidence_text)
+        output_class = documentclass_name(tex_text)
+        if evidence_class and output_class and evidence_class != output_class:
+            failures.append(f"documentclass differs from TeX evidence: output={output_class} evidence={evidence_class}")
+        for command in ("markboth",):
+            evidence_command = normalized_command(evidence_text, command)
+            output_command = normalized_command(tex_text, command)
+            if evidence_command and output_command and evidence_command != output_command:
+                failures.append(f"reusable TeX scaffold command changed from evidence: \\{command}")
 
         if r"\documentclass{ieeeaccess}" in evidence_text and r"\documentclass{ieeeaccess}" in tex_text:
             scaffold_needles = [
