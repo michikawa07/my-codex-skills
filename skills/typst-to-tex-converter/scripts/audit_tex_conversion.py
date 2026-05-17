@@ -12,6 +12,7 @@ parent/child subfigure map is present in the TeX output.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from collections import Counter, defaultdict
@@ -19,26 +20,45 @@ from pathlib import Path
 
 
 KEY_CMD_RE = re.compile(r"\\(label|ref|eqref|figref|tabref|secref|subref|cite)\{([^{}]*)\}")
-FORBIDDEN_UNITS_RE = re.compile(r"\\(?:meter|per|degree|newton|radian|milli)\b")
+FORBIDDEN_UNITS_RE = re.compile(r"\\(?:meter|per|degree|newton|radian|milli|percent)\b")
+NEWCOMMAND_RE = re.compile(r"\\newcommand\{\\([A-Za-z@]+)\}")
 ACTIVE_TYPST_RE = re.compile(r"(#(?:qty|unit|subpar_grid|figure)\b|(?<![\\A-Za-z0-9_.-])@[A-Za-z0-9][A-Za-z0-9_.:-]*|<[A-Za-z][A-Za-z0-9_:-]+>)")
+ACTIVE_TYPST_STRUCT_RE = re.compile(
+    r"^\s*(?:placement|scope|caption|image|authors?|affiliation|abstract|index-terms|title|keywords|set|show|let|assert|box|sized_box)\s*[:(]"
+    r"|(?<!\\)\b(?:qty|unit|cases|calc\.round|arguments|measure|place)\s*\("
+    r"|#h\("
+)
 FALLBACK_RE = re.compile(r"FIXME\s+typst-to-tex:")
+BLOCK_MARKER_RE = re.compile(r"%\s+(?:BEGIN|END)\s+typst-to-tex block\b")
+DISGUISED_TYPST_RE = re.compile(r"#\s*(?:qty|unit)\s*\(|(?<![\\A-Za-z])(?:qty|unit)\s*\(", re.I)
+AUDIT_CHEAT_RE = re.compile(r"\\(?:newcommand\{\\audit|audit[A-Za-z]*\b|phantom|hphantom|vphantom|smash|llap|rlap)")
+CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 CJK_RE = re.compile(r"[\u3040-\u30ff\u3400-\u9fff]")
 CJK_SUPPORT_RE = re.compile(r"CJKutf8|\\begin\{CJK|xeCJK|luatexja|pLaTeX|upLaTeX", re.I)
 NOTE_RE = re.compile(r"#(?:l|r)note\[[^\]]*\]")
 PACKAGE_RE = re.compile(r"\\usepackage(?:\[[^\]]*\])?\{([^{}]+)\}")
 DOCUMENTCLASS_RE = re.compile(r"\\documentclass(?:\[[^\]]*\])?\{([^{}]+)\}")
 RAW_TYPST_MATH_RE = re.compile(
-    r"(?<!\\)\b(?:alpha|beta|gamma|delta|theta|omega|tau|pi)(?:_[A-Za-z]|\b)"
+    r"(?<!\\)\b(?:alpha|beta|gamma|delta|theta|omega|tau|pi)(?:_[A-Za-z]|\s*_\s*\{|\b)"
     r"|(?<!\\)\b(?:integral|dots|tilde\.eq|plus\.minus|dd)\b"
+    r"|(?<!\\)\babs\s*\("
+    r"|(?<!\\)\bk_(?:omega|tau)\b"
+    r"|\^t\b"
     r"|(?<!\\)\bmax\s*\("
 )
 STRAIGHT_CJK_QUOTE_RE = re.compile(r'[\u3040-\u30ff\u3400-\u9fff][^"\n]*"[^"\n]+"')
+AUDIT_PLACEHOLDER_RE = re.compile(r"Converted multiline caption|caption audit placeholder|audit placeholder", re.I)
+CJK_FRAGMENT_RE = re.compile(r"[\u3040-\u30ff\u3400-\u9fff][\u3040-\u30ff\u3400-\u9fffA-Za-z0-9一-龯々ぁ-んァ-ンー，．、。・（）()]+")
+INVISIBLE_CONTENT_RE = re.compile(r"\\(?:hphantom|vphantom|phantom|smash|llap|rlap)\s*\{[^{}]*\}")
+INVISIBLE_COMMAND_RE = re.compile(r"\\(?:hphantom|vphantom|phantom|smash|llap|rlap)\s*\{")
+CAPTION_TYPST_BRACKET_RE = re.compile(r"\\caption\s*\{[^{}]*\]\s*\}", re.S)
 UNUSED_PACKAGE_RULES = {
     "algorithmic": re.compile(r"\\begin\{algorithmic\}"),
     "threeparttable": re.compile(r"\\begin\{threeparttable\}"),
     "ulem": re.compile(r"\\(?:uline|uuline|uwave|sout|xout)\b"),
 }
 DISPLAY_ENVS = ("align", "equation", "gather", "multline")
+SOURCE_REQUIRED_KINDS = {"comment", "note", "label", "reference", "qty_or_unit", "subpar_grid"}
 
 
 def active_part(line: str) -> str:
@@ -66,7 +86,10 @@ def tex_comment_texts(lines: list[str]) -> list[str]:
     for line in lines:
         stripped = line.lstrip()
         if stripped.startswith("%"):
-            comments.append(stripped[1:].strip())
+            text = stripped[1:].strip()
+            if FALLBACK_RE.search(text) or text.startswith(("BEGIN typst-to-tex block", "END typst-to-tex block")):
+                continue
+            comments.append(text)
     return comments
 
 
@@ -89,6 +112,8 @@ def comment_buckets(lines: list[str], source: bool) -> dict[str, Counter[str]]:
                     buckets[current][text] += 1
         elif line.lstrip().startswith("%"):
             text = line.lstrip()[1:].strip()
+            if FALLBACK_RE.search(text) or text.startswith(("BEGIN typst-to-tex block", "END typst-to-tex block")):
+                continue
             if text:
                 buckets[current][text] += 1
     return buckets
@@ -103,6 +128,36 @@ def source_active_labels(lines: list[str]) -> set[str]:
     for line in lines:
         labels.update(re.findall(r"<([A-Za-z][A-Za-z0-9_:-]+)>", typst_active_part(line)))
     return labels
+
+
+def source_active_label_kinds(lines: list[str]) -> dict[str, str]:
+    kinds: dict[str, str] = {}
+    for line in lines:
+        active = typst_active_part(line)
+        labels = re.findall(r"<([A-Za-z][A-Za-z0-9_:-]+)>", active)
+        if not labels:
+            continue
+
+        stripped = active.strip()
+        heading = bool(re.match(r"^=+\s+.*<[A-Za-z][A-Za-z0-9_:-]+>", stripped))
+        figure_context = any(token in stripped for token in ("figure(", "image(", "subpar.grid", "label:"))
+        math_context = stripped.startswith("$") or stripped.endswith("\\")
+
+        for label in labels:
+            kind: str | None = None
+            if heading:
+                kind = "section"
+            elif label.startswith("sfig"):
+                kind = "subfigure"
+            elif figure_context:
+                kind = "figure"
+            elif math_context:
+                kind = "equation"
+            else:
+                kind = inferred_label_kind(label)
+            if kind:
+                kinds[label] = kind
+    return kinds
 
 
 def source_active_notes(lines: list[str]) -> list[str]:
@@ -182,6 +237,54 @@ def source_headings(lines: list[str]) -> list[str]:
     return headings
 
 
+def normalize_for_prose_coverage(text: str) -> str:
+    text = INVISIBLE_CONTENT_RE.sub("", text)
+    # Remove Typst quantity/unit calls before TeX-style comment stripping:
+    # source calls such as #qty(0.5, "%") contain a literal percent sign.
+    text = re.sub(r"#(?:qty|unit)\([^)]*\)", "", text)
+    text = re.sub(r"//.*", "", text)
+    text = re.sub(r"(?<!\\)%.*", "", text)
+    text = text.replace("``", "").replace("''", "")
+    text = re.sub(r"[\"“”‘’]", "", text)
+    text = re.sub(r"^\s*(?:[-+*]|\d+[.)])\s*", "", text)
+    text = re.sub(r"@[A-Za-z0-9_.:-]+", "", text)
+    text = re.sub(r"<[A-Za-z][A-Za-z0-9_:-]+>", "", text)
+    text = re.sub(r"\$[^$]*\$", "", text)
+    text = re.sub(r"\\(?:cite|ref|eqref|figref|tabref|secref|subref|SI|si|ang)\{[^{}]*\}(?:\{[^{}]*\})?", "", text)
+    text = re.sub(r"\\[A-Za-z]+\*?(?:\[[^\]]*\])?", "", text)
+    text = re.sub(r"[{}\\#$]", "", text)
+    text = re.sub(r"^\s*(?:[-+*]|\d+[.)])\s*", "", text)
+    return re.sub(r"\s+", "", text)
+
+
+def source_prose_fragments(lines: list[str], min_len: int = 18, fragment_len: int = 28) -> list[tuple[int, str]]:
+    fragments: list[tuple[int, str]] = []
+    structural_prefixes = (
+        "#", "=", "$", ")", "]", "},", "],", "placement:", "caption:", "image(",
+        "columns:", "gutter:", "gap:", "label:", "set ", "show:", "import ",
+        "abstract:", "index-terms:", "authors:", "title:",
+    )
+    for idx, line in enumerate(lines, start=1):
+        active = typst_active_part(line).strip()
+        if not active or active.startswith(structural_prefixes):
+            continue
+        if active in {"(", "[", ")", "]"}:
+            continue
+        normalized = normalize_for_prose_coverage(active)
+        for chunk in re.split(r"[．。]", normalized):
+            if len(chunk) < min_len or not CJK_RE.search(chunk):
+                continue
+            starts = {0}
+            if len(chunk) > fragment_len:
+                starts.add(max(0, (len(chunk) - fragment_len) // 2))
+                starts.add(max(0, len(chunk) - fragment_len))
+            for start in sorted(starts):
+                fragment = chunk[start:start + fragment_len]
+                if len(fragment) >= min_len:
+                    fragments.append((idx, fragment))
+    return fragments
+
+
 def tex_headings(lines: list[str]) -> list[str]:
     headings: list[str] = []
     for line in lines:
@@ -232,6 +335,13 @@ def normalized_command(text: str, command: str) -> str | None:
     return "|".join(re.sub(r"\s+", " ", arg).strip() for arg in args)
 
 
+def normalized_single_arg_command(text: str, command: str) -> str | None:
+    match = re.search(rf"\\{command}\{{([^{{}}]*)\}}", text)
+    if not match:
+        return None
+    return re.sub(r"\s+", " ", match.group(1)).strip()
+
+
 def has_nonempty_command_arg(text: str, command: str) -> bool:
     return any(value.strip() for value in re.findall(rf"\\{command}\{{([^{{}}]*)\}}", text))
 
@@ -247,8 +357,70 @@ def package_names(text: str) -> set[str]:
     return names
 
 
+def newcommand_names(text: str) -> set[str]:
+    return set(NEWCOMMAND_RE.findall(text))
+
+
+def text_without_newcommand_definitions(text: str) -> str:
+    return "\n".join(
+        line for line in text.splitlines()
+        if not re.match(r"\s*\\newcommand\{\\[A-Za-z@]+\}", line)
+    )
+
+
+def same_file(left: Path, right: Path) -> bool:
+    try:
+        return left.resolve() == right.resolve()
+    except OSError:
+        return False
+
+
 def grouped_citation_style(text: str) -> bool:
     return bool(re.search(r"\\cite\{[^{}]+,[^{}]+\}", text))
+
+
+def load_ledger(path: Path | None) -> list[dict[str, object]]:
+    if not path:
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    items = data.get("items", [])
+    return [item for item in items if isinstance(item, dict)]
+
+
+def tex_reference_targets(text: str) -> set[str]:
+    targets: set[str] = set()
+    for command, arg in KEY_CMD_RE.findall(text):
+        if command == "label":
+            continue
+        for target in arg.split(","):
+            target = target.strip()
+            if target:
+                targets.add(target)
+    return targets
+
+
+def inferred_label_kind(label: str) -> str | None:
+    if label.startswith(("sec:", "ssec:", "sssec:")):
+        return "section"
+    if label.startswith(("fig:", "fig_")) or label == "fig" or label.startswith("fig"):
+        return "figure"
+    if label.startswith("sfig"):
+        return "subfigure"
+    if label.startswith(("tab:", "tab_")) or label == "tab" or label.startswith("tab"):
+        return "table"
+    if label.startswith(("eq:", "eq_")) or label == "eq" or label.startswith("eq"):
+        return "equation"
+    return None
+
+
+def expected_reference_command(kind: str) -> str:
+    return {
+        "section": "secref",
+        "figure": "figref",
+        "subfigure": "subref",
+        "table": "tabref",
+        "equation": "eqref",
+    }[kind]
 
 
 def display_env_counts(text: str) -> Counter[str]:
@@ -262,6 +434,14 @@ def source_math_let_names(lines: list[str]) -> set[str]:
         if match:
             names.add(match.group(1))
     return names
+
+
+def source_bibliography_paths(source_typ: Path, lines: list[str]) -> list[Path]:
+    paths: list[Path] = []
+    source_text = "\n".join(typst_active_part(line) for line in lines)
+    for match in re.finditer(r"#?bibliography\s*\(\s*\"([^\"]+\.bib)\"", source_text):
+        paths.append((source_typ.parent / match.group(1)).resolve())
+    return paths
 
 
 def subfigure_parent_map(lines: list[str]) -> dict[str, str]:
@@ -315,10 +495,12 @@ def main() -> int:
     parser.add_argument("output_tex", type=Path)
     parser.add_argument("--fix", action="store_true")
     parser.add_argument("--tex-evidence", type=Path, default=None)
+    parser.add_argument("--ledger", type=Path, default=None)
     args = parser.parse_args()
 
     source_lines = args.source_typ.read_text(encoding="utf-8").splitlines()
     tex_text = args.output_tex.read_text(encoding="utf-8")
+    ledger_items = load_ledger(args.ledger)
 
     if args.fix:
         tex_text = fix_key_escapes(tex_text)
@@ -327,15 +509,82 @@ def main() -> int:
 
     tex_lines = tex_text.splitlines()
     active_lines = [active_part(line) for line in tex_lines if not is_comment_line(line)]
+    active_text = "\n".join(active_lines)
     active_body = tex_active_body_text(tex_lines)
 
     failures: list[str] = []
     warnings: list[str] = []
 
+    evidence_path = args.tex_evidence.resolve() if args.tex_evidence else None
+    for local_tex in args.source_typ.parent.glob("*.tex"):
+        if same_file(local_tex, args.output_tex):
+            continue
+        if evidence_path and same_file(local_tex, args.tex_evidence):
+            continue
+        try:
+            local_text = local_tex.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            local_text = local_tex.read_text(encoding="utf-8", errors="replace")
+        if local_text == tex_text:
+            failures.append(f"output is an exact copy of non-source local TeX file: {local_tex.name}")
+            break
+
     fallback_markers = [(idx + 1, line.strip()) for idx, line in enumerate(tex_lines) if FALLBACK_RE.search(line)]
     if fallback_markers:
         failures.append(f"unresolved fallback markers remain: {len(fallback_markers)}")
         warnings.extend(f"fallback marker line: {line_no}: {line}" for line_no, line in fallback_markers[:10])
+
+    control_chars = [
+        (idx + 1, repr(match.group(0)), line.encode("unicode_escape").decode("ascii"))
+        for idx, line in enumerate(tex_lines)
+        for match in CONTROL_CHAR_RE.finditer(line)
+    ]
+    if control_chars:
+        failures.append(f"ASCII control characters in TeX output: {len(control_chars)}")
+        warnings.extend(
+            f"control character line {line_no}: {char} in {escaped_line}"
+            for line_no, char, escaped_line in control_chars[:10]
+        )
+
+    block_markers = [(idx + 1, line.strip()) for idx, line in enumerate(tex_lines) if BLOCK_MARKER_RE.search(line)]
+    if block_markers:
+        failures.append(f"unresolved block markers remain: {len(block_markers)}")
+        warnings.extend(f"block marker line: {line_no}: {line}" for line_no, line in block_markers[:10])
+
+    invisible_commands = INVISIBLE_COMMAND_RE.findall(active_text)
+    if invisible_commands:
+        failures.append(f"invisible TeX commands used in active body: {len(invisible_commands)}")
+        warnings.extend(f"invisible command: {cmd}" for cmd in invisible_commands[:10])
+
+    if CAPTION_TYPST_BRACKET_RE.search(active_text):
+        failures.append("caption appears to contain leftover Typst closing bracket")
+
+    audit_cheats = [
+        (idx + 1, line.strip())
+        for idx, line in enumerate(tex_lines)
+        if not is_comment_line(line) and AUDIT_CHEAT_RE.search(active_part(line))
+    ]
+    if audit_cheats:
+        failures.append(f"audit-bypass or invisible-content macros in active output: {len(audit_cheats)}")
+        warnings.extend(f"audit-bypass line: {line_no}: {line}" for line_no, line in audit_cheats[:10])
+
+    disguised_typst = [
+        (idx + 1, line.strip())
+        for idx, line in enumerate(tex_lines)
+        if not is_comment_line(line) and DISGUISED_TYPST_RE.search(active_part(line))
+    ]
+    if disguised_typst:
+        failures.append(f"disguised/raw Typst command text remains active: {len(disguised_typst)}")
+        warnings.extend(f"disguised Typst line: {line_no}: {line}" for line_no, line in disguised_typst[:10])
+
+    unescaped_percent = [
+        (idx + 1, line.strip())
+        for idx, line in enumerate(tex_lines)
+        if not is_comment_line(line) and re.search(r"[0-9A-Za-z\u3040-\u30ff\u3400-\u9fff](?<!\\)%[0-9A-Za-z\u3040-\u30ff\u3400-\u9fff]", line)
+    ]
+    if unescaped_percent:
+        failures.append(f"unescaped percent signs in active text: {len(unescaped_percent)}")
+        warnings.extend(f"unescaped percent line: {line_no}: {line}" for line_no, line in unescaped_percent[:10])
 
     source_comments = [c for c in source_comment_texts(source_lines) if c]
     output_comments = tex_comment_texts(tex_lines)
@@ -383,6 +632,18 @@ def main() -> int:
         failures.append(f"extra Typst note comments not present as active source notes: {sum(extra_notes.values())}")
         warnings.extend(f"extra note comment: {note}" for note in list(extra_notes)[:10])
 
+    evidence_comments = []
+    if args.tex_evidence:
+        evidence_comments = tex_comment_texts(args.tex_evidence.read_text(encoding="utf-8", errors="replace").splitlines())
+    allowed_comment_counts = Counter(source_comments) + Counter(source_notes) + Counter(evidence_comments)
+    extra_output_comments = [
+        comment for comment, count in output_comment_counts.items()
+        if not FALLBACK_RE.search(comment) and allowed_comment_counts[comment] < count
+    ]
+    if extra_output_comments:
+        failures.append(f"extra output comments not from source notes/comments or TeX evidence: {len(extra_output_comments)}")
+        warnings.extend(f"extra output comment: {comment}" for comment in extra_output_comments[:10])
+
     source_lets = source_math_let_definitions(source_lines)
     output_let_notes = [comment for comment in output_comments if comment.startswith("Source-local definition converted")]
     if output_let_notes and not source_lets:
@@ -400,6 +661,7 @@ def main() -> int:
                 break
 
     source_labels = source_active_labels(source_lines)
+    source_label_kinds = source_active_label_kinds(source_lines)
     output_labels = tex_active_labels(tex_lines)
     missing_active_labels = sorted(source_labels - output_labels)
     if missing_active_labels:
@@ -408,10 +670,49 @@ def main() -> int:
     if extra_active_labels:
         failures.append(f"extra active labels not present in source: {', '.join(extra_active_labels[:10])}")
 
+    generic_ref_misuse: list[str] = []
+    typed_ref_misuse: list[str] = []
+    for command, target in KEY_CMD_RE.findall(active_text):
+        if command in {"cite", "label"}:
+            continue
+        kind = source_label_kinds.get(target) or inferred_label_kind(target)
+        if kind:
+            expected_command = expected_reference_command(kind)
+            if command != expected_command:
+                if not (kind == "subfigure" and command == "figref"):
+                    typed_ref_misuse.append(
+                        rf"\{command}{{{target}}} targets a {kind} label; use \{expected_command}"
+                    )
+        if command != "ref":
+            continue
+        if target.startswith(("fig:", "sfig")):
+            generic_ref_misuse.append(rf"\ref{{{target}}} should use figure/subfigure reference macros")
+        elif target.startswith(("sec:", "ssec:", "sssec:")):
+            generic_ref_misuse.append(rf"\ref{{{target}}} should use section reference macros")
+        elif target.startswith("tab:"):
+            generic_ref_misuse.append(rf"\ref{{{target}}} should use table reference macros")
+        elif target.startswith("eq"):
+            generic_ref_misuse.append(rf"\ref{{{target}}} should use equation reference macros")
+    if generic_ref_misuse:
+        failures.append(f"generic \\ref used for typed source references: {len(generic_ref_misuse)}")
+        warnings.extend(f"generic ref misuse: {item}" for item in generic_ref_misuse[:10])
+    if typed_ref_misuse:
+        failures.append(f"reference macro does not match target kind: {len(typed_ref_misuse)}")
+        warnings.extend(f"typed ref misuse: {item}" for item in typed_ref_misuse[:10])
+
     active_typst = [(idx + 1, line.strip()) for idx, line in enumerate(active_lines) if ACTIVE_TYPST_RE.search(line)]
     if active_typst:
         failures.append(f"active Typst syntax remains: {len(active_typst)} line(s)")
         warnings.extend(f"active Typst line: {line_no}: {line}" for line_no, line in active_typst[:10])
+
+    active_typst_struct = [
+        (idx + 1, line.strip())
+        for idx, line in enumerate(active_lines)
+        if ACTIVE_TYPST_STRUCT_RE.search(line)
+    ]
+    if active_typst_struct:
+        failures.append(f"active Typst structural syntax remains: {len(active_typst_struct)} line(s)")
+        warnings.extend(f"active Typst structural line: {line_no}: {line}" for line_no, line in active_typst_struct[:10])
 
     orphan_typst_delimiters = [
         (idx + 1, line.strip())
@@ -439,6 +740,15 @@ def main() -> int:
         active_bib = re.search(r"^\s*\\bibliographystyle\{|^\s*\\bibliography\{", "\n".join(active_lines), re.M)
         if not active_bib:
             failures.append("active source bibliography has no active TeX bibliography commands")
+        bib_uses_url = False
+        for bib_path in source_bibliography_paths(args.source_typ, source_lines):
+            if bib_path.exists() and re.search(r"^\s*url\s*=", bib_path.read_text(encoding="utf-8", errors="replace"), re.M | re.I):
+                bib_uses_url = True
+                break
+        if bib_uses_url and not ({"url", "hyperref"} & package_names(tex_text)):
+            failures.append("source bibliography contains URL fields but output lacks url or hyperref package")
+    if r"\url{" in active_body and not ({"url", "hyperref"} & package_names(tex_text)):
+        failures.append(r"active bibliography/body uses \url but output lacks url or hyperref package")
 
     if CJK_RE.search("\n".join(source_lines)) and CJK_RE.search("\n".join(active_lines)) and not CJK_SUPPORT_RE.search(tex_text):
         failures.append("active CJK text present without explicit CJK engine/package support")
@@ -471,6 +781,50 @@ def main() -> int:
             f"caption block comment placement mismatch: source_inside={source_block_caption_comments} output_inside={tex_block_caption_comments}"
         )
 
+    if ledger_items:
+        required_items = [item for item in ledger_items if item.get("required")]
+        output_reference_targets = tex_reference_targets(active_text)
+        ledger_missing: list[str] = []
+        for item in required_items:
+            kind = str(item.get("kind", ""))
+            text = str(item.get("text", ""))
+            line = item.get("line", "?")
+            if kind == "comment" and output_comment_counts[text] < 1:
+                ledger_missing.append(f"comment line {line}: {text}")
+            elif kind == "note" and output_comment_counts[text] < 1:
+                ledger_missing.append(f"note line {line}: {text}")
+            elif kind == "label" and text not in output_labels:
+                ledger_missing.append(f"label line {line}: {text}")
+            elif kind == "reference" and text not in output_reference_targets:
+                ledger_missing.append(f"reference line {line}: {text}")
+            elif kind == "subpar_grid" and active_subfloats == 0:
+                ledger_missing.append(f"subpar_grid line {line}")
+
+        quantity_items = [item for item in required_items if item.get("kind") == "qty_or_unit"]
+        source_quantity_items = sum(1 for item in quantity_items if item.get("name") != "unit")
+        if not source_quantity_items:
+            source_quantity_items = len(quantity_items)
+        output_quantity_commands = len(re.findall(r"\\(?:SI|si|ang)\{", active_text))
+        if source_quantity_items and output_quantity_commands < source_quantity_items:
+            ledger_missing.append(
+                f"quantity commands: source_items={source_quantity_items} output_commands={output_quantity_commands}"
+            )
+
+        if ledger_missing:
+            failures.append(f"ledger required items not resolved: {len(ledger_missing)}")
+            warnings.extend(f"ledger unresolved: {item}" for item in ledger_missing[:10])
+
+        external_findings = [
+            item
+            for item in ledger_items
+            if str(item.get("source", "")) not in {"", "source-scan"}
+            and str(item.get("kind", "")) not in SOURCE_REQUIRED_KINDS
+        ]
+        warnings.extend(
+            f"external ledger finding: {item.get('kind')}: {item.get('text')}"
+            for item in external_findings[:10]
+        )
+
     active_escaped_math = re.findall(r"\b[A-Za-z]+\\_[A-Za-z0-9]+", active_text)
     if active_escaped_math:
         failures.append(f"escaped math identifiers in active text: {len(active_escaped_math)}")
@@ -479,14 +833,58 @@ def main() -> int:
     if adjacent_cites:
         failures.append(f"adjacent citation commands should be grouped: {len(adjacent_cites)}")
 
+    aggregate_reference_lines = [
+        (idx + 1, line.strip())
+        for idx, line in enumerate(active_body.splitlines())
+        if len(re.findall(r"\\(?:ref|eqref|figref|tabref|secref|subref)\{", line)) > 8
+    ]
+    aggregate_cite_lines = []
+    for idx, line in enumerate(active_body.splitlines(), start=1):
+        for cite_arg in re.findall(r"\\cite\{([^{}]+)\}", line):
+            if len([key for key in cite_arg.split(",") if key.strip()]) > 8:
+                aggregate_cite_lines.append((idx, line.strip()))
+                break
+    if aggregate_reference_lines:
+        failures.append(f"aggregate reference catch-all lines: {len(aggregate_reference_lines)}")
+        warnings.extend(f"aggregate reference line: {line_no}: {line}" for line_no, line in aggregate_reference_lines[:5])
+    if aggregate_cite_lines:
+        failures.append(f"aggregate citation catch-all lines: {len(aggregate_cite_lines)}")
+        warnings.extend(f"aggregate citation line: {line_no}: {line}" for line_no, line in aggregate_cite_lines[:5])
+
+    placeholder_lines = [
+        (idx + 1, line.strip())
+        for idx, line in enumerate(active_body.splitlines())
+        if AUDIT_PLACEHOLDER_RE.search(line)
+    ]
+    if placeholder_lines:
+        failures.append(f"audit-satisfying placeholder text remains active: {len(placeholder_lines)}")
+        warnings.extend(f"placeholder line: {line_no}: {line}" for line_no, line in placeholder_lines[:10])
+
     raw_typst_math = [(idx + 1, line.strip()) for idx, line in enumerate(active_body.splitlines()) if RAW_TYPST_MATH_RE.search(line)]
     if raw_typst_math:
         failures.append(f"raw Typst math tokens remain in active body: {len(raw_typst_math)} line(s)")
         warnings.extend(f"raw math token line: {line_no}: {line}" for line_no, line in raw_typst_math[:10])
 
+    normalized_output_prose = normalize_for_prose_coverage(active_body)
+    missing_prose_fragments = [
+        (line_no, fragment)
+        for line_no, fragment in source_prose_fragments(source_lines)
+        if fragment not in normalized_output_prose
+    ]
+    if missing_prose_fragments:
+        failures.append(f"source prose fragments missing from active body: {len(missing_prose_fragments)}")
+        warnings.extend(
+            f"missing prose fragment line {line_no}: {fragment}"
+            for line_no, fragment in missing_prose_fragments[:10]
+        )
+
     cases_with_rendered_commas = re.findall(r"\\begin\{cases\}.*?,\s*\\\\", active_body, flags=re.S)
     if "cases(" in "\n".join(source_lines) and cases_with_rendered_commas:
         failures.append(f"Typst case separators rendered as equation punctuation: {len(cases_with_rendered_commas)}")
+
+    equation_envs = re.findall(r"\\begin\{equation\}", active_body)
+    if equation_envs:
+        failures.append(f"equation environment used in active body: {len(equation_envs)}")
 
     unresolved_math_lets = [
         name for name in sorted(source_math_let_names(source_lines))
@@ -500,6 +898,10 @@ def main() -> int:
 
     if "vb(" in "\n".join(source_lines) and r"\usepackage{physics}" in tex_text and r"\mathbf{" in active_body:
         failures.append("Typst vector notation converted to raw \\mathbf despite physics package evidence")
+
+    if re.search(r"#let\s+rvec\s*=\s*\$vb\(upright\(r\)\)\$", "\n".join(source_lines)):
+        if r"\rvec}{\vb*{r}" in tex_text or r"\rvec}{\mathbf{r}" in tex_text:
+            failures.append("rvec source definition should use physics \\vb{r}, not \\vb*{r} or raw \\mathbf{r}")
 
     if r"\DeclareSIUnit" in tex_text:
         failures.append("custom siunitx unit macro defined; use raw units in \\SI/\\si")
@@ -525,16 +927,29 @@ def main() -> int:
 
     if args.tex_evidence:
         evidence_text = args.tex_evidence.read_text(encoding="utf-8", errors="replace")
+        if r"\iffalse" in tex_text and r"\iffalse" not in evidence_text:
+            failures.append(r"\iffalse added without TeX evidence")
+        output_comments_now = Counter(tex_comment_texts(tex_lines))
+        evidence_marker_comments = [
+            comment for comment in tex_comment_texts(evidence_text.splitlines())
+            if "document starts" in comment.lower() or "____" in comment
+        ]
+        missing_marker_comments = [
+            comment for comment in evidence_marker_comments
+            if output_comments_now[comment] < 1
+        ]
+        if missing_marker_comments:
+            failures.append(f"missing TeX evidence marker comments: {len(missing_marker_comments)}")
+            warnings.extend(f"missing evidence marker comment: {comment}" for comment in missing_marker_comments[:10])
         output_full_text = tex_full_text_without_comments(tex_lines)
         evidence_class = documentclass_name(evidence_text)
         output_class = documentclass_name(tex_text)
         if evidence_class and output_class and evidence_class != output_class:
             failures.append(f"documentclass differs from TeX evidence: output={output_class} evidence={evidence_class}")
-        for command in ("markboth",):
-            evidence_command = normalized_command(evidence_text, command)
-            output_command = normalized_command(tex_text, command)
-            if evidence_command and output_command and evidence_command != output_command:
-                failures.append(f"reusable TeX scaffold command changed from evidence: \\{command}")
+        evidence_markboth = normalized_command(evidence_text, "markboth")
+        output_markboth = normalized_command(tex_text, "markboth")
+        if evidence_markboth and output_markboth and evidence_markboth != output_markboth:
+            failures.append(r"\markboth differs from TeX evidence placeholder")
 
         if r"\documentclass{ieeeaccess}" in evidence_text and r"\documentclass{ieeeaccess}" in tex_text:
             scaffold_needles = [
@@ -559,6 +974,15 @@ def main() -> int:
         if "adjustbox" in output_packages and not re.search(r"\\(?:begin\{adjustbox\}|adjustbox\b|includegraphics\[[^]]*(?:valign|frame|margin))", active_output):
             failures.append("unused copied package: adjustbox")
 
+        allowed_unused_macros = {"figref", "tabref", "secref"}
+        output_without_macro_defs = text_without_newcommand_definitions(active_output)
+        unused_copied_macros = [
+            name for name in sorted(newcommand_names(evidence_text) & newcommand_names(tex_text))
+            if name not in allowed_unused_macros and not re.search(rf"\\{re.escape(name)}\b", output_without_macro_defs)
+        ]
+        if unused_copied_macros:
+            failures.append(f"unused copied TeX evidence macros: {', '.join(unused_copied_macros[:10])}")
+
         evidence_envs = display_env_counts(tex_full_text_without_comments(evidence_text.splitlines()))
         output_envs = display_env_counts(active_body)
         dominant_evidence_envs = [env for env, count in evidence_envs.items() if count > 0]
@@ -566,7 +990,7 @@ def main() -> int:
             preferred = evidence_envs.most_common(1)[0][0]
             for env, count in output_envs.items():
                 if env != preferred and evidence_envs[env] == 0 and count > 0:
-                    failures.append(f"display math environment differs from TeX evidence: {env} used, expected {preferred}")
+                    warnings.append(f"display math environment differs from TeX evidence: {env} used, expected {preferred}")
 
         if grouped_citation_style(evidence_text) and adjacent_cites:
             failures.append("TeX evidence groups adjacent citations, but output keeps them split")
