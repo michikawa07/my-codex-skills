@@ -90,8 +90,48 @@ When add/delete markup is requested:
 - Edit only the response-letter quotation blocks requested by the user unless they ask for a broader range.
 - Keep unchanged surrounding quote text unmarked.
 - Represent deleted manuscript text with `\del{...}` and added manuscript text with `\add{...}`.
-- Do not mechanically copy raw word-level diff boundaries. Group markup into readable phrase or clause units, such as sentence start to comma, sentence start to period, comma to comma, or comma to period.
 - Preserve the revised quotation text after ignoring `\del{...}` content; the visible added/current side must still match the revised manuscript quote.
+
+Granularity rule:
+
+1. Prefer the manuscript diff's visible color spans.
+   - If a manuscript diff file exists, such as `main-diffHEAD.tex`, use it to decide the `\add{}` and `\del{}` boundaries.
+   - Read the actual visible colored text, including commands such as `\DIFadd{...}`, `\DIFdel{...}`, `\DIFaddFL{...}`, and `\DIFdelFL{...}`.
+   - Do not treat the whole outer range of `\DIFaddbegin ... \DIFaddend` or `\DIFdelbegin ... \DIFdelend` as one colored unit. Those wrappers can contain unchanged text and several independent colored spans.
+   - If the `.tex` diff is hard to interpret, inspect the compiled diff PDF or the local manuscript context before deciding the colored spans.
+
+2. Compare one response-letter quotation block at a time.
+   - For each requested quotation block, locate the same revised text in the manuscript and the corresponding old text from the diff.
+   - Compare the response-letter markup against the manuscript diff's colored spans in source order.
+   - Treat adjacent response-letter `\add{}` or `\del{}` spans as one unit only when they are separated by whitespace or unchanged punctuation that belongs to the same continuous edit.
+
+3. Make response-letter units match the manuscript diff units.
+   - If one response-letter `\add{...}` or `\del{...}` covers multiple independently colored manuscript-diff spans, split it.
+   - If several response-letter spans divide one continuous manuscript-diff colored span, merge them.
+   - Leave unchanged words outside `\add{}` and `\del{}` even when they are in the same sentence as a change.
+   - Do not mark a whole sentence only because a local phrase changed inside that sentence.
+   - Use sentence-level markup only when the manuscript diff colors the whole sentence, or when the entire sentence was added or deleted.
+
+4. Fallback when no manuscript diff file exists.
+   - Infer units from `git diff HEAD -- <manuscript-file>`.
+   - Prefer clause-level units bounded by punctuation: sentence start to comma, comma to comma, comma to period, semicolon to comma/period, or colon to comma/period.
+   - For very local edits inside a clause, use a short phrase-level unit rather than expanding to the whole clause.
+   - Do not copy raw character-level or single-token diff noise unless the single token is the complete semantic change.
+   - Do not collapse multiple independent edits into one large sentence-level span.
+
+Examples:
+
+```tex
+% Local replacement inside a sentence: correct
+The stimulation intensity was \del{set as an empirical constant}\add{empirically fixed}, so arbitrarily specified weights could not be presented.
+
+% Local replacement inside a sentence: too coarse
+\del{The stimulation intensity was set as an empirical constant, so arbitrarily specified weights could not be presented.}\add{The stimulation intensity was empirically fixed, so arbitrarily specified weights could not be presented.}
+
+% Whole added sentence: correct only when the manuscript diff colors the whole sentence
+\add{Sierotowicz and Castellini [15] proposed a control method for omnidirectional endpoint force generation via EMS based on a musculoskeletal model.}
+```
+
 - If `\del{...}` contains math or fragile macros and compilation fails because `\sout` cannot process them, wrap only the fragile math/macro fragment in `\mbox` inside `\del`, for example `\del{\mbox{$\Wtar$}}` or `\del{\mbox{\SI{1.0}{kg}}}`.
 - Do not replace failed deletion markup with plain `\textcolor{red}{...}`. If `\mbox` is unsuitable, leave the fragile fragment unmarked or ask the user how to display it.
 
