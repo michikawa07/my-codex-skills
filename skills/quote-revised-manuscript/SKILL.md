@@ -82,22 +82,28 @@ Use this skill to complete reviewer-response quotations from the revised manuscr
 
 ## Optional Add/Delete Markup
 
-Apply `\add{}` and `\del{}` markup only when the user explicitly asks for add/delete markup, diff markup, or equivalent wording. Do not add this markup during ordinary quotation filling or auditing.
+Apply `\add{}` and `\del{}` markup when the user explicitly asks for add/delete markup, diff markup, or equivalent wording. During ordinary quotation filling or auditing, leave quotations without add/delete markup.
 
 When add/delete markup is requested:
 
 - Use `git diff HEAD -- <manuscript-file>` as the source of truth for the old and revised text.
-- Edit only the response-letter quotation blocks requested by the user unless they ask for a broader range.
+- Edit the response-letter quotation blocks requested by the user. Expand the edited range only when the user asks for a broader range.
 - Keep unchanged surrounding quote text unmarked.
 - Represent deleted manuscript text with `\del{...}` and added manuscript text with `\add{...}`.
 - Preserve the revised quotation text after ignoring `\del{...}` content; the visible added/current side must still match the revised manuscript quote.
+- Use the manuscript diff to determine boundaries while preserving both sides of each change:
+  - For replacements, write adjacent `\del{old manuscript text}\add{revised manuscript text}` spans at the matched granularity.
+  - For pure additions, write only `\add{revised manuscript text}`.
+  - For pure deletions, write only `\del{old manuscript text}`.
+  - Keep an existing `\del{...}` when it corresponds to old manuscript text replaced or deleted by the revision.
 
 Granularity rule:
 
-1. Prefer the manuscript diff's visible color spans.
+1. Prefer the manuscript diff's visible color spans for boundaries, not for side selection.
    - If a manuscript diff file exists, such as `main-diffHEAD.tex`, use it to decide the `\add{}` and `\del{}` boundaries.
    - Read the actual visible colored text, including commands such as `\DIFadd{...}`, `\DIFdel{...}`, `\DIFaddFL{...}`, and `\DIFdelFL{...}`.
-   - Do not treat the whole outer range of `\DIFaddbegin ... \DIFaddend` or `\DIFdelbegin ... \DIFdelend` as one colored unit. Those wrappers can contain unchanged text and several independent colored spans.
+   - Treat `\DIFaddbegin ... \DIFaddend` and `\DIFdelbegin ... \DIFdelend` as wrapper ranges that can contain unchanged text and several independent colored spans. Use the inner colored commands and visible colored text to decide units.
+   - When the diff shows both deleted and added colored text for the same local edit, keep both in the response letter as `\del{...}\add{...}`. If one side is hard to see in the diff file, recover it from `git diff HEAD -- <manuscript-file>`.
    - If the `.tex` diff is hard to interpret, inspect the compiled diff PDF or the local manuscript context before deciding the colored spans.
 
 2. Compare one response-letter quotation block at a time.
@@ -109,15 +115,15 @@ Granularity rule:
    - If one response-letter `\add{...}` or `\del{...}` covers multiple independently colored manuscript-diff spans, split it.
    - If several response-letter spans divide one continuous manuscript-diff colored span, merge them.
    - Leave unchanged words outside `\add{}` and `\del{}` even when they are in the same sentence as a change.
-   - Do not mark a whole sentence only because a local phrase changed inside that sentence.
+   - Mark only the local changed phrase or clause when a local phrase changed inside a sentence.
    - Use sentence-level markup only when the manuscript diff colors the whole sentence, or when the entire sentence was added or deleted.
 
 4. Fallback when no manuscript diff file exists.
    - Infer units from `git diff HEAD -- <manuscript-file>`.
    - Prefer clause-level units bounded by punctuation: sentence start to comma, comma to comma, comma to period, semicolon to comma/period, or colon to comma/period.
    - For very local edits inside a clause, use a short phrase-level unit rather than expanding to the whole clause.
-   - Do not copy raw character-level or single-token diff noise unless the single token is the complete semantic change.
-   - Do not collapse multiple independent edits into one large sentence-level span.
+   - Use a single-token span only when that token is the complete semantic change.
+   - Keep multiple independent edits as separate spans instead of one large sentence-level span.
 
 Examples:
 
@@ -125,7 +131,13 @@ Examples:
 % Local replacement inside a sentence: correct
 The stimulation intensity was \del{set as an empirical constant}\add{empirically fixed}, so arbitrarily specified weights could not be presented.
 
-% Local replacement inside a sentence: too coarse
+% Replacement: keep the old side and the revised side
+The target weight was \del{changed to}\add{varied as} $\Wtar = \SI{1.0}{kg},\,\SI{1.5}{kg}$.
+
+% Add-only markup for the same replacement loses the old side
+The target weight was \add{varied as} $\Wtar = \SI{1.0}{kg},\,\SI{1.5}{kg}$.
+
+% Local replacement inside a sentence: sentence-level span is too coarse
 \del{The stimulation intensity was set as an empirical constant, so arbitrarily specified weights could not be presented.}\add{The stimulation intensity was empirically fixed, so arbitrarily specified weights could not be presented.}
 
 % Whole added sentence: correct only when the manuscript diff colors the whole sentence
@@ -133,7 +145,7 @@ The stimulation intensity was \del{set as an empirical constant}\add{empirically
 ```
 
 - If `\del{...}` contains math or fragile macros and compilation fails because `\sout` cannot process them, wrap only the fragile math/macro fragment in `\mbox` inside `\del`, for example `\del{\mbox{$\Wtar$}}` or `\del{\mbox{\SI{1.0}{kg}}}`.
-- Do not replace failed deletion markup with plain `\textcolor{red}{...}`. If `\mbox` is unsuitable, leave the fragile fragment unmarked or ask the user how to display it.
+- Keep failed deletion markup out of plain `\textcolor{red}{...}` replacements. If `\mbox` is unsuitable, leave the fragile fragment unmarked or ask the user how to display it.
 
 ## LaTeX Conversion Rules
 
