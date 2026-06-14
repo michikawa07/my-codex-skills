@@ -24,21 +24,28 @@ description: Convert a Typst manuscript or document into TeX/LaTeX while preserv
 ## Workflow
 
 1. Select the Typst source, requested TeX output, and any TeX evidence named by the user.
-2. If the output is new, create a scaffold seed:
+2. If the working directory is inside a git repository with an existing `HEAD`, create a diff-audit baseline before any conversion:
+   - Byte-copy `<source.typ>` to `<output.tex>`, overwriting `<output.tex>` if it exists.
+   - Run `git add -f -- <output.tex>`.
+   - Run `git commit --only -m "Add Typst-to-TeX baseline for <output.tex>" -- <output.tex>`.
+   - Continue conversion on the current branch. Do not stash, reset, or commit any other path.
+   - If the baseline commit command fails because there is no change in `<output.tex>`, continue without a baseline commit.
+   Skip this step outside git repositories or in repositories without `HEAD`.
+3. If the output is new or still contains the raw Typst baseline copy, create a scaffold seed:
    `scripts/seed_tex_skeleton.py source.typ output.tex --tex-evidence evidence.tex --block-ledger .typst-to-tex/block-ledger.json`
    Omit `--tex-evidence` only when none exists.
-3. Process source order from top to bottom. Use:
+4. Process source order from top to bottom. Use:
    `scripts/next_conversion_block.py .typst-to-tex/block-ledger.json output.tex`
    to find the next pending source span, then identify the first semantic element in that span.
-4. Inspect the element locally. Convert it only if every contained construct is known. Write the TeX fragment to a temporary file and replace exactly that block with:
+5. Inspect the element locally. Convert it only if every contained construct is known. Write the TeX fragment to a temporary file and replace exactly that block with:
    `scripts/replace_block.py output.tex <block-id> fragment.tex --block-ledger .typst-to-tex/block-ledger.json`
    When creating fragment files from a shell, use a single-quoted heredoc such as `cat <<'EOF'`; never use `echo -e`, unquoted `printf`, or string literals that interpret backslash escapes.
-5. If a seed block contains multiple semantic elements, convert only when all of them are known and belong together syntactically. Otherwise split the work manually by replacing the block with the first converted element plus a fresh local marker for the remaining source lines.
-6. Run `scripts/scan_typst_preservation.py source.typ --output .typst-to-tex/source-scan.json` for final auditing and unresolved-source detection, not as a precondition that all source constructs have been globally classified.
-7. After all markers are replaced, normalize indentation only:
+6. If a seed block contains multiple semantic elements, convert only when all of them are known and belong together syntactically. Otherwise split the work manually by replacing the block with the first converted element plus a fresh local marker for the remaining source lines.
+7. Run `scripts/scan_typst_preservation.py source.typ --output .typst-to-tex/source-scan.json` for final auditing and unresolved-source detection, not as a precondition that all source constructs have been globally classified.
+8. After all markers are replaced, normalize indentation only:
    `scripts/format_tex_indent.py output.tex`
    This is a post-processing step, not a conversion step. It must not change tokens, line order, comments, labels, command arguments, or blank/nonblank line count except leading whitespace.
-8. Then run:
+9. Then run:
    `scripts/run_conversion_checks.py source.typ output.tex --tex-evidence evidence.tex -- <build command>`
    The wrapper audits before building. Omit `--tex-evidence` only when none exists.
    Use the user's requested build command and working-directory conventions exactly. If validation is done in an isolated copy, copy or expose required TeX class/style/font/image assets so the command sees the same files as it would in the project.
