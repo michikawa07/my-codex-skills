@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quote Revised Manuscript"
+  short_description: "Fill response-letter quotations from revised manuscript diffs."
+  default_prompt: "Use this skill to replace response-letter TODO quotations with appropriate excerpts from revised manuscript diffs."
