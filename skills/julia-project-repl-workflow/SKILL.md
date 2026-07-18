@@ -11,8 +11,8 @@ Use this skill before running Julia code in a repository or project.
 
 - Use exactly one persistent Julia REPL PTY for iterative work.
 - Send Julia code to that REPL with `write_stdin`.
-- Omit `yield_time_ms` when `write_stdin` sends non-empty input. Never put a long wait on the command-send call.
-- If the command is still running after the send call returns, poll the same PTY with an empty `write_stdin` call. Set `yield_time_ms` only on these empty polling calls.
+- For ordinary REPL command submission, call `write_stdin` with only the session ID and input. Do not add wait parameters or empty polling calls when sending the command already fulfills the user's request.
+- Use `yield_time_ms` or polling only when completion verification is required for the task. Treat them only as tool-output waiting controls; do not use them to speed up Julia or as an unverified routine step.
 - Do not use `julia -e` or fresh Julia processes for editing, testing, or verification.
 - Do not install, repair, update, reset, or reconfigure Julia unless the user explicitly asks.
 - Shell commands for file inspection and executable discovery are allowed.
