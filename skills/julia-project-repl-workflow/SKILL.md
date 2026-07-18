@@ -11,11 +11,20 @@ Use this skill before running Julia code in a repository or project.
 
 - Use exactly one persistent Julia REPL PTY for iterative work.
 - Send Julia code to that REPL with `write_stdin`.
-- For ordinary REPL command submission, call `write_stdin` with only the session ID and input. Do not add wait parameters or empty polling calls when sending the command already fulfills the user's request.
-- Use `yield_time_ms` or polling only when completion verification is required for the task. Treat them only as tool-output waiting controls; do not use them to speed up Julia or as an unverified routine step.
 - Do not use `julia -e` or fresh Julia processes for editing, testing, or verification.
 - Do not install, repair, update, reset, or reconfigure Julia unless the user explicitly asks.
 - Shell commands for file inspection and executable discovery are allowed.
+
+## Reuse The Warm REPL
+
+- Treat the persistent REPL as a performance mechanism, not as an end state. Reuse its loaded packages, JIT-compiled methods, plotting backend, and loaded function definitions so repeated work executes without startup and recompilation costs.
+- When source code is unchanged, run only the functions needed to consume the latest inputs and produce the requested outputs. Do not reload packages, re-include files, or restart Julia as part of routine repetition.
+- When source code changed, update the same REPL with Revise or `includet` as described below, then rerun the affected functions.
+
+## Run Commands To Completion
+
+- Do not treat writing input to the PTY as task completion. A Julia command is complete only after the requested call returns without error; a command that produces an artifact is complete only after the artifact-writing call returns.
+- Observe the command result and the return of the `julia>` prompt. Use `yield_time_ms` or polling only when needed to obtain that evidence, and do not add fixed waits unrelated to observed execution.
 
 ## Select Julia Executable
 
