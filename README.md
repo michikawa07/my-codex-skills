@@ -117,8 +117,29 @@ New-Item -ItemType Junction -Path "$codexRoot\hooks" -Target $repoHooks
 New-Item -ItemType SymbolicLink -Path "$codexRoot\hooks.json" -Target "$repoHooks\hooks.json"
 ```
 
+On native Windows, `hooks/hooks.json` uses the Python runtime bundled with
+Codex Desktop:
+
+```text
+%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe
+```
+
+Verify that runtime before enabling the hook:
+
+```powershell
+$python = "$HOME\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+if (-not (Test-Path -LiteralPath $python)) {
+    throw "Codex bundled Python was not found: $python"
+}
+& $python --version
+```
+
+If Codex stores its bundled runtime elsewhere, update `commandWindows` in
+`hooks/hooks.json` to that Python executable. This does not affect the
+Linux, macOS, or WSL `command`, which continues to use `python3`.
+
 Creating a file symbolic link may require Windows Developer Mode or an elevated
-terminal. Do not overwrite an existing `hooks.json`; merge its hook definitions
+PowerShell session. Do not overwrite an existing `hooks.json`; merge its hook definitions
 or back it up deliberately instead.
 
 ### Trust the hook

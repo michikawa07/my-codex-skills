@@ -8,7 +8,7 @@
           {
             "type": "command",
             "command": "python3 ~/.codex/hooks/restore_recent_context.py",
-            "commandWindows": "py -3 \"%USERPROFILE%\\.codex\\hooks\\restore_recent_context.py\"",
+            "commandWindows": "\"%USERPROFILE%\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe\" \"%USERPROFILE%\\.codex\\hooks\\restore_recent_context.py\"",
             "timeout": 10,
             "statusMessage": "Restoring recent conversation context"
           }
