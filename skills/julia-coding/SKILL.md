@@ -5,6 +5,19 @@ description: Use whenever Codex reads, explains, reviews, edits, or writes Julia
 
 # Julia Coding
 
+## Style References
+
+At the start of each Julia coding task, before the first edit or write, open and read the current guidance at:
+
+- [Julia Style Guide](https://docs.julialang.org/en/v1/manual/style-guide/)
+- [Julia Short-Circuit Evaluation](https://docs.julialang.org/en/v1/manual/control-flow/#Short-Circuit-Evaluation)
+- [BlueStyle](https://github.com/JuliaDiff/BlueStyle)
+- [JuliaFormatter Code Style](https://domluna.github.io/JuliaFormatter.jl/dev/style/)
+
+Read these references once per task. Do not reopen them before subsequent edits in the same task unless the user asks or the guidance must be rechecked.
+
+Apply explicit user instructions and the existing local style first, then Julia's official guidance. Use BlueStyle and JuliaFormatter only for formatting decisions that remain unspecified.
+
 ## First Moves
 
 Before editing Julia code:
