@@ -1,9 +1,10 @@
 # codex-skills
 
-Personal Codex skills shared across machines.
+Personal Codex skills and hooks shared across machines.
 
-This repository keeps user-authored skills in one Git-managed location. Each
-machine can point Codex at `./skills` with a symlink, then update with `git pull`.
+This repository keeps user-authored skills and hooks in one Git-managed
+location. Each machine links Codex to `./skills` and `./hooks`, then receives
+updates with `git pull`.
 
 ## Contents
 
@@ -15,37 +16,58 @@ machine can point Codex at `./skills` with a symlink, then update with `git pull
 - `skills/quote-revised-manuscript`: revised-manuscript quotation workflow for response letters
 - `skills/todo-archive-consensus`: TODO.md and ARCHIVE.md maintenance workflow
 - `skills/typst-to-tex-converter`: Typst-to-TeX conversion workflow
+- `hooks/restore_recent_context.py`: restores recent conversation and tool context after compaction
 
-## Install On Ubuntu
+## Installation
 
-Clone this repository to `~/codex-skills`, then run the installer:
+Install in the same operating-system environment and user account where Codex
+stores its configuration. For example, use WSL instructions only when Codex is
+also running in WSL and uses that WSL user's `~/.codex`.
+
+### Install with Codex
+
+Give Codex the following request:
+
+```text
+Install https://github.com/michikawa07/my-codex-skills into ~/codex-skills.
+If it is already cloned there, update it with a fast-forward-only pull instead.
+Read its README and use the instructions for the operating-system environment
+where this Codex session stores its configuration. Install both the skills and
+hooks, verify the resulting links, and do not delete, replace, or move any
+existing non-link path without asking me first. Finally, tell me how to review
+and trust the SessionStart hook in the Codex surface I am currently using.
+```
+
+On Linux, macOS, or WSL, Codex should normally run `./install.sh --hooks`.
+It should stop and ask before adding `--replace`, because that option moves
+existing skills or hook paths aside.
+
+### Manual installation on Linux, macOS, or WSL
+
+Clone the repository and install both the skills and shared hooks:
 
 ```bash
 git clone https://github.com/michikawa07/my-codex-skills.git ~/codex-skills
 cd ~/codex-skills
-./install.sh
+./install.sh --hooks
 ```
 
-By default this links:
+This creates symlinks instead of copying files:
 
 ```text
-~/.agents/skills -> ~/codex-skills/skills
+~/.agents/skills    -> ~/codex-skills/skills
+~/.codex/hooks      -> ~/codex-skills/hooks
+~/.codex/hooks.json -> ~/codex-skills/hooks/hooks.json
 ```
 
-For older Codex setups that still read `~/.codex/skills`, run:
+To install only the skills, omit `--hooks`. For older Codex setups that still
+read `~/.codex/skills`, add `--legacy-codex`.
 
-```bash
-./install.sh --legacy-codex
-```
+If a target is an existing normal file or directory, the installer stops
+without changing it. Inspect that path before using `--replace`; replacement
+moves it to a timestamped backup and may supersede an existing hooks setup.
 
-If the target already exists as a normal directory, the script stops instead of
-overwriting it. To move the existing directory aside and create the symlink:
-
-```bash
-./install.sh --legacy-codex --replace
-```
-
-## Install On Windows
+### Manual installation on native Windows
 
 Clone this repository to `$HOME\codex-skills`:
 
@@ -53,9 +75,10 @@ Clone this repository to `$HOME\codex-skills`:
 git clone https://github.com/michikawa07/my-codex-skills.git "$HOME\codex-skills"
 ```
 
-Create a directory junction for each skill. Existing copies with the same names
-are removed before the junctions are created. Linking skills individually keeps
-Codex's bundled `$HOME\.codex\skills\.system` directory intact.
+Create a directory junction for each skill. The snippet checks every destination
+before changing anything and stops if a same-named path already exists. Linking
+skills individually keeps Codex's bundled `$HOME\.codex\skills\.system`
+directory intact.
 
 ```powershell
 $repoSkills = "$HOME\codex-skills\skills"
@@ -63,33 +86,71 @@ $codexSkills = "$HOME\.codex\skills"
 
 New-Item -ItemType Directory -Force -Path $codexSkills | Out-Null
 
-Get-ChildItem -LiteralPath $repoSkills -Directory | ForEach-Object {
-    $link = Join-Path $codexSkills $_.Name
-
-    if (Test-Path -LiteralPath $link) {
-        Remove-Item -LiteralPath $link -Recurse -Force
+$plannedLinks = Get-ChildItem -LiteralPath $repoSkills -Directory | ForEach-Object {
+    [PSCustomObject]@{
+        Source = $_.FullName
+        Link = Join-Path $codexSkills $_.Name
     }
+}
 
-    New-Item -ItemType Junction -Path $link -Target $_.FullName | Out-Null
+$conflicts = $plannedLinks | Where-Object { Test-Path -LiteralPath $_.Link }
+if ($conflicts) {
+    $paths = ($conflicts.Link -join "`n")
+    throw "Existing skill paths must be reviewed before installation:`n$paths"
+}
+
+$plannedLinks | ForEach-Object {
+    New-Item -ItemType Junction -Path $_.Link -Target $_.Source | Out-Null
 }
 ```
 
-Restart Codex after changing skill locations.
+For the hooks, first confirm that `$HOME\.codex\hooks` and
+`$HOME\.codex\hooks.json` do not contain another hooks setup. Then create a
+directory junction and file symbolic link:
+
+```powershell
+$repoHooks = "$HOME\codex-skills\hooks"
+$codexRoot = "$HOME\.codex"
+
+New-Item -ItemType Directory -Force -Path $codexRoot | Out-Null
+New-Item -ItemType Junction -Path "$codexRoot\hooks" -Target $repoHooks
+New-Item -ItemType SymbolicLink -Path "$codexRoot\hooks.json" -Target "$repoHooks\hooks.json"
+```
+
+Creating a file symbolic link may require Windows Developer Mode or an elevated
+terminal. Do not overwrite an existing `hooks.json`; merge its hook definitions
+or back it up deliberately instead.
+
+### Trust the hook
+
+Restart or reload Codex after installation. In the VS Code extension, open the
+Codex sidebar settings, select **Hooks**, find the `SessionStart` hook under the
+user configuration, and select **Trust**. In the Codex CLI, review it from
+`/hooks`. The installer cannot grant this trust.
+
+Codex requires another review whenever the hook definition changes.
+
+### What the compaction hook restores
+
+On context compaction, the hook restores up to five recent conversation
+exchanges and the five latest tool uses. Tool output previews share a 1,500-byte
+budget; larger outputs keep their head and tail plus the call id, original size,
+and transcript line numbers needed to retrieve the exact result.
 
 ## Update
 
-On Ubuntu:
+On Linux, macOS, or WSL:
 
 ```bash
-cd ~/codex-skills
-git pull
+git -C ~/codex-skills pull --ff-only
 ```
 
-On Windows:
+On native Windows:
 
 ```powershell
-git -C "$HOME\codex-skills" pull
+git -C "$HOME\codex-skills" pull --ff-only
 ```
 
-Because Codex reads the linked skill directories, no copy step is needed after
-pulling changes.
+Because Codex reads the linked skills and hooks, no copy step is needed after
+pulling changes. If `hooks.json` changed, review and trust the hook again from
+the VS Code **Hooks** settings or the CLI `/hooks` screen.
