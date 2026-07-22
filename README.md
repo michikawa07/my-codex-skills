@@ -153,10 +153,12 @@ Codex requires another review whenever the hook definition changes.
 
 ### What the compaction hook restores
 
-On context compaction, the hook restores up to five recent conversation
-exchanges and the five latest tool uses. Tool output previews share a 1,500-byte
-budget; larger outputs keep their head and tail plus the call id, original size,
-and transcript line numbers needed to retrieve the exact result.
+On context compaction, the hook restores one chronological event stream built
+from up to five recent conversation exchanges and the five latest tool uses.
+User and Codex messages, tool-call inputs, and tool results retain their
+transcript line order. Event content is copied verbatim; when the size limit is
+reached, older content is shortened first with an explicit truncation marker
+instead of being summarized.
 
 ## Update
 
