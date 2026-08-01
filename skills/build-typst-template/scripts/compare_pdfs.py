@@ -434,6 +434,35 @@ def mask_measurement(raw: bytes, image_width: int, box: tuple[int, int, int, int
     return {"x": left, "y": top, "width": right - left + 1, "height": bottom - top + 1, "center_x": sum_x / count, "center_y": sum_y / count}
 
 
+def local_rule_bands(
+    raw: bytes, image_width: int, box: tuple[int, int, int, int], *, horizontal: bool,
+) -> list[dict[str, Any]]:
+    """Return dense local row/column bands as coarse rule/image structure."""
+    x, y, width, height = box
+    values = []
+    if horizontal:
+        for row in range(height):
+            base = (y + row) * image_width + x
+            segment = raw[base:base + width]
+            values.append((width - segment.count(0)) / width)
+    else:
+        for column in range(width):
+            start = y * image_width + x + column
+            segment = raw[start:start + height * image_width:image_width]
+            values.append((height - segment.count(0)) / height)
+    bands, start = [], None
+    for index, coverage in enumerate((*values, 0.0)):
+        if coverage >= 0.5 and start is None:
+            start = index
+        if coverage < 0.5 and start is not None:
+            bands.append({
+                "start": start, "end": index,
+                "maximum_coverage": max(values[start:index]),
+            })
+            start = None
+    return bands
+
+
 def tile_measurements(buffers: tuple[int, int, bytes | None, bytes | None, bytes | None], geometry: dict[str, Any], columns: int, rows: int, page: int) -> list[dict[str, Any]]:
     width, height, changed_mask, ref_mask, cand_mask = buffers
     if columns > width or rows > height: raise InputError("tile grid exceeds raster dimensions and would create zero-width tiles")
@@ -452,7 +481,22 @@ def tile_measurements(buffers: tuple[int, int, bytes | None, bytes | None, bytes
             w_pt, h_pt = tile[2] / width * visual_width, tile[3] / height * visual_height
             item: dict[str, Any] = {"id": f"p{page:03d}-r{row + 1:03d}-c{column + 1:03d}-tile", "page": page, "measurement_kind": "tile-observation", "row": row + 1, "column": column + 1, "box_pt": [x_pt, y_pt, w_pt, h_pt]}
             if changed is not None: item["pixel"] = {"thresholded_changed_ratio": ratio, "thresholded_changed_pixels": changed}
-            if ref_mask is not None and cand_mask is not None: item["ink"] = {"reference": ref_ink, "candidate": cand_ink, "displacement": ink_displacement(ref_ink, cand_ink)}
+            if ref_mask is not None and cand_mask is not None:
+                item["ink"] = {
+                    "reference": ref_ink, "candidate": cand_ink,
+                    "displacement": ink_displacement(ref_ink, cand_ink),
+                    "structure": {
+                        "reference": {
+                            "horizontal_bands": local_rule_bands(ref_mask, width, tile, horizontal=True),
+                            "vertical_bands": local_rule_bands(ref_mask, width, tile, horizontal=False),
+                        },
+                        "candidate": {
+                            "horizontal_bands": local_rule_bands(cand_mask, width, tile, horizontal=True),
+                            "vertical_bands": local_rule_bands(cand_mask, width, tile, horizontal=False),
+                        },
+                        "coverage_cutoff": 0.5,
+                    },
+                }
             result.append(item)
     return result
 

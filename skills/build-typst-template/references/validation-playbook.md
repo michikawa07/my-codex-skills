@@ -1,244 +1,227 @@
 # Typst Template Validation Playbook
 
-Use this playbook after the acceptance manifest defines what the project means
-by correct. Automation produces evidence and gate results; visual interpretation
-and source conflicts remain engineering decisions.
+Use this reference after evidence inspection and whenever a coherent template
+change is ready for fixture verification.
 
-## 1. Observe, Then Freeze Only Approved Intent
+## Contents
 
-The verifier observes hashes, DOCX/PDF inventory, page geometry/count, font
-candidates, dependencies, tool versions, extracted text, and metrics. Put only
-these decisions in `acceptance.json`:
+- [Project Check File](#1-project-check-file)
+- [Run Artifacts](#2-run-artifacts)
+- [Source Boundary](#3-source-boundary)
+- [Read the Official Scan Hierarchically](#4-read-the-official-scan-hierarchically)
+- [Interpret Signals Separately](#5-interpret-signals-separately)
+- [Repair Loop](#6-repair-loop)
 
-- authoritative reference PDF and structural source
-- exact official fixture source
-- intended fixture meaning and comparison basis
-- required Typst family names and exact normalized embedded PDF font names
-- source-supported visual mode and residual decision
-- required text and ordered end markers
-- expected success and expected diagnostic fixtures
-- approved input hashes after a baseline is accepted
+## 1. Project Check File
 
-The failure addressed here is test drift: changing content, fonts, renderer, or
-reference while interpreting metric changes as template progress. Reference page
-count and geometry are observed, not manually duplicated.
+Keep `checks.json` small and project-specific:
 
-## 2. Run the Fixed Verifier
-
-Resolve the Skill directory and run into a new project-visible directory:
-
-```bash
-python3 <skill-dir>/scripts/verify_template.py run \
-  acceptance.json layout-audit/run-001
+```json
+{
+  "project_root": ".",
+  "template_entry": "template.typ",
+  "entry_symbol": "robomech",
+  "font_paths": ["/mnt/c/Windows/Fonts"],
+  "bibliography_data": "references.bib",
+  "comparison_dpi": 300,
+  "fixtures": [
+    {
+      "id": "official",
+      "kind": "official",
+      "source": "fixtures/official.typ",
+      "reference_pdf": "evidence/official.pdf",
+      "required_text_file": "evidence/official-required.txt",
+      "geometry_tolerance_pt": 0.1,
+      "text_thresholds": {
+        "reference_coverage": 0.95,
+        "candidate_precision": 0.95,
+        "ordered_similarity": 0.90
+      }
+    },
+    {
+      "id": "frontmatter-long",
+      "kind": "frontmatter",
+      "source": "fixtures/frontmatter-long.typ",
+      "ordered_text": ["FRONTMATTER-LAST", "BODY-FIRST"]
+    },
+    {
+      "id": "body-flow",
+      "kind": "body-flow",
+      "source": "fixtures/body-flow.typ",
+      "minimum_pages": 2,
+      "page_flows": [
+        {"start": "LIST-START", "end": "LIST-END", "following": "LIST-AFTER"},
+        {"start": "TABLE-START", "end": "TABLE-END", "following": "TABLE-AFTER"}
+      ]
+    }
+  ]
+}
 ```
 
-The verifier uses fixed operations rather than manifest-supplied shell commands:
+Exactly one fixture of each `kind` is allowed. All three must compile
+successfully; there is no diagnostic outcome or capability inventory.
 
-1. hash declared evidence
-2. inventory declared DOCX structure without interpreting it
-3. resolve required Typst fonts
-4. compile declared fixtures and capture warnings/dependencies
-5. verify expected success or expected diagnostic outcomes
-6. extract candidate text and embedded PDF fonts
-7. verify page counts, required text, order, and end markers
-8. write a per-page scan record: all-layer raster evidence for `evidence`, or
-   non-raster content/font/geometry preflight for gated modes
-9. for `zero`/`approved-budget`, write a per-page 300 DPI gate record and retain
-   failure artifacts only for failed targets; no duplicate raster scan is needed
-10. write `run.json`, `summary.txt`, logs, PDFs, text, scan index, and selected
-    detail artifacts
+Paths are relative to `project_root`, which is relative to `checks.json`.
+`template_entry`, fixture sources, reference PDFs, and required-text files stay
+inside the project root. Font paths may be absolute.
 
-The output directory is new for each run, so prior evidence remains available
-for regression comparison. Put retained runs where the user can open them from
-their host environment; use temporary directories for disposable experiments.
+Optional fixture checks are:
 
-## 3. Interpret Automated Gates
+- `required_text`: literal snippets that must occur after Unicode normalization
+  and whitespace removal;
+- `required_text_file`: one required snippet per nonblank line;
+- `ordered_text`: snippets that must occur in the declared order;
+- `minimum_pages`: positive lower page bound;
+- `page_flows`: markers that occur once, cross from start to end page, and place
+  the end before following content.
 
-| Gate | What a pass proves | What still needs judgment |
+The body-flow fixture declares at least two flows: one for a naturally crossing
+list and one for a naturally crossing table. The checker does not assign those
+meanings from marker names; the project does. If the official source contains a
+display equation or a figure/caption, body-flow must also exercise that standard
+structure. When `bibliography_data` is declared, official and body-flow both use
+standard citation plus bibliography semantics and consume the file. Declare
+`bibliography_style_asset` only for a positively justified project style file;
+built-in style names need no asset declaration.
+
+The official fixture additionally declares its reference, geometry tolerance,
+and normalized-text thresholds. Geometry tolerance cannot exceed `0.1 pt`, text
+thresholds cannot be weaker than coverage `0.95`, precision `0.95`, and ordered
+similarity `0.90`, and `comparison_dpi` cannot be below 300. The checker derives
+the embedded face set from the reference; there is no worker-selected required
+font list. It fails exact normalized set differences, ordered word-anchor or
+numbered-equation drift, and local ink/rule/image structure displacement above
+the fixed `0.25 pt` cap on any page. These are structural preflights, not pixel
+identity or visual acceptance. Use the comparator directly for a disposable
+lower-DPI diagnostic.
+
+Every locked official snippet must occur in the reference PDF before it is
+checked in the candidate. Font normalization removes only subset prefixes and
+conservatively normalizes spelling/case; it does not collapse styles or guess
+aliases. Add an equivalence only after positive evidence establishes one.
+
+## 2. Run Artifacts
+
+Run:
+
+```bash
+python3 <skill-dir>/scripts/check_fixtures.py checks.json audit/run-001
+```
+
+The output contains:
+
+- `report.json` and `summary.txt`;
+- compiler logs and Typst dependency JSON;
+- all three candidate PDFs;
+- page-separated extracted text;
+- PDF geometry and embedded-font observations;
+- official normalized content metrics;
+- reference-derived font-face results and every-page word, equation, and
+  local-ink/rule/image preflights;
+- line-evidenced source layout inventories and standard-structure observations;
+- bibliography data/style dependency consumption when declared;
+- the official comparator `scan/index.json` and page details.
+
+`report.json` also contains `repair_targets`, a deterministic queue capped at
+about twelve entries. It summarizes existing evidence rather than adding a new
+gate: reference/candidate embedded faces, each failing page's earliest and
+maximum same-line coherent token-cluster median, equation body/number anchors,
+and one representative local band/ink delta per failing page. Isolated raw word
+maxima remain diagnostic because repeated tokens can have different semantic
+locations. `summary.txt` prints the actionable targets compactly
+with a correction direction. A target is a causal repair hypothesis, not a
+completion decision.
+
+Hashes bind the report to the current config, template, sources, reference,
+required-text file, dependencies, logs, PDFs, and comparison index. The checker
+does not ask the author to copy hashes into the config.
+
+## 3. Source Boundary
+
+The source lint checks only mechanically observable ownership:
+
+- template and fixture are distinct;
+- the template exports the project-declared `entry_symbol`;
+- each fixture imports that symbol, directly or through `*`, from the exact
+  template path;
+- each fixture references the symbol without redefining it;
+- Typst's dependency graph contains the template;
+- a fixture does not call a private symbol defined by that template.
+
+It accepts both `.with(...)` and `doc => wrapper(..., doc)` forms. It does not
+inspect metadata fields, ban page breaks or widths, or decide whether an author
+choice belongs in the fixture. Separately, `source_inventory` reports each
+layout-sensitive construct and absolute dimension with a source line. Classify
+those observations in the work log; the inventory is not a deny-list.
+
+## 4. Read the Official Scan Hierarchically
+
+Start with `comparison/index.json`:
+
+1. page count and page correspondence;
+2. per-page geometry and rotation;
+3. normalized and raw extracted text;
+4. embedded font-family sets;
+5. render producer and tool versions;
+6. page ranking and hotspot findings.
+
+Then request high-resolution detail for the most semantically risky findings:
+
+```bash
+python3 <skill-dir>/scripts/compare_pdfs.py detail \
+  audit/run-001/comparison \
+  audit/detail-title \
+  --finding <finding-id> --dpi 300
+```
+
+The comparator does not register or rescale pages. Geometry displacement,
+wrapping drift, and missing ink remain visible.
+
+The batch checker consumes this scan mechanically. It fails when any ordered
+word anchor, numbered equation body/number anchor, local tile ink centroid or
+extent, or dense local row/column band moves by more than `0.25 pt`; changed ink
+presence and insufficient every-page spatial coverage also fail. The reference
+and the source-observed structure count select the anchors, not a worker list.
+This connects coarse rules, images, and block drift to status without certifying
+aesthetics.
+
+## 5. Interpret Signals Separately
+
+| Signal | Establishes | Does not establish |
 |---|---|---|
-| Evidence/dependency hashes | tested files are the declared files | authority and semantic correctness |
-| Clean compile and font checks | intended toolchain/fonts were available and embedded | glyph-shaping equivalence |
-| Page count and geometry | document has the declared physical structure | correctness of content positions |
-| Required and ordered text | named content and tails survived extraction | visual typography and PDF reading-order limits |
-| Expected diagnostic | impossible input fails through the intended path | whether the input should be supported instead |
-| Full-page pixel metrics | visual change locations and magnitude | cause and importance of each residual |
-| Region metrics | named local visual evidence | semantic correctness inside that region |
+| Clean compile and dependency | fixture consumed the template | correct API meaning |
+| Required/order/page-flow text | visible tail and ordering behavior | visual placement quality |
+| Page geometry | paper boxes and rotation | content alignment |
+| Reference-derived font inventory | exact normalized embedded face set | identical glyph rasterization |
+| Word/equation/local-ink preflight | bounded structural displacement on every page | aesthetic or pixel acceptance |
+| Pixel/ink hotspot | difference location and magnitude | cause or importance |
+| Text coverage and order | content comparability | visual equivalence |
 
-Treat the verifier's `pass` as a necessary machine result. Combine it with the
-manual causal review before declaring the template complete.
+Inspect frontmatter, the frontmatter/body transition, equation numbers, caption
+prefixes, table rules, list/table tails, references, and the final page whenever
+they occur. Classify the cause before editing.
 
-## 4. Compare Content Before Geometry
+## 6. Repair Loop
 
-Use full visual calibration when the candidate and reference carry equivalent
-content. Verify equivalence through the strongest available positive contract:
+For a failure:
 
-- exact or normalized extracted-text match when the PDF encodings permit it
-- required complete snippets for equations, tables, units, and bibliography
-- image and source dependency hashes
-- explicit record of instructional annotations excluded from the fixture
+1. fix missing or wrong official content before layout;
+2. fix missing fonts before tuning geometry;
+3. locate the highest-risk visual difference;
+4. map it to the structural source and template rule;
+5. change the rule, not a sample-only offset or public flag;
+6. rerun the affected fixture;
+7. rerun all three and the official comparison.
 
-When content equivalence cannot be established, select `geometry-only`: inspect
-paper geometry and artifact presence while reporting wrapping and pagination as
-unresolved. When the original application is available, create a temporary
-matched reference variant and select `content-equivalent`.
+Before step 5, predict which signed reference→candidate delta the governing rule
+will reduce. After the focused rerun, require that residual to move toward zero.
+Then require no regression on any other official page or any of the three
+fixtures. If the prediction fails, reject the hypothesis and reclassify the
+cause; do not preserve it with a sample-only offset or a weaker threshold.
 
-## 5. Scan Every Page, Then Diagnose Selected Detail
+When a reviewer finds an escaped defect, add the smallest positive check to the
+existing fixture that owns the behavior. Avoid creating a universal profile or
+new permanent fixture family for a single publication defect.
 
-For `visual.mode: "evidence"`, run `compare_pdfs.py scan` at the default
-150 DPI over every page; a reasoned `comparison_settings.scan_dpi` override may
-change it. For `zero` and `approved-budget`, the verifier runs a
-non-raster content/font/geometry preflight and lets the 300 DPI gate perform the
-sole full-page raster pass. The comparison keeps the rendered page origin and
-scale. Its compact index separates content, font, toolchain, page-geometry, ink,
-and pixel signals and proposes grid hotspots. This preserves evidence of margin,
-global translation, line pitch, and page flow without loading every image and
-metric into one context.
-
-Read the index first. Rank findings by semantic risk and magnitude, then use
-`detail --page`, `--box`, or `--finding` for the required high-resolution crop.
-Measurement kind reports how PDFs differ; source and rendering evidence classify
-why. This keeps the all-page scan complete while attention remains targeted.
-
-The full-page report supplies difference and ink bounds. Promote a component to
-a named visual-page-point region when that evidence identifies a local question whose
-importance survives full-page aggregation:
-
-- titles and each author/affiliation boundary
-- abstract, keywords, and page-top headings
-- equation body and number field
-- figure/caption boundary
-- table headers, brackets, rules, and final row
-- bibliography heading, wrapped entries, and final entry
-- footer
-
-Use a region to answer a local question while retaining every page in the scan
-and, when approved, the compact gate as the downstream regression condition.
-This addresses the historical failure where a
-small author overlap and a wrong presenter glyph disappeared inside a low
-aggregate page score.
-
-Region coordinates use top-left page points after page rotation, with `x`
-increasing rightward and `y` downward. This matches the rendered comparison
-image and deliberately differs from lower-left PDF user-space coordinates.
-
-## 5a. Risk Catalog and Escaped-Defect Loop
-
-Every finding belongs to one or more of these risks. The catalog separates
-location evidence from causal judgment, so a low aggregate pixel score cannot
-erase a locally important defect.
-
-| Risk | Positive evidence that exposes it |
-|---|---|
-| 1. Coverage | nominal, boundary, and required diagnostic fixture coverage |
-| 2. Geometry | page count, boxes, margins, and declared anchor/ROI evidence |
-| 3. Glyph | required embedded font plus high-resolution glyph ROI |
-| 4. Semantic text | complete required literals and ordered tail markers |
-| 5. Math structure | source-structure fixture and equation/rule-clearance crop |
-| 6. Flow | page-crossing fixture followed by a unique marker |
-| 7. Container extent | local-width/natural-height fixture, including 0/0 preliminary image sizing |
-| 8. Rules | table header, bracket, vertical-rule, and lower-rule ROIs |
-| 9. Environment | toolchain/version/font inventory and cross-environment fixture |
-| 10. API responsibility | standard-syntax fixture and public-API review |
-| 11. Diagnostics | deliberately impossible fixture with actionable required text |
-| 12. Artifact usability | compact index first and retained failure images in user-visible output |
-
-When human review finds an escaped difference, do not merely lower a global
-threshold. Record the observed signal, structural cause, and user-visible
-consequence. Then add the smallest positive contract that would have detected
-it: a literal/marker for a text distinction, ROI for a localized geometry or
-glyph question, or a nominal/boundary/diagnostic fixture for a behavior. Re-run
-the complete manifest and use the new result as evidence. This converts a human
-discovery into a future machine check without claiming pixels can infer cause.
-
-In this template family that loop has distinct entries for: Japanese body
-`図`/`表` versus caption `Fig.`/`Table`; a 9.5 pt caption; bibliography-heading
-space; zero-premeasurement image sizing; presenter-circle glyph geometry;
-chapter defaults versus an intentional local override; and nested figure
-ownership. They have different causes, so they should not share one generic
-layout-difference exception.
-
-## 6. Classify the Cause
-
-| Observation | Next investigation | Typical correction |
-|---|---|---|
-| Text contract differs | fixture/source structure | restore equivalent wording, symbols, data, or locale terms |
-| Page geometry differs | page and section settings | correct paper, margins, header/footer geometry |
-| Anchors drift progressively | line pitch and paragraph boundaries | implement the actual leading/spacing property |
-| One variable-height block shifts following content | natural extent and minimum-height rule | return measured height plus supported minimum |
-| Glyph edges differ while anchors and wrapping agree | font shaping/rasterization | record the residual and preserve structural geometry |
-| Wrapping differs | local width, font advance, content equivalence | measure at the local container and verify fonts |
-| Table rule intersects content | tallest cell bounds and shared insets | derive row height/clearance from content |
-| Later rows or following text disappear | breakability of the actual container | make the content-bearing element breakable and verify its end marker |
-| CLI and preview text differ | tool version, document language, CSL locale | make the approved locale term explicit and test both environments |
-
-Choose a correction that explains the observation. Then exercise the same rule
-with different content. A nearby offset that merely cancels the symptom will
-fail this second fixture.
-
-## 7. Structural Acceptance Matrix
-
-| Component | Nominal contract | Boundary contract | Diagnostic contract |
-|---|---|---|---|
-| Title/front matter | one line, normal authors | multi-line bilingual titles, many authors | declared single-line area overflow |
-| Heading | normal flow | page top, after equation | — |
-| Equation | short formula | tall/wide/page-boundary formula | formula plus number exceeds usable width |
-| Image | fixed natural size | relative, zero-premeasurement, narrow parent | unresolved or over-tall atomic object |
-| Caption | short numbered | wrapped, multi-digit, unnumbered | atomic figure/caption exceeds page |
-| Table | short table | tall header, narrow/multi-page, repeated rules | unsupported atomic table structure |
-| List | short list | page crossing, short tail, oversized tail | — |
-| References | one digit | two/three digits, wrapped, multi-page | — |
-| Bibliography | common article | every supported item type and locale | malformed required metadata |
-
-Put a unique required text marker after each breakable boundary object. A marker
-proves that the complete object and following flow reached the PDF; it does not
-replace visual inspection of rules and spacing.
-
-## 8. Choose a Visual Mode From Evidence
-
-| Evidence condition | Visual mode and process |
-|---|---|
-| same toolchain and intentionally unchanged baseline | `zero`; raw changed-pixel count must be exactly zero |
-| original-application reference with classified residuals | `approved-budget`; record cause, scope, and publication risk |
-| reference/candidate content not established equivalent | `evidence`; generate artifacts and withhold wrapping/pagination conclusions |
-
-`geometry-only` records physical geometry and artifact presence without a visual
-layout claim. `evidence` records scan evidence and does not run a visual
-acceptance gate; its required approved inspection determines whether pending
-clears. `zero` and `approved-budget` run `gate` after the scan.
-
-Calibration, geometry-only, and approved-budget comparisons remain
-`inspection_pending` until their `inspection` names an approved matching
-`review-record`. With that inspection and a passing approved-budget gate, the
-comparison can clear pending and contribute to completion.
-
-Use `zero` for a before/after regression rendered by the same toolchain when
-the change is expected to leave the official fixture untouched. This is raw
-pixel equality, not a 3% thresholded-difference measurement. The 3% default
-belongs to `evidence` and `approved-budget` measurements; an approved-budget
-override requires a documented reason.
-
-For Word-to-Typst comparisons, first classify the residual at full resolution.
-Then freeze page and region limits that preserve all known structural and
-semantic requirements. Record the decision that supports a nonzero limit.
-
-The default PDF geometry tolerance of `0.1 pt` accounts for common A4 decimal
-rounding between exporters. Select a stricter value when the publication rule
-defines one.
-
-## 9. Final Regression
-
-After the final template change:
-
-1. run the full manifest into a fresh directory
-2. confirm `run.json` reports `pass`
-3. confirm every page has its mode-appropriate scan record and, for a gated
-   mode, its per-page gate record; inspect risk-ranked plus declared detail
-   artifacts without requiring a duplicate raster scan
-4. compare every formerly failing component with its selected latest detail
-5. review the public API by meaning
-6. run `git diff --check` on changed text files
-7. confirm the edit set contains only approved files
-
-Report tested fixtures, exact toolchain, automated results, manual classifications,
-and remaining decisions. This makes “complete” a reproducible claim rather than
-a summary of whichever crop was inspected last.
+Do not call the result ready while source-inventory spacing, font, or placement
+observations remain unclassified or unexplained one-off compensation remains.

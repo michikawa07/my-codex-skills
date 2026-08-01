@@ -1,254 +1,314 @@
 ---
 name: build-typst-template
-description: Build, reconstruct, or harden reusable Typst document templates from Word/DOCX, PDF, TeX/LaTeX, or existing Typst evidence. Use when Codex must reproduce an official sample across every page, separate semantic author API from layout machinery, diagnose layout drift, or verify titles, authors, figures, tables, equations, lists, references, fonts, and pagination with a repeatable acceptance contract.
+description: Build, reconstruct, or harden a reusable Typst document template from project-specific DOCX, PDF, TeX/LaTeX, or Typst evidence. Use when Codex must derive an author-facing API from the supplied publication structure, reproduce an official sample across every page, separate author choices from layout machinery, or diagnose template drift with focused fixtures and hierarchical PDF comparison.
 ---
 
 # Build Typst Template
 
-Reconstruct the document system that produced the sample. A sample PDF supplies
-observations; it does not by itself define the reusable rule.
+Reconstruct the document system evidenced by the project. Do not force projects
+into one metadata model, wrapper name, capability list, or acceptance profile.
 
-## Separate the Three Responsibilities
+## Working Contract
 
-| Responsibility | Owner | Result |
-|---|---|---|
-| Scope, editable files, source precedence, intended author choices, accepted residuals | user | explicit decisions |
-| Infer semantic structure, choose the public API, derive layout rules, classify visual residuals | Codex | specification and implementation |
-| Hash inputs, compile fixtures, separate comparison signals, scan every PDF page, verify text/end markers, and gate approved contracts | bundled scripts | repeatable evidence |
+Keep three responsibilities separate:
 
-Keep these boundaries explicit. The verifier proves declared conditions; it does
-not decide which reference is authoritative or whether a remaining glyph-shape
-difference is acceptable.
+| Responsibility | Owner |
+|---|---|
+| Choose authoritative inputs, edit scope, and accepted residuals | user |
+| Infer semantics, design the project API, implement rules, classify residuals | Codex |
+| Extract facts, compile declared fixtures, lint source boundaries, compare PDFs | bundled scripts |
 
-## Establish a Contract Without Turning It Into Data Entry
+Automation reports observations and failed declared checks. It does not decide
+source authority, API meaning, visual acceptability, or project completion.
 
-Resolve the directory containing this `SKILL.md` as `<skill-dir>`, then create a
-starter manifest in the document project:
+## Minimal Workflow
+
+1. Inspect every user-named source before designing the API.
+2. Lock the official fixture content to the reference.
+3. Derive the public API from structural evidence.
+4. Implement document rules while keeping author choices in usage files.
+5. Maintain exactly three project-declared success fixtures: official,
+   frontmatter variation, and body-flow variation.
+6. Compile all three, scan every official page, and inspect risk-ranked details.
+7. Change a reusable rule, rerun affected fixtures, then rerun all three.
+8. Report evidence, residual causes, and any decision still required from the
+   user.
+
+Use fresh output directories so stale PDFs or scans cannot masquerade as current
+results.
+
+## Inspect and Lock Evidence
+
+Run the evidence inspector before editing the official fixture:
 
 ```bash
-python3 <skill-dir>/scripts/verify_template.py init acceptance.json
+python3 <skill-dir>/scripts/inspect_evidence.py \
+  audit/inspect source.docx source.tex reference.pdf
 ```
 
-Read [references/acceptance-manifest.md](references/acceptance-manifest.md).
-Start from the skeleton, inspect the evidence and fixture, and record only
-authority, fixture meaning, author choices, supported capabilities, positive
-text/diagnostic expectations, and accepted residual decisions. The verifier
-observes hashes, DOCX/PDF inventory, reference page/geometry/font candidates,
-tool versions, candidate embedded fonts, dependencies, and visual metrics.
+It records hashes and format facts. For PDFs it also records every page's
+geometry, embedded font names, and page-separated extracted text. Read the text
+files against the rendered reference page by page. Extraction is a checklist,
+not a semantic or visual oracle.
 
-The manifest is the boundary between judgment and repetition:
+Apply these positive authority rules:
 
-- Put an intent value in the manifest after its meaning and evidence are understood.
-- Let the verifier execute every repeatable check after that value is fixed.
-- When evidence leaves authority, residual risk, or edit scope unresolved, record
-  that state and ask the user one concrete question.
-
-## Establish Evidence Authority
-
-Apply these positive branches:
-
-| Available evidence | Use it for | Resulting action |
-|---|---|---|
-| Written publication rule states a property | normative requirement | implement and cite that property |
-| PDF exported by the intended authoring application | final geometry and appearance | calibrate page and component positions against it |
-| DOCX, TeX, or another editable source | structure and authoring semantics | inspect styles, sections, object types, and explicit breaks |
-| Repeated examples show the same behavior | reusable-rule evidence | formulate one rule and test it with varied content |
-| One sample alone shows a behavior | hypothesis | create a boundary fixture before promoting it to a rule |
-| Sources prescribe different behavior | user decision | present the exact conflict and ask which source governs |
-
-Operate on the approved edit set. When the required change falls outside that
-set, request an explicit scope expansion. This protects concurrent user work
-without spending time monitoring unrelated files.
-
-Use the original application to create a matched reference variant when a test
-depends on that application's wrapping or pagination. When that application is
-unavailable, classify the corresponding visual claim as unresolved while
-continuing structural work supported by the available evidence.
-
-## Build a Comparable Official Fixture
-
-Pixel differences become layout evidence when reference and candidate contain
-the same wording, explicit line breaks, equations, images, table data, and
-bibliography entries. First make the usage fixture content-equivalent to the
-official sample, including meaningful brackets, symbols, units, and reference
-labels.
-
-When content differs, choose one of these branches:
-
-- Create a temporary matched reference and run full visual calibration.
-- Compare only properties independent of content, such as paper geometry, while
-  withholding conclusions about wrapping and pagination.
-
-Keep the reusable template and the official fixture separate. Put real author
-choices such as an intentional line break or table column widths in the fixture;
-put typography, spacing, measurement, pagination, and overflow handling in the
-template.
-
-## Design the Public API by Meaning
-
-Evaluate an API element by what it represents, rather than by its name:
-
-| Meaning | Typst interface |
+| Evidence | Positive use |
 |---|---|
-| Ordinary heading, figure, table, equation, list, label, or reference | standard Typst syntax styled through `set` and `show` |
-| Document metadata such as title, authors, affiliations, abstract, keywords | one document wrapper |
-| Author-controlled content choice such as a deliberate break or column width | explicit usage-file data |
-| Reusable semantic structure absent from standard Typst | a generally named helper with nominal and boundary fixtures |
-| Calibration, measured offset, caption hang, pagination, or overflow policy | private template implementation |
-| Visual discrepancy unique to one sample | investigate content measurement and flow before creating any API |
+| Written publication rule | implement the stated normative property |
+| Editable DOCX, TeX, or Typst source | derive structure and authoring semantics |
+| Export from the intended authoring application | calibrate appearance and pagination |
+| Repeated behavior | formulate and vary one reusable rule |
+| Behavior seen once | retain as a hypothesis until a relevant variation supports it |
 
-A renamed placement flag or continuation helper remains the same flawed API when
-the author still has to understand template internals. The underlying problem is
-the leaked responsibility, not the identifier.
+If two authoritative inputs prescribe different values for the same reusable
+property, name that property and ask which governs. Different file formats,
+producer names, or candidate omissions do not themselves establish a conflict.
 
-Prefer this authoring shape:
+Transcribe the official sample's meaningful text, explicit breaks, equations,
+tables, captions, references, notes, symbols, and intentional spelling exactly.
+Do not tune the reference text to make the candidate pass. Compare layout only
+after the official fixture is content-equivalent.
 
-```typst
-#import "template.typ": *
+## Derive the Public API From This Project
 
-#show: body => template(
-  title: [...],
-  authors: (...),
-  abstract: [...],
-  keywords: (...),
-  body,
-)
+Before implementation, read
+[references/component-property-ledger.md](references/component-property-ledger.md)
+and create that element-by-element ledger in the work log. Enumerate the known
+frontmatter/body/structural roles in reference reading order, add roles the
+project actually contains, and mark a known role absent only after verifying its
+absence. Resolve every applicable typography, alignment, width/wrap, spacing,
+break, numbering/stroke/padding, flow, evidence, target, author-syntax,
+implementation, crop/anchor, and variation field before implementing it. The
+eight broad categories are not an adequate reconstruction specification.
 
-== Standard heading
+Follow the ledger's implementation ladder: standard Typst rules/elements first,
+then contextual measurement for content dependence, then a local helper for an
+evidenced repeated semantic gap, and an external library only for a documented
+remaining requirement with a recorded dependency benefit. Select it from the
+positive semantic/property requirement; a pixel residual supplies a measurement
+target, not a technology choice. Match page/fonts, each frontmatter
+element, body/headings, equations, figures/tables, and references in dependency
+order, validating each element's crop/measurement before full-page integration.
 
-#figure(...)
-#table(...)
-$ equation $
+Add a public argument only when an editable source or written rule exposes an
+author-editable semantic slot. Derive its name, shape, and optionality from that
+evidence. Preserve free-form content when the source exposes free-form content;
+do not invent records merely because another publication used them.
+
+Also inventory citations and the reference list in the structural source. When
+they occur:
+
+- create a project bibliography data file from those entries;
+- cite with Typst's standard `@key` or `cite` semantics and render with
+  `bibliography` rather than a hand-formatted list;
+- use a built-in bibliography style when it can reproduce the reference;
+- create a project style asset only when positive reference evidence shows that
+  built-in styling cannot do so, and record that evidence in the work log.
+
+Declare the data file, and the style asset if one is genuinely required, in
+`checks.json`. Exercise citation and bibliography consumption in the existing
+official and body-flow fixtures; do not add a bibliography fixture family.
+
+Apply these interface rules:
+
+- Style ordinary headings, figures, tables, equations, lists, labels, and
+  references through standard Typst elements.
+- Use one project-named document wrapper when the source has a document-level
+  metadata and layout boundary.
+- Add a helper only for a project-specific semantic structure that standard
+  Typst does not express clearly or that repeats with the same meaning.
+- Keep deliberate line breaks, table column widths, selected assets, and other
+  author content choices in fixtures.
+- Keep typography, measured spacing, caption behavior, pagination policy, and
+  overflow handling in the template.
+- Keep sample wording and one-off visual compensation out of the public API.
+- Do not expose placement or continuation switches whose only purpose is to
+  reproduce one sample.
+
+Read [references/implementation-patterns.md](references/implementation-patterns.md)
+before implementing content-dependent layout.
+
+## Classify Layout Ownership
+
+After the first fixture run, read the line-evidenced `source_inventory` for the
+template and all three fixtures. Classify every reported spacing, font,
+placement, break, layout construct, and absolute dimension in the work log:
+
+```text
+path:line | observed source | semantic owner | evidence | action
 ```
 
-Before implementing components, read
-[references/implementation-patterns.md](references/implementation-patterns.md).
+Use `author content`, `template policy`, `one-off compensation`, or `unresolved`
+as the owner. An author-selected asset size, table width, or deliberate break is
+allowed when structural evidence makes it an author choice. Do not use the
+inventory as a deny-list. Move reusable policy into the template and remove or
+resolve unexplained compensation. Do not report the template ready while a
+spacing, font, or placement observation remains unclassified, `unresolved`, or
+an unexplained one-off compensation.
 
-## Derive Rules From Content and Structure
+## Prefer Rules Over Offsets
 
-Fixed compensation is structurally wrong when the formatted object's extent can
-change: it makes correctness depend on the calibration sample. Apply this
-selection rule:
+Use constants only for publication-fixed dimensions with identifiable evidence.
+For content-dependent extents, use natural flow and local measurement:
 
 | Property | Implementation source |
 |---|---|
-| Publication-fixed margin, rule thickness, or minimum line box | named constant with cited provenance |
-| Content-dependent width or height | `measure`, `layout`, `context`, natural flow, and content-aware insets |
-| Local container-dependent size | measure at the actual local width |
-| Breakable content | allow Typst pagination and verify its tail survives |
-| Atomic content that fits the usable region | keep the complete object together |
-| Atomic content larger than the usable region | emit an actionable diagnostic |
+| Fixed paper geometry, margin, type size, rule thickness | evidenced constant |
+| Content-dependent width or height | `measure`, `layout`, `context`, natural flow |
+| Local-width behavior | measure at the actual local width |
+| Breakable list or table | allow pagination and check its tail |
+| Atomic object that fits | keep the complete object together |
+| Atomic object too large | emit a project-appropriate actionable error |
 
-Implement in dependency order:
+A measured offset can calibrate a fixed publication rule. It is not a substitute
+for measuring content that may wrap, grow, or move between pages.
 
-1. page, fonts, paragraph flow, footer
-2. headings and body flow
-3. title, authors, affiliations, abstract, keywords
-4. equations and number fields
-5. figures, captions, images, grouped content
-6. tables, rules, headers, pagination
-7. lists and tail behavior
-8. cross-references and bibliography
+Implement in dependency order: page and fonts, paragraph flow, headings,
+frontmatter, equations, figures and captions, tables and lists, then references.
+Compile the official fixture after each cross-cutting change because local
+height changes move all downstream content.
 
-Compile the complete official fixture after each component because a local
-change can alter every downstream page.
+## Use Exactly Three Fixtures
 
-## Make Structural Claims Behavioral
+The fixture names and API are project-declared; only their purposes are fixed.
 
-Create fixtures that exercise the public interface rather than scanning for a
-few forbidden spellings. A textual deny-list is easy to evade while preserving
-the same leaked responsibility.
+1. **Official** reproduces the supplied sample completely and names its visual
+   reference. It calibrates content, geometry, fonts, pagination, and appearance.
+2. **Frontmatter variation** changes frontmatter content while keeping the body
+   stable. Use a meaningful long or multiline case supported by this source.
+   Check the final frontmatter marker precedes the first body marker, then inspect
+   the transition for clipping or overlap.
+3. **Body-flow variation** keeps compact frontmatter and grows ordinary body,
+   list, and table content enough to cross pages naturally. Put start/end markers
+   inside each breakable element and a following marker after it. When the
+   official source contains a display equation or a figure with caption, also
+   exercise each here with standard Typst syntax; keep their styling in the
+   template.
 
-Declare at least these contracts in `acceptance.json`:
+Do not add a generic capability matrix, generated fixture family, or mandatory
+diagnostic. Add a new project fixture only after an observed defect cannot be
+expressed by one of these three; ask before expanding the permanent workflow.
 
-- one-line and multi-line titles, subtitles, authors, and affiliations
-- headings in normal flow and at page boundaries
-- inline slash/fraction semantics and tall display equations
-- relative and narrow-parent images, including preliminary zero dimensions
-- numbered, unnumbered, wrapped, and narrow captions
-- short, narrow, tall-header, and multi-page tables with repeated rules
-- lists whose tails cross pages and tails longer than one page
-- one-, two-, and three-digit references plus every supported bibliography type
-- explicit diagnostic fixtures for overwide or over-tall atomic content
+Declare paths and positive checks in the project's small `checks.json`. Read
+[references/validation-playbook.md](references/validation-playbook.md) for its
+exact fields and interpretation.
 
-For the known JSME-style distinctions, positive text contracts state Japanese
-body references (`図1`, `表1`) separately from English caption prefixes
-(`Fig. 1`, `Table 1`). Caption size, bibliography-heading spacing, and the
-presenter marker are geometry questions, so they receive named visual regions
-rather than approximate text proxies. A 0/0 preliminary image measurement is a
-compilation-and-tail boundary fixture. Chapter overrides and nested-figure
-spacing first receive a declared ownership choice: author content/local choice
-or template flow rule.
-
-Place unique end markers after breakable stress objects and declare them as
-required text. Declare complete expected bibliography snippets so locale changes
-such as `p.` becoming another label fail through absence of the approved output,
-rather than through a growing list of banned words.
-
-## Run the Mechanical Loop
-
-After the manifest is filled, run:
+Run the batch checker:
 
 ```bash
-python3 <skill-dir>/scripts/verify_template.py run \
-  acceptance.json layout-audit/run-001
+python3 <skill-dir>/scripts/check_fixtures.py \
+  checks.json audit/run-001
 ```
 
-Use a new, user-accessible output directory for each run. The verifier performs
-the fixed work: evidence/dependency hashes, DOCX/PDF inventory, compilation,
-font observation, text/end-marker contracts, and expected diagnostics.
-`compare_pdfs.py scan` separates content, font, toolchain, page geometry, ink,
-and pixel signals into compact `index.json`, page detail records, and grid
-hotspot candidates. `detail` rereads a selected page, box, or finding at the
-requested high resolution. `gate` makes a compact decision only for approved `zero` or
-`approved-budget` contracts.
+The checker verifies the declared source boundary, source inventories, clean
+Typst compilation, dependency and bibliography consumption, hashes, page/text
+checks, standard-structure coverage, and page-flow markers. For the official
+fixture it derives the embedded font-face set from the reference PDF and fails
+missing or extra candidate faces after conservative exact normalization; do not
+supply a hand-picked font list. It also runs the sibling comparator at least
+300 DPI and applies fixed `0.25 pt` structural preflights across every page:
+ordered text-word anchors, source-counted numbered-equation body/number anchors,
+and local ink extents plus dense row/column bands. These catch displacement and
+coarse block, rule, and image-structure drift; they do not establish pixel
+identity or aesthetic acceptance. Use `compare_pdfs.py scan` directly for a
+disposable lower-DPI diagnostic.
 
-Read the scan index first, rank findings by semantic risk as well as magnitude,
-then read selected detail. Every page remains in the scan without placing all
-images and raw metrics in one context. Measurement kind locates a difference;
-causal classification is a separate engineering decision. Promote a meaningful
-recurrent hotspot to a named ROI for repeatable local evidence.
+## Compare Every Page, Then Focus
 
-## Diagnose What Automation Detects
+The official comparison is hierarchical:
 
-Read [references/validation-playbook.md](references/validation-playbook.md) after
-the first verifier run. Let automation locate and quantify differences; use
-engineering judgment to classify their causes.
+```bash
+python3 <skill-dir>/scripts/compare_pdfs.py scan \
+  reference.pdf candidate.pdf audit/scan
 
-After each implementation change:
+python3 <skill-dir>/scripts/compare_pdfs.py detail \
+  audit/scan audit/detail --finding <finding-id>
+```
 
-1. run the entire manifest into a fresh output directory
-2. read the scan index, then inspect affected or risk-ranked detail
-3. inspect downstream page flow and structural end markers
-4. record the causal classification and the rule changed
-5. preserve or update acceptance values only after the change is understood
+Read `index.json` first. Confirm page correspondence, geometry, content, font
+sets, and render origin. Then inspect risk-ranked pages and hotspots at high
+resolution. Never register or rescale the candidate into agreement: displacement
+is evidence about the template.
 
-An aggregate score is a detector, not a diagnosis. Local overlaps, missing
-brackets, wrong fraction structure, presenter glyphs, and locale-generated words
-can remain important even when a full-page ratio is small.
+Prioritize semantic risk over aggregate magnitude. Inspect frontmatter,
+presenter marks, column transitions, equation numbers, caption prefixes, table
+rules and repeated headers, list tails, references, and the final page when they
+occur. A small full-page ratio can hide a missing glyph or an overlapping rule.
 
-## Completion States
+Classify each material residual before changing code. A passed structural
+preflight does not waive this review:
 
-Use exactly one final state:
+- content mismatch
+- font or glyph substitution
+- fixed geometry error
+- content-dependent flow error
+- asset difference
+- renderer-only raster difference
+- unresolved source conflict
 
-- **complete**: every page has mode-appropriate comparison evidence—a per-page
-  scan record in every mode and, for `zero`/`approved-budget`, a per-page 300 DPI
-  gate record; gated modes do not require a duplicate raster scan. Approved
-  visual contracts pass their compact gate; risk-ranked and declared details
-  have recorded inspection/classification; API semantics were reviewed; source
-  conflicts and residuals have recorded decisions; unrelated files stayed
-  outside the edit set.
-- **incomplete**: at least one declared contract fails; report its evidence and
-  continue the loop.
-- **blocked**: an authoritative source, required font, or user decision needed to
-  define correctness is unavailable; report the precise missing input.
+Change the smallest reusable rule that explains the observation. Preserve a
+residual only after its cause and affected scope are understood.
 
-Source inspection is always allowed. If a required font is missing or
-compilation emits a fallback warning, the verifier acceptance run cannot pass.
-The project/template completion state is `blocked` until the required font
-resolves without fallback. Any fallback compile or structural experiment based
-on fallback output is diagnostic non-acceptance evidence only.
+Use the following causal map to turn a measured signature into a positive
+repair. Treat `candidate - reference` as the signed delta:
 
-Describe residual differences quantitatively and by cause. Reserve claims such
-as “pixel-identical” for the exact pages and regions whose zero-difference
-contracts passed.
+| symptom | measurement signature | governing rule | positive repair | revalidation |
+|---|---|---|---|---|
+| a block moves coherently | similar word `dx`/`dy` from its first anchor onward | shared wrapper alignment, inset, or block placement | move the governing container by the negative delta | affected anchors approach zero; other blocks/pages do not move |
+| downstream content accumulates vertical drift | small early `dy`, then progressively larger `dy` | earliest wrong leading, paragraph gap, or block spacing | correct that repeated spacing rule at the first divergence | cumulative `dy` collapses toward zero through later pages |
+| equation body or number is displaced | equation body-left and number left/top reference→candidate→delta | template equation indent/alignment/number rule | correct the standard equation rule, preserving author math | all equation deltas approach zero and body-flow equation still works |
+| text anchors agree but a line differs | dense horizontal/vertical rule-band delta or count change | table/grid stroke or rule placement | reproduce the evidenced stroke thickness and position | band edges/counts match without moving text anchors |
+| figure region has wrong extent or center | local image ink bbox width/height or centroid delta | figure sizing/alignment and shared caption block | reproduce the evidenced asset box and alignment | image bbox deltas approach zero; caption and following flow remain stable |
+| embedded faces are missing or extra | reference-derived face-set missing/extra entries | affected element font/show rule and fallback chain | select the evidenced face/style and remove unintended fallback | candidate face set equals reference before geometry tuning |
+
+Do not add a fixture-only `move`, negative gap, or public offset to cancel one
+observation. It hides the governing cause, usually changes downstream flow, and
+has no positive prediction for the frontmatter/body-flow variations. A local
+author value is acceptable only when structural evidence identifies it as
+author content in the reconstruction map.
+
+`check_fixtures.py` places at most about twelve compact `repair_targets` in
+`report.json` and `summary.txt`. They are derived from the existing font,
+per-page earliest/maximum same-line coherent token-cluster medians, equation,
+and representative local band/ink measurements. Isolated raw word maxima remain
+diagnostic because repeated words can match the wrong semantic occurrence. Each
+target includes reference and candidate values plus the correction direction.
+Use them as repair hypotheses, not as authority or automatic acceptance.
+
+For every repair, state the predicted measurement and direction before editing,
+then run a focused PDCA cycle:
+
+1. change only the hypothesized governing template rule;
+2. rerun the affected fixture and confirm the targeted signed residual moves
+   toward zero, not merely below a threshold;
+3. rerun every official page and all three fixtures, confirming that previously
+   stable pages and the other two fixtures did not regress;
+4. if the residual does not move in the predicted direction, reject or revert
+   the hypothesis, reclassify the cause, and test a new governing rule. Do not
+   weaken a gate or add a fixture-only compensation to preserve the hypothesis.
+
+## Promote Escaped Defects Positively
+
+When review finds a defect that the three fixtures missed:
+
+1. record the visible signal and structural cause;
+2. decide whether it belongs to author content or template policy;
+3. add the smallest positive text, order, page-flow, or focused visual check to
+   the relevant existing fixture;
+4. change the reusable rule;
+5. rerun all three fixtures and the official all-page scan.
+
+Avoid deny-lists of implementation spellings. Test the behavior that should
+survive instead.
+
+## Report
+
+Report the three fixture results, exact input/template hashes, compiler warnings,
+reference-derived font comparison, official page/text/anchor/local-ink metrics,
+page-flow and standard-structure evidence, bibliography dependencies, completed
+ownership classifications, inspected visual regions, rule changes, and remaining
+residual causes. Say that the result is ready for user review only when all
+mechanical checks pass, every inventory item has a resolved owner, and every
+material visual difference has been classified. User acceptance remains a user
+decision.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Build Typst Template"
-  short_description: "Reconstruct Typst templates with evidence and behavioral audits"
-  default_prompt: "Use $build-typst-template to reconstruct a reusable Typst template from Word or PDF evidence. Separate authority and fixture intent from automatic observations, preserve standard Typst authoring syntax, scan every page, then inspect risk-ranked details and behavioral boundary fixtures."
+  short_description: "Derive and verify project-specific Typst templates"
+  default_prompt: "Use $build-typst-template to reconstruct this document template from the supplied structural and visual evidence."

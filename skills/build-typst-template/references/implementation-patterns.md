@@ -1,185 +1,135 @@
-# Typst Template Implementation Decisions
+# Typst Template Implementation Patterns
 
-Use these decisions to convert observed layout behavior into reusable Typst
-rules. Each branch records observed failure → structural cause → positive rule →
-mechanical fixture/evidence → remaining classification judgment. Verify each
-selected branch with both an official fixture and a boundary fixture.
+Read this reference when converting observed document behavior into reusable
+Typst rules. The examples show responsibility placement, not a required API.
 
-## 1. Public API Placement
+## Contents
 
-The failure mode is responsibility leakage: the document author must understand
-calibration or pagination internals to use ordinary content. Renaming the leaked
-flag or wrapper leaves that failure unchanged.
+- [Place Responsibilities by Meaning](#1-place-responsibilities-by-meaning)
+- [Prefer Standard Elements](#2-prefer-standard-elements)
+- [Measure at the Local Width](#3-measure-at-the-local-width)
+- [Let Breakable Content Break](#4-let-breakable-content-break)
+- [Make Frontmatter Grow Naturally](#5-make-frontmatter-grow-naturally)
+- [Keep Calibration Private](#6-keep-calibration-private)
+- [Recheck Downstream Flow](#7-recheck-downstream-flow)
 
-| Content or behavior | Place it here | Verification |
-|---|---|---|
-| Heading, figure, table, equation, list, label, reference | standard Typst element plus template `set`/`show` | fixture uses only the standard construct |
-| Title, author, affiliation, abstract, keyword metadata | document wrapper | nominal and long-front-matter fixtures |
-| Deliberate author choice such as a line break, image width, table columns | usage file | value has a content meaning visible to the author |
-| Layout calibration, page-top spacing, measured hang, overflow policy | private template function | usage fixture contains no corresponding control |
-| New semantic object absent from Typst | semantic helper | helper works for multiple contents and has a boundary fixture |
-| One sample's unique visual arrangement | fixture content plus a general layout rule | another sample exercises the same rule |
+## 1. Place Responsibilities by Meaning
 
-When ordinary source syntax expresses the author’s meaning, the fixture uses
-that syntax and the template supplies styling. When a recurring structure has
-meaning absent from Typst, create a named semantic helper and give it nominal
-and boundary fixtures. When a difference is only one sample's geometry, inspect
-measurement and flow before choosing an interface.
+| Meaning | Preferred location |
+|---|---|
+| Page geometry, type rules, spacing, numbering, overflow policy | template |
+| Title, authors, abstract, keywords, selected assets | usage file |
+| Deliberate line break or table width chosen for this document | usage file |
+| Ordinary heading, figure, table, equation, list, label, reference | standard Typst syntax |
+| Repeated project-specific semantic structure | project-named helper |
+| Literal wording from one official sample | official fixture |
 
-## 2. Variable Extent and Spacing
+An API name does not fix a responsibility leak. If authors must understand an
+internal offset or pagination trick, the control is still in the wrong layer.
 
-The recurring failure is compensating one parameter with another: fixed boxes,
-negative moves, and spacer pairs can match a one-line sample while hiding the
-true paragraph or object extent.
-
-| Condition | Layout rule | Test |
-|---|---|---|
-| Content can wrap or gain superscripts | return its natural measured height | add one line and a superscript |
-| Source defines a minimum line or row height | use the minimum plus measured overflow | short and tall contents share the same rule |
-| Source defines paragraph before/after spacing | implement that spacing at the paragraph boundary | normal flow and page-top cases |
-| Position depends on an object's actual bounds | measure the rendered object | root, fraction, presenter marker, title glyph |
-| A prior value appears only as an offset that cancels another offset | recover the underlying paragraph/object rule | remove either offset in a temporary branch and inspect causality |
-
-Use the full-page comparison after changing leading or paragraph spacing because
-small differences accumulate into later page breaks.
-
-Read compact all-page scan evidence before opening a full-resolution crop. Scan
-measurements distinguish signal kinds; source and rendering evidence still
-classify whether the cause is content, font/toolchain, geometry, ink, or layout.
-Select detail by semantic risk, then promote a recurrent meaningful hotspot into
-a region contract.
-
-## 3. Titles, Authors, and Affiliations
-
-| Condition | Layout rule | Test |
-|---|---|---|
-| Title line count varies | natural-height line stack with the source line pitch | one, two, and three lines in each language |
-| The publication expects an author-selected break | preserve that explicit break as content | compare a temporary reference variant from the original application |
-| Author names contain affiliation superscripts | measure the intended line box separately from the superscript glyph | Japanese-to-Romanized author gap and baseline |
-| Presenter is marked by a glyph | match glyph family, size, outline, and baseline | high-resolution presenter-marker region |
-| Author or affiliation count grows | let the block push following content by its measured height | many-author and many-affiliation fixture |
-
-Measure Japanese title, English title, Japanese authors, Romanized authors, and
-affiliations as separate anchors. A full-page average can hide a collision at one
-boundary.
-
-## 4. Inline and Display Mathematics
-
-The source's mathematical structure governs the output. Similar-looking glyphs
-can have different semantics and different layout boxes.
-
-| Source structure | Typst representation | Verification |
-|---|---|---|
-| Literal slash expression | horizontal slash form | expected expression text and high-resolution crop |
-| Stacked fraction | explicit vertical fraction | measured height and following-rule clearance |
-| Parenthesized numerator/denominator around a slash | explicit parentheses plus horizontal fraction | parentheses, slash, and baseline all visible |
-| Mathematical square root | `sqrt` structure | root bar covers the intended expression |
-| Literal root symbol followed by math | text glyph plus math content | no generated overbar |
-| Display equation with number | measure formula and number field together | short, tall, wide, and page-boundary fixtures |
-
-When a template internally redraws display math through an inline context, set
-the intended fraction style inside that renderer. The effective inner context,
-rather than the author's outer syntax, controls the result.
-
-Use the normal reserved display height for nominal equations and add measured
-overflow for taller equations. Move an atomic equation as one object when the
-remaining page space is smaller than its measured height. Emit a diagnostic when
-formula plus number field exceeds the usable width.
-
-## 5. Figures, Captions, and Grouped Content
-
-| Condition | Layout rule | Test |
-|---|---|---|
-| Image uses a relative width | resolve it against the actual containing block | full-width and narrow-parent fixtures |
-| Preliminary measurement returns zero or unresolved dimensions | defer ratio-based sizing until dimensions resolve | relative and zero-premeasurement fixtures retain following text |
-| Image fits its local container | preserve natural aspect ratio | fixed and relative widths |
-| Atomic figure plus caption fits a page | keep the measured pair together | page-boundary fixture |
-| Figure body can break, such as a long table | make the figure element itself breakable | final row and following end marker survive |
-| Caption prefix varies in digits or numbering state | measure the rendered prefix and derive the hang | numbered, multi-digit, and unnumbered captions |
-| Project already defines a grouping primitive | reuse it when its counter semantics match | independent figures and true subfigures keep correct counters |
-
-Choose grouping by semantic counter structure. Two independent tables in a row
-remain two independent table figures; a subfigure primitive represents a parent
-with children even when the visual arrangement looks similar.
-
-## 6. Tables
-
-The recurring failure is using row indices, fixed boxes, or baseline moves to
-mask the height of roots, fractions, units, and wrapped cells. Those values match
-one table while disconnecting rules from the content they enclose.
-
-| Source property | Typst rule | Verification |
-|---|---|---|
-| Publication or author fixes column widths | keep those horizontal widths as table content | compare table width and wrapping |
-| Row height expands with content | natural cell height plus shared insets | normal, wrapped, root, fraction, and subscript cells |
-| Source declares a minimum row height | minimum plus measured overflow | short and tall cells |
-| Header contains quantity and unit lines | preserve their distinct structures and measure the tallest cell | brackets, unit baseline, lower-rule clearance |
-| Vertical rules span the complete table | use the table's full default row range | header and continued-page rule continuity |
-| Rule length follows table width | derive it from the laid-out table width | narrow and wide tables |
-| Table crosses pages | make the containing table figure breakable | repeated header/rules, final row, end marker |
-
-A useful starting rule is:
+Derive the document wrapper from the structural source. These are equally valid
+when their projects support them:
 
 ```typst
-#show figure.where(kind: table): set block(breakable: true)
+#import "journal.typ": journal-paper
+#show: journal-paper.with(title: [...], author-block: [...])
 ```
 
-Verify this rule with the supported Typst version and every custom `figure` show
-rule. Styling an outer wrapper alone can leave the actual figure atomic.
+```typst
+#import "conference.typ": conference
+#show: doc => conference(
+  title-ja: [...],
+  title-en: [...],
+  doc,
+)
+```
 
-Treat units, brackets, exponent rows, and table data as content-equivalence
-requirements. Pixel metrics cannot prove that a missing bracket is semantically
-acceptable.
+Do not normalize both into a universal metadata record.
 
-## 7. Lists and Page Flow
+## 2. Prefer Standard Elements
 
-| Condition | Layout rule | Test |
-|---|---|---|
-| Standard list crosses a page | preserve one continuous standard list | sequence and end marker survive |
-| A short tail would be isolated | keep the measured short tail together | one-item tail fixture |
-| The tail itself exceeds a page | allow it to split naturally | oversized-tail fixture |
+Style semantics through show rules:
 
-The template owns page-flow behavior. The author keeps writing the same list
-syntax before and after a page break.
+```typst
+#set heading(numbering: "1.1")
+#show heading.where(level: 1): it => project-heading(it)
 
-## 8. References and Bibliography
+#show figure.where(kind: table): set figure.caption(position: top)
+#show figure.caption: it => project-caption(it)
+```
 
-| Condition | Layout rule | Test |
-|---|---|---|
-| Manual reference number gains digits | reserve a measured or policy-defined number field | `(1)`, `(10)`, `(100)` wrap to the same body start |
-| Page range exists | render the approved singular/plural page label | complete expected bibliography entry |
-| Electronic article identifier exists | store and render it as an article identifier | entry contains the approved identifier phrase |
-| Document language changes locale selection | define required CSL terms explicitly | compile the golden bibliography under each supported language |
-| Word and Typst use the same family but different advances | compare anchors and wrapping before changing tracking | arbitrary long entries retain stable wrapping |
+Keep headings as `heading`, tables as `table`, and equations as
+`math.equation`. This preserves counters, labels, references, queries, and
+pagination behavior. Create a helper only when standard syntax cannot represent
+the author-facing meaning cleanly.
 
-Compile every supported bibliography item type in one golden fixture. Require
-complete expected entry snippets rather than testing only for the absence of a
-known bad word.
+## 3. Measure at the Local Width
 
-## 9. Fonts and Rendering Environment
+Content can wrap differently inside a grid, column, or narrowed block. Measure
+where the object will render:
 
-| Observed state | Valid use |
-|---|---|
-| Required families resolve and appear in the candidate PDF | visual geometry calibration |
-| Required family is unavailable or compilation falls back | source inspection and diagnostic experimentation only |
-| Same family appears in both PDFs but glyph edges differ | compare anchors, baselines, and line wrapping to classify shaping |
+```typst
+#let guarded(body) = layout(size => {
+  let extent = measure(body, width: size.width)
+  assert(extent.width <= size.width, message: "Object is too wide")
+  body
+})
+```
 
-Source inspection is always allowed. If a required font is missing or
-compilation emits a fallback warning, the verifier acceptance run cannot pass.
-The project/template completion state is `blocked` until the required font
-resolves without fallback. Any fallback compile or structural experiment based
-on fallback output is diagnostic non-acceptance evidence only.
+Do not measure at full page width and reuse the result inside a narrower parent.
+Preliminary measurement can also expose zero or unbounded dimensions; defer a
+decision until the local layout provides finite space.
 
-Record the exact Typst version, font paths, and embedded PDF font names in every
-accepted run. A PDF created without the intended fonts is a different test input,
-even when it compiles successfully.
+## 4. Let Breakable Content Break
 
-## 10. Behavioral Evidence
+Tables and lists should normally use natural flow. Keep their internal start and
+end markers in the content when testing a page crossing. External page breaks
+prove only that the surrounding document reached another page.
 
-For each capability, declare one positive result: `renders`, `paginates with a
-tail marker`, or `fails with an actionable diagnostic`. Automation repeats those
-facts; visual/text evidence locates a mismatch, and source/rendering evidence
-classifies its cause. This preserves the observed requirements for natural-height
-front matter, semantic math, content-height tables and full rules, local-width
-images with zero-measure guards, continuous lists, and explicit bibliography
-locale terms.
+Do not place a breakable table in a fixed-height or unbreakable wrapper. If a
+caption or repeated header needs special treatment, preserve the underlying
+table as a table and style that structure.
+
+Atomic figures and equations need a different rule:
+
+- keep the object whole when it fits the usable local region;
+- scale only when the publication rule permits scaling;
+- reject it with an actionable message when it cannot fit;
+- never silently clip it.
+
+## 5. Make Frontmatter Grow Naturally
+
+Model source-supported optional fields explicitly, but let absent fields remove
+their own spacing. Measure a title or author block when the publication requires
+it to remain atomic. Avoid fixed heights copied from the official fixture: a
+longer title must increase the block and move the body transition.
+
+Use a frontmatter variation that changes only this dimension. Its purpose is to
+show that the API value is consumed and that the first body content remains
+visible and ordered after the frontmatter.
+
+## 6. Keep Calibration Private
+
+Publication-fixed values can be named private constants with a source note:
+
+```typst
+#let _caption-gap = 3.2mm // official rule, section 4.2
+```
+
+A raster-measured value without normative provenance can still be a private
+calibration value, but verify it with varied content before treating it as a
+general rule. Do not export `_caption-gap`, `placement`, `continuation`, or an
+equivalent flag solely to position one sample.
+
+## 7. Recheck Downstream Flow
+
+Typography and vertical extent are coupled. After changing title, heading,
+equation, caption, table, or reference layout:
+
+1. compile the affected fixture;
+2. inspect the changed region;
+3. inspect following content and the final page;
+4. compile all three fixtures;
+5. rerun the official all-page comparison.
+
+Local visual improvement is not sufficient when it changes pagination.
