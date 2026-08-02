@@ -85,12 +85,15 @@ when evidence identifies a recurring author-controlled semantic field.
    complete those children in reading order, and then close the parent contract;
    work upstream before downstream through page, containers, frontmatter,
    paragraphs/headings, lists/equations, figures/tables, and references.
-   Establish each active element's exact official content and semantic API
-   before geometry tuning. Continue through every reference page.
-5. **Challenge uncertain rules.** First render the official content. Then make
-   focused temporary examples that vary only the content or flow needed to test
-   an inference, such as a wrapping title, a page-crossing list, or a long
-   bibliography. Retain a project fixture in proportion to its demonstrated use.
+   Use the Element Completion Loop below to establish each active element's
+   official content, semantic API, and first meaningful variation before
+   geometry tuning. Close each branch from paired evidence, then continue
+   through every reference page.
+5. **Deepen uncertain rules.** The element loop renders its first official and
+   varied instances before geometry tuning. When that pair leaves competing
+   inferences, add a focused temporary example that varies only the content or
+   flow needed to distinguish them. Retain a project fixture in proportion to
+   its demonstrated use.
 6. **Compare hierarchically.** First compare page count, page boxes, content,
    fonts, and whole-page alignment. Then inspect the riskiest elements with
    crops, overlays, diffs, text/image bboxes, and high-resolution rasterization.
@@ -145,30 +148,36 @@ view when later evidence refines it:
    inherited rules, flow context, sibling relationships, and downstream effects
    supplied by the established parent and earlier elements.
 2. **Meaning and API.** State the element's semantic purpose, boundary,
-   author-editable fields, template-owned policy, and invariants. Include any
+   author-editable fields, template-owned policy, and invariants. Select the
+   smallest author-controlled content or flow change that can distinguish its
+   generative rule from an official-instance workaround. Include any
    project-specific element the checklist does not name.
 3. **Official content.** Establish exact correspondence for the active element's
    wording, symbols, equations, assets, citations, order, and deliberate breaks.
-4. **Owned parameter bundle.** Infer a coherent governing bundle from structural
+4. **Early variation.** Materialize the selected change through the public
+   author workflow and render it before parameter or geometry tuning. Predict
+   what remains invariant, what changes, and how both cases affect the parent,
+   neighbors, and downstream flow.
+5. **Owned parameter bundle.** Infer a coherent governing bundle from structural
    and rendered evidence. Assign each rule to the element whose semantics it
    governs, covering applicable typography, alignment, width/wrap, spacing,
    breaks, numbering, strokes, padding, markers, and asset treatment.
-5. **Generative implementation.** Express the contract with standard Typst
-   semantics, `set`/`show` rules, and natural flow. Use contextual measurement
-   when local available space governs the result, and place reusable constants
-   at their semantic owner rather than compensating in sample content.
-6. **Focused confirmation.** Compare the local target through exact content,
-   its crop, bboxes, fonts, line formation, and relation to its parent,
-   preceding sibling, and following flow. Use the earliest governing rule to
-   explain related residuals.
-7. **Minimal variation.** Exercise the smallest meaningful content or flow
-   change. Confirm what remains invariant, what changes, and that the author did
-   not need layout-only arguments or special sample markup.
-8. **Regression and completion.** Rerender through the public author workflow
-   and recheck the parent, completed neighbors, and affected document-wide flow.
-   When one coherent contract explains the official instance and variation,
-   complete the element and advance in hierarchy and reading order. Reopen it
-   when later evidence refines an upstream rule.
+6. **Generative implementation.** Express one contract for the official and
+   varied instances with standard Typst semantics, `set`/`show` rules, and
+   natural flow. Use contextual measurement when local available space governs
+   the result. Place reusable constants at their semantic owner rather than
+   compensating in sample content.
+7. **Paired confirmation.** Compare the official local target and the varied
+   case through exact content, crops, bboxes, fonts, line formation, and their
+   relations to parent, neighbors, and following flow. Confirm the predicted
+   invariant or change and use the earliest governing rule to explain residuals.
+8. **Branch closure.** Rerender both cases through the public author workflow
+   and recheck the parent, completed children and neighbors, and affected
+   document-wide flow. Close a leaf when one coherent contract explains both
+   cases. Close a composite parent after its supported children are closed and
+   their composition preserves the parent contract. Then advance in hierarchy
+   and reading order; reopen the branch when later evidence refines an upstream
+   rule.
 
 Element completion is Codex's evidence-based judgment, not a numeric gate. It
 means the semantic purpose, API, invariants, and rule ownership are expressed
