@@ -16,46 +16,45 @@ Define evidence as every user-named file plus every regular file recursively
 contained in a user-named directory. Calibrate only from that closed set. Add a
 parent, sibling, prior output, or symlink target only when the user names it.
 
-Inventory that set before editing. Inspect every named source and every page of
-each reference. When sources disagree about a reusable rule, identify the exact
-conflict and ask the user which source governs. Treat file metadata, extracted
-text, XML properties, bboxes, and pixels as observations; infer their meaning by
-reading the structural source together with the rendered document.
+Inventory that set before editing. Render each reference and make a shallow
+all-page pass recording pagination, page roles, and top-level hierarchy.
+Complete detailed inspection as corresponding semantic elements become active;
+by finish, inspect every named source and every page of each reference. When
+sources disagree about a reusable rule, identify the exact conflict and ask the
+user which source governs. Treat metadata, extracted text, XML properties,
+bboxes, and pixels as observations interpreted beside the structural source and
+rendered document.
 
 ## Core Workflow
 
-1. **Collect mechanical evidence.** First inventory files, hashes, editable
-   structure, text, page geometry, embedded fonts, and page images. Then render
-   editable sources with their established application or compiler so their
-   intended appearance and pagination are visible.
-2. **Establish content correspondence.** First compare meaningful wording,
-   symbols, equations, images, tables, citations, order, and explicit breaks.
-   Then correct content differences before using geometry to tune layout.
-3. **Map the actual document.** Read
+1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
+   geometry, embedded fonts, and images; render editable sources with their
+   established application or compiler to expose appearance and pagination.
+2. **Map the top level.** Read
    [the element and parameter checklist](references/component-property-ledger.md)
-   and use relevant branches in scratch notes. First identify the hierarchy and
-   semantic role of each observed element; then inspect applicable parameters
-   and add any project-specific element the checklist does not name.
-4. **Design from evidence.** First identify author-editable semantic slots and
-   repeated publication rules; then choose an API that exposes the former and
-   keeps the latter private. Preserve free-form content when the source exposes
-   it. Keep sample wording and one-off visual compensation out of the API.
-5. **Build a compilable skeleton, then complete elements in dependency order.**
-   Establish the public structure and rough natural flow early. Then work
-   parent before child and upstream before downstream: page, containers,
-   frontmatter, paragraphs and headings, lists/equations, figures/tables, and
-   references. Keep tuning attention on one unfinished element at a time.
-6. **Challenge uncertain rules.** First render the official content. Then make
+   and use relevant branches in scratch notes. From the shallow pass, identify
+   the wrapper, page roles, major containers, reading order, repeated regions,
+   and author-editable slots. Map detailed elements and parameters when each
+   becomes active.
+3. **Build and compile the skeleton.** Expose observed author slots and preserve
+   their free-form content while keeping publication rules private. Establish
+   page setup, major containers, and rough natural flow, then compile. This first
+   Typst compile precedes deep inspection of later elements or pages.
+4. **Complete elements in dependency order.** Work on one active element at a
+   time, parent before child and upstream before downstream: page, containers,
+   frontmatter, paragraphs/headings, lists/equations, figures/tables, and
+   references. Establish its exact official content and semantic API before
+   geometry tuning. Continue through the full hierarchy and every reference page.
+5. **Challenge uncertain rules.** First render the official content. Then make
    focused temporary examples that vary only the content or flow needed to test
    an inference, such as a wrapping title, a page-crossing list, or a long
-   bibliography. Keep a useful project fixture when the project warrants it;
-   do not require a fixture family, manifest, schema, or gate.
-7. **Compare hierarchically.** First compare page count, page boxes, content,
+   bibliography. Retain a project fixture in proportion to its demonstrated use.
+6. **Compare hierarchically.** First compare page count, page boxes, content,
    fonts, and whole-page alignment. Then inspect the riskiest elements with
    crops, overlays, diffs, text/image bboxes, and high-resolution rasterization.
    Finally inspect downstream flow and the last page. Measurements locate and
    quantify differences; Codex decides their meaning and importance.
-8. **Repair causally.** First state which reusable rule should explain a
+7. **Repair causally.** First state which reusable rule should explain a
    material residual and predict the direction of change. Then change the
    smallest governing rule, rerender the affected example, and check whether
    the prediction held. Reinspect every affected downstream page and relevant
@@ -67,9 +66,8 @@ residuals require their decision.
 
 ## Element Completion Loop
 
-A parameter inventory is an input to reconstruction, not its unit of progress.
-Progress through the document hierarchy by completing each semantic element
-that owns parameters, then advance to the next element.
+Use the document hierarchy and semantic elements as the unit of progress. Attach
+each parameter inventory to its owning element; complete it before advancing.
 
 The parent container establishes the child's coordinate system, available
 width, inherited rules, and flow context. Interpret and tune child parameters
@@ -80,18 +78,22 @@ elements before later ones.
 
 For one element at a time:
 
-1. Mark its semantic boundary and its author-facing content or API.
-2. Select the positive evidence target and collect its applicable parameter
+1. Mark its semantic boundary, role, and author-facing content or API, including
+   any project-specific element the checklist does not name.
+2. Establish exact content correspondence for that element by comparing its
+   official wording, symbols, equations, images, tables, citations, order, and
+   explicit breaks. Resolve semantic differences before geometry tuning.
+3. Select the positive evidence target and collect its applicable parameter
    bundle: typography, alignment, width/wrap, spacing, break behavior, and any
    element-specific strokes, numbering, padding, or asset behavior.
-3. Implement that bundle with standard Typst elements, `set`/`show` rules, and
+4. Implement that bundle with standard Typst elements, `set`/`show` rules, and
    natural flow; use contextual measurement when the result depends on local
    available space.
-4. Compare the focused element using its crop plus relevant bboxes, fonts, line
+5. Compare the focused element using its crop plus relevant bboxes, fonts, line
    breaks, and relation to the parent and immediately preceding element.
-5. Exercise the smallest content variation that challenges the inferred rule,
+6. Exercise the smallest content variation that challenges the inferred rule,
    then recheck the parent and previously completed neighbor for regression.
-6. When the evidence supports completion, lock the governing reusable rule and
+7. When the evidence supports completion, lock the governing reusable rule and
    advance in hierarchy and reading order.
 
 Element completion is Codex's evidence-based judgment, not a numeric gate. It
