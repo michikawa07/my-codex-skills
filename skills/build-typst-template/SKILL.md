@@ -97,7 +97,14 @@ For one element at a time:
 Element completion is Codex's evidence-based judgment, not a numeric gate. It
 means the semantic author API is correct, the local visual target is matched,
 parent and neighbor relations are correct, a relevant content variation is
-stable, and standard Typst semantics remain intact.
+stable, and standard Typst semantics remain intact. Residual classification
+identifies a cause and repair hypothesis; it does not itself establish
+acceptance. Keep the element active while a material local visual or semantic
+target remains mismatched, including bibliography field order or punctuation
+and equation placement. Advance only when evidence supports the target or the
+user explicitly accepts that specific residual. Ask the user only when source
+authority or acceptance actually requires their decision; a renderer-origin
+diagnosis alone leaves the residual unaccepted.
 
 ## Mechanical Evidence Helpers
 
