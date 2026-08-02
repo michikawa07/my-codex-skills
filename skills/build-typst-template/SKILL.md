@@ -50,6 +50,15 @@ content, and compiled output shows realized geometry and pagination. Treat the
 structural definitions as primary evidence for semantics and rule ownership,
 and the render as primary evidence for their realized effects.
 
+Promote a choice to a template default, public API, or document semantic when
+the closed evidence or explicit user direction assigns it that reusable role.
+Let structural publication rules and exact official content and formatting
+govern the intended target. When portability, a generic convention, or
+implementation convenience suggests an alternative, treat it as a reported
+constraint or candidate user decision while preserving the evidenced target.
+Keep literal one-off guidance in the official fixture; expose it through the API
+when evidence identifies a recurring author-controlled semantic field.
+
 ## Core Workflow
 
 1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
