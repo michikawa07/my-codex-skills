@@ -9,6 +9,22 @@ support.
 First inspect the source structure and rendered pages; then choose semantics,
 targets, author syntax, and Typst rules from that evidence.
 
+Work down the hierarchy one element at a time. For the active element, first
+recover its contract: semantic content, parent and sibling relationships,
+fixed versus content-dependent behavior, inherited versus local policy,
+author-editable fields, and invariants under ordinary content changes. Then
+apply the relevant parameter bundles below as properties owned by that element.
+This ordering matters: the same numerical width or spacing means something
+different when it belongs to a page, a frontmatter container, a title, or a
+sample-only content workaround.
+
+The hierarchy is also the default progress order. Establish a parent enough to
+define its children's coordinate and flow context, then complete its children
+in reading order. A whole-page scan may identify the next suspect element, but
+focused structural and visual evidence completes that element. When a later
+element reveals that a parent rule was wrong, reopen the parent and repeat the
+affected descendants rather than accumulating local offsets.
+
 ## Parameter Bundles
 
 Apply **C** to every container: width and height policy (fixed, intrinsic,

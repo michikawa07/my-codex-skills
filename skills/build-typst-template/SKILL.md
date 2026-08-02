@@ -40,11 +40,13 @@ rendered document.
    their free-form content while keeping publication rules private. Establish
    page setup, major containers, and rough natural flow, then compile. This first
    Typst compile precedes deep inspection of later elements or pages.
-4. **Complete elements in dependency order.** Work on one active element at a
-   time, parent before child and upstream before downstream: page, containers,
-   frontmatter, paragraphs/headings, lists/equations, figures/tables, and
-   references. Establish its exact official content and semantic API before
-   geometry tuning. Continue through the full hierarchy and every reference page.
+4. **Complete elements in dependency order.** Keep one hierarchy branch active.
+   Establish a composite parent's contract enough to define its children,
+   complete those children in reading order, and then close the parent contract;
+   work upstream before downstream through page, containers, frontmatter,
+   paragraphs/headings, lists/equations, figures/tables, and references.
+   Establish each active element's exact official content and semantic API
+   before geometry tuning. Continue through every reference page.
 5. **Challenge uncertain rules.** First render the official content. Then make
    focused temporary examples that vary only the content or flow needed to test
    an inference, such as a wrapping title, a page-crossing list, or a long
@@ -66,40 +68,65 @@ residuals require their decision.
 
 ## Element Completion Loop
 
-Use the document hierarchy and semantic elements as the unit of progress. Attach
-each parameter inventory to its owning element; complete it before advancing.
+Use the document hierarchy and semantic elements as the unit of progress. Keep
+one branch active and attach each rule to its semantic owner. A composite parent
+can remain open while its children are completed; close it before moving to an
+unrelated branch.
+
+Treat each element as a semantic layout contract within its parent context.
+Recover its purpose, author-facing boundary, invariant behavior under justified
+content and flow changes, and ownership of governing rules. Use checklist
+branches to surface questions; let source and render evidence determine the
+actual contract and its coherent parameter bundle. The target is a positive
+rule that generates both the official instance and justified variations;
+compilation, avoided failures, or a small undifferentiated pixel residual alone
+cannot establish that rule.
 
 The parent container establishes the child's coordinate system, available
 width, inherited rules, and flow context. Interpret and tune child parameters
 inside that established context. Typography is structural too: font face,
 size, tracking, and line pitch change wrapping and element extent, which moves
-downstream content. Therefore complete parents before children and earlier flow
-elements before later ones.
+downstream content. Therefore establish parents before children, close composite
+parents after their children, and work earlier flow elements before later ones.
 
-For one element at a time:
+Raise one active element from a rough implementation to a supported semantic
+contract before moving to the next. Follow this order, revisiting an earlier
+view when later evidence refines it:
 
-1. Mark its semantic boundary, role, and author-facing content or API, including
-   any project-specific element the checklist does not name.
-2. Establish exact content correspondence for that element by comparing its
-   official wording, symbols, equations, images, tables, citations, order, and
-   explicit breaks. Resolve semantic differences before geometry tuning.
-3. Select the positive evidence target and collect its applicable parameter
-   bundle: typography, alignment, width/wrap, spacing, break behavior, and any
-   element-specific strokes, numbering, padding, or asset behavior.
-4. Implement that bundle with standard Typst elements, `set`/`show` rules, and
-   natural flow; use contextual measurement when the result depends on local
-   available space.
-5. Compare the focused element using its crop plus relevant bboxes, fonts, line
-   breaks, and relation to the parent and immediately preceding element.
-6. Exercise the smallest content variation that challenges the inferred rule,
-   then recheck the parent and previously completed neighbor for regression.
-7. When the evidence supports completion, lock the governing reusable rule and
-   advance in hierarchy and reading order.
+1. **Parent context.** Establish the coordinate system, available width,
+   inherited rules, flow context, sibling relationships, and downstream effects
+   supplied by the established parent and earlier elements.
+2. **Meaning and API.** State the element's semantic purpose, boundary,
+   author-editable fields, template-owned policy, and invariants. Include any
+   project-specific element the checklist does not name.
+3. **Official content.** Establish exact correspondence for the active element's
+   wording, symbols, equations, assets, citations, order, and deliberate breaks.
+4. **Owned parameter bundle.** Infer a coherent governing bundle from structural
+   and rendered evidence. Assign each rule to the element whose semantics it
+   governs, covering applicable typography, alignment, width/wrap, spacing,
+   breaks, numbering, strokes, padding, markers, and asset treatment.
+5. **Generative implementation.** Express the contract with standard Typst
+   semantics, `set`/`show` rules, and natural flow. Use contextual measurement
+   when local available space governs the result, and place reusable constants
+   at their semantic owner rather than compensating in sample content.
+6. **Focused confirmation.** Compare the local target through exact content,
+   its crop, bboxes, fonts, line formation, and relation to its parent,
+   preceding sibling, and following flow. Use the earliest governing rule to
+   explain related residuals.
+7. **Minimal variation.** Exercise the smallest meaningful content or flow
+   change. Confirm what remains invariant, what changes, and that the author did
+   not need layout-only arguments or special sample markup.
+8. **Regression and completion.** Rerender and recheck the parent, completed
+   neighbors, and affected downstream flow. When one coherent contract explains
+   the official instance and variation, complete the element and advance in
+   hierarchy and reading order. Reopen it when later evidence refines an
+   upstream rule.
 
 Element completion is Codex's evidence-based judgment, not a numeric gate. It
-means the semantic author API is correct, the local visual target is matched,
-parent and neighbor relations are correct, a relevant content variation is
-stable, and standard Typst semantics remain intact. Residual classification
+means the semantic purpose, API, invariants, and rule ownership are expressed
+correctly; the official content and local visual target match; parent and
+neighbor relations survive a relevant variation; and standard Typst semantics
+remain intact. Residual classification
 identifies a cause and repair hypothesis; it does not itself establish
 acceptance. Keep the element active while a material local visual or semantic
 target remains mismatched, including bibliography field order or punctuation
