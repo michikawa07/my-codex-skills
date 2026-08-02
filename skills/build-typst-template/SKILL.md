@@ -40,12 +40,11 @@ reading the structural source together with the rendered document.
    repeated publication rules; then choose an API that exposes the former and
    keeps the latter private. Preserve free-form content when the source exposes
    it. Keep sample wording and one-off visual compensation out of the API.
-5. **Implement in dependency order.** Start with page geometry and fonts, then
-   containers and flow, frontmatter, paragraphs and headings, lists/equations,
-   figures/tables, and references. Prefer standard Typst elements and `set` or
-   `show` rules. Choose `context`, `layout`, or `measure` when behavior depends
-   on available space; add a helper only for an evidenced repeated semantic
-   gap; add a library only when a remaining requirement justifies it.
+5. **Build a compilable skeleton, then complete elements in dependency order.**
+   Establish the public structure and rough natural flow early. Then work
+   parent before child and upstream before downstream: page, containers,
+   frontmatter, paragraphs and headings, lists/equations, figures/tables, and
+   references. Keep tuning attention on one unfinished element at a time.
 6. **Challenge uncertain rules.** First render the official content. Then make
    focused temporary examples that vary only the content or flow needed to test
    an inference, such as a wrapping title, a page-crossing list, or a long
@@ -65,6 +64,40 @@ reading the structural source together with the rendered document.
 Use fresh output directories so stale artifacts cannot appear current. Ask the
 user only when source authority, intended semantics, edit scope, or acceptable
 residuals require their decision.
+
+## Element Completion Loop
+
+A parameter inventory is an input to reconstruction, not its unit of progress.
+Progress through the document hierarchy by completing each semantic element
+that owns parameters, then advance to the next element.
+
+The parent container establishes the child's coordinate system, available
+width, inherited rules, and flow context. Interpret and tune child parameters
+inside that established context. Typography is structural too: font face,
+size, tracking, and line pitch change wrapping and element extent, which moves
+downstream content. Therefore complete parents before children and earlier flow
+elements before later ones.
+
+For one element at a time:
+
+1. Mark its semantic boundary and its author-facing content or API.
+2. Select the positive evidence target and collect its applicable parameter
+   bundle: typography, alignment, width/wrap, spacing, break behavior, and any
+   element-specific strokes, numbering, padding, or asset behavior.
+3. Implement that bundle with standard Typst elements, `set`/`show` rules, and
+   natural flow; use contextual measurement when the result depends on local
+   available space.
+4. Compare the focused element using its crop plus relevant bboxes, fonts, line
+   breaks, and relation to the parent and immediately preceding element.
+5. Exercise the smallest content variation that challenges the inferred rule,
+   then recheck the parent and previously completed neighbor for regression.
+6. When the evidence supports completion, lock the governing reusable rule and
+   advance in hierarchy and reading order.
+
+Element completion is Codex's evidence-based judgment, not a numeric gate. It
+means the semantic author API is correct, the local visual target is matched,
+parent and neighbor relations are correct, a relevant content variation is
+stable, and standard Typst semantics remain intact.
 
 ## Mechanical Evidence Helpers
 
