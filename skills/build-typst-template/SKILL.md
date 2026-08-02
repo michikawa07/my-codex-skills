@@ -10,6 +10,24 @@ document semantics, relevant parameters, public API, Typst implementation,
 visual differences, repairs, and readiness. Use automation only to expose facts
 that make those judgments faster.
 
+## North Star
+
+Port the publication format as an authoring system that a new author can use
+without learning the source template's layout machinery. The Typst template
+owns publication policy; its user supplies ordinary semantic document content
+through a small justified API and standard Typst elements. The system must
+reproduce the official instance and remain coherent when realistic titles,
+authors, paragraphs, lists, equations, figures, tables, citations, references,
+and page flow change. The official sample is necessary evidence for that port,
+not the whole deliverable.
+
+Treat every inspection, compile, crop, difference, fixture, and element loop as
+evidence or a bounded subproblem serving this document-level objective. A local
+metric or completed procedure is progress only when it improves the inferred
+authoring system without shifting layout knowledge into sample content or
+breaking the rest of the document. Reconnect each local decision to the author
+workflow, template-owned rule, and document-wide behavior it is meant to secure.
+
 ## Bound the Evidence
 
 Define evidence as every user-named file plus every regular file recursively
@@ -25,6 +43,13 @@ user which source governs. Treat metadata, extracted text, XML properties,
 bboxes, and pixels as observations interpreted beside the structural source and
 rendered document.
 
+For a layered source stack, trace each rule to its role. A base class supplies
+inherited defaults, a publication style or package defines publication
+overrides, an author template exposes the intended author workflow and official
+content, and compiled output shows realized geometry and pagination. Treat the
+structural definitions as primary evidence for semantics and rule ownership,
+and the render as primary evidence for their realized effects.
+
 ## Core Workflow
 
 1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
@@ -39,7 +64,9 @@ rendered document.
 3. **Build and compile the skeleton.** Expose observed author slots and preserve
    their free-form content while keeping publication rules private. Establish
    page setup, major containers, and rough natural flow, then compile. This first
-   Typst compile precedes deep inspection of later elements or pages.
+   Typst compile precedes deep inspection of later elements or pages and creates
+   an early feedback point; it is not evidence of fidelity or completion by
+   itself.
 4. **Complete elements in dependency order.** Keep one hierarchy branch active.
    Establish a composite parent's contract enough to define its children,
    complete those children in reading order, and then close the parent contract;
@@ -72,6 +99,14 @@ Use the document hierarchy and semantic elements as the unit of progress. Keep
 one branch active and attach each rule to its semantic owner. A composite parent
 can remain open while its children are completed; close it before moving to an
 unrelated branch.
+
+Each active branch is a nested part of the complete authoring system, not an
+independent optimization target. Before changing it, identify the author action
+or publication invariant it must support and the upstream and downstream
+contracts it touches. After changing it, judge both its focused evidence and its
+contribution to the usable whole. Pixel scores, elapsed time, number of compiled
+fixtures, and number of visited elements describe observations; none substitutes
+for that causal and document-level judgment.
 
 Treat each element as a semantic layout contract within its parent context.
 Recover its purpose, author-facing boundary, invariant behavior under justified
@@ -116,11 +151,11 @@ view when later evidence refines it:
 7. **Minimal variation.** Exercise the smallest meaningful content or flow
    change. Confirm what remains invariant, what changes, and that the author did
    not need layout-only arguments or special sample markup.
-8. **Regression and completion.** Rerender and recheck the parent, completed
-   neighbors, and affected downstream flow. When one coherent contract explains
-   the official instance and variation, complete the element and advance in
-   hierarchy and reading order. Reopen it when later evidence refines an
-   upstream rule.
+8. **Regression and completion.** Rerender through the public author workflow
+   and recheck the parent, completed neighbors, and affected document-wide flow.
+   When one coherent contract explains the official instance and variation,
+   complete the element and advance in hierarchy and reading order. Reopen it
+   when later evidence refines an upstream rule.
 
 Element completion is Codex's evidence-based judgment, not a numeric gate. It
 means the semantic purpose, API, invariants, and rule ownership are expressed
@@ -200,11 +235,13 @@ then choose a repair from the semantic and structural evidence.
 
 ## Finish and Report
 
-Finish when the template expresses the inferred document semantics, the public
-API contains only justified author choices, representative content renders
-robustly, every reference page has been inspected, and each material residual
-has an understood cause and scope. This is Codex's evidence-based judgment, not
-the result of a machine threshold.
+Finish when a new author can create and revise representative manuscripts
+through the semantic public API and standard Typst content, while the template
+owns publication policy and expresses the inferred document semantics. The
+official instance and justified variations must render robustly, every reference
+page must be inspected, and each material residual must have an understood cause
+and scope. This is Codex's evidence-based judgment, not the result of a machine
+threshold.
 
 Report the evidence used, API and implementation choices, render commands,
 pages and focused regions inspected, causal repairs tested, remaining residuals
