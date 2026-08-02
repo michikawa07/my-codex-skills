@@ -61,12 +61,16 @@ and the render as primary evidence for their realized effects.
    the wrapper, page roles, major containers, reading order, repeated regions,
    and author-editable slots. Map detailed elements and parameters when each
    becomes active.
-3. **Build and compile the skeleton.** Expose observed author slots and preserve
-   their free-form content while keeping publication rules private. Establish
-   page setup, major containers, and rough natural flow, then compile. This first
-   Typst compile precedes deep inspection of later elements or pages and creates
-   an early feedback point; it is not evidence of fidelity or completion by
-   itself.
+3. **Build and compile the skeleton.** When the closed evidence includes a named
+   working Typst template or document, use its standard-element plumbing and
+   responsibility structure as architecture evidence. Derive the target's
+   semantic API, publication policy, content-dependent rules, and calibration,
+   including fixed offsets, from the target structural and rendered evidence.
+   Expose observed author slots and preserve their free-form content while
+   keeping publication rules private. Establish page setup, major containers,
+   and rough natural flow, then compile. This first Typst compile precedes deep
+   inspection of later elements or pages and creates an early feedback point;
+   it is not evidence of fidelity or completion by itself.
 4. **Complete elements in dependency order.** Keep one hierarchy branch active.
    Establish a composite parent's contract enough to define its children,
    complete those children in reading order, and then close the parent contract;
