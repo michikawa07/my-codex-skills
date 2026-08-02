@@ -104,9 +104,9 @@ their own spacing. Measure a title or author block when the publication requires
 it to remain atomic. Avoid fixed heights copied from the official fixture: a
 longer title must increase the block and move the body transition.
 
-Use a frontmatter variation that changes only this dimension. Its purpose is to
-show that the API value is consumed and that the first body content remains
-visible and ordered after the frontmatter.
+When this behavior is uncertain, render a focused frontmatter variation that
+changes only this dimension. Use it to judge whether the API value is consumed
+and the first body content remains visible and ordered after the frontmatter.
 
 ## 6. Keep Calibration Private
 
@@ -129,7 +129,7 @@ equation, caption, table, or reference layout:
 1. compile the affected fixture;
 2. inspect the changed region;
 3. inspect following content and the final page;
-4. compile all three fixtures;
-5. rerun the official all-page comparison.
+4. rerender the relevant content variations;
+5. rerun the official all-page comparison when the change can affect it.
 
 Local visual improvement is not sufficient when it changes pagination.

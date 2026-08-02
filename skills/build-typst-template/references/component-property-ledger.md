@@ -1,128 +1,107 @@
-# Component Property Ledger
+# Document Element and Parameter Checklist
 
-Use this ledger before writing template rules. Its purpose is to reconstruct a
-positive, element-level specification from the project's evidence. It is not a
-generic publication profile and it is not a post-hoc failure list.
+Use this as a thinking aid while reading the actual sources. Copy useful prompts
+into scratch notes in whatever form helps the task. It is not a required
+artifact, fixed schema, exhaustive taxonomy, or completion gate. Add unknown
+elements under their real parent and omit branches that evidence does not
+support.
 
-## 1. Enumerate Components in Reading Order
+First inspect the source structure and rendered pages; then choose semantics,
+targets, author syntax, and Typst rules from that evidence.
 
-Walk the authoritative source and reference in this order, retaining repeated
-semantic roles and each observed heading level:
+## Parameter Bundles
 
-1. page, header, and footer;
-2. each localized title/subtitle (Japanese/English when evidenced);
-3. each localized author group (Japanese/English when evidenced), including any
-   presenter mark;
-4. affiliations;
-5. abstract;
-6. keywords;
-7. ordinary body paragraph;
-8. each heading level separately;
-9. list;
-10. display equation and its number;
-11. figure and caption;
-12. table and caption;
-13. citation and bibliography.
+Apply **C** to every container: width and height policy (fixed, intrinsic,
+fill-parent, measured, min/max); horizontal and vertical alignment; padding or
+insets on every edge; internal and external spacing; columns, gutters, flow,
+overflow, keep/break, and page behavior.
 
-For every known role, record either `present` or `verified absent` with evidence.
-If the source contains another semantic role, add it in its actual reading-order
-position; do not force it into the nearest known name. A role or property that
-has not been checked is `unresolved`, not absent.
+Apply **T** to every text-bearing element: font family, face, and fallback;
+size; weight and style; glyph horizontal scale or character width; tracking and
+word spacing; color and baseline/vertical position; horizontal/vertical
+alignment; line pitch; available width, wrapping, and explicit breaks; first,
+hanging, left, and right indents; space before and after; keep-with-next,
+keep-lines, widow/orphan, and page-break behavior.
 
-DOCX XML, TeX commands, and PDF geometry provide facts, not semantic labels.
-Codex assigns the semantic role by reading the source and rendered reference.
-Record that judgment and its evidence explicitly. In particular, a DOCX style
-name, `textAlignment`, or paragraph index does not by itself establish a title,
-horizontal alignment, or author-facing API.
+For each applicable prompt, first inspect normative or structural values,
+repeated instances, and visual measurements; then choose the semantic owner,
+target, confidence, author syntax, and implementation. A scratch note may be a
+sentence, table, annotated crop, or source comment.
 
-## 2. Record Properties, Not Just Components
+## Hierarchical Element Prompts
 
-Use one ledger row per property so provenance and uncertainty are not hidden in
-a large component summary:
+- **Document [C]** — document metadata and language; authoring boundary;
+  section/page sequence; global counters, outlines, labels, links, and color.
+  - **Page [C]** — paper size and orientation; margins/content box; background;
+    first/odd/even page variants; numbering and page counter resets.
+    - **Header [C,T]** — semantic content, fields, running-title rules, rule or
+      stroke, distance from page/body, first/odd/even visibility.
+    - **Footer [C,T]** — semantic content, page-number format/alignment, rule or
+      stroke, distance from page/body, first/odd/even visibility.
+  - **Frontmatter container [C]** — reading order; optional-field collapse;
+    atomic versus growing behavior; transition into body.
+    - **Title [T]** — semantic/localized variants; grouping; prominence;
+      punctuation; optionality.
+    - **Subtitle [T]** — relation to title; optionality and collapsed spacing.
+    - **Authors [C,T]** — order, grouping, separators, line formation; links to
+      affiliations; correspondence semantics.
+      - **Presenter mark [T]** — glyph/string, attachment target, placement,
+        repetition, legend meaning, and interaction with wrapping.
+    - **Affiliations [C,T]** — marker/link semantics; grouping, order,
+      separators, and line formation.
+    - **Abstract [C,T]** — label/prefix, language variants, run-in versus block,
+      width and paragraph behavior.
+    - **Keywords [C,T]** — label/prefix, separator and punctuation, item order,
+      line formation, optionality.
+  - **Body container [C]** — usable region; section flow; frontmatter
+    transition; page and column balancing policy.
+    - **Columns [C]** — count, widths, gutter, rules, balance, span behavior,
+      reading order, column/page breaks.
+      - **Paragraphs [T]** — paragraph semantics; justification and hyphenation;
+        first/hanging indent; inter-paragraph policy.
+      - **Heading level 1..N [C,T]** — identify every observed level separately;
+        hierarchy, counter/reset, numbering/prefix/suffix, punctuation, outline
+        and bookmark behavior; run-in/block form; keep with following content.
+      - **Lists [C,T]** — ordered/unordered/description semantics; nesting;
+        marker or counter style, prefix/suffix, alignment, marker-body gap,
+        counter reset/continuation, page flow.
+        - **Items [C,T]** — marker attachment; item indentation and spacing;
+          paragraph children; keep/break and split behavior.
+      - **Equations [C,T]** — inline/display semantics; math font and glyph
+        treatment; alignment and indent; counter/reset, number format and
+        prefix/suffix; number position; label/reference semantics; keep/break.
+      - **Figures [C]** — semantic kind, placement/float policy, counter/reset,
+        label/reference semantics, keep with caption, page/column span.
+        - **Images [C]** — source asset and intrinsic dimensions; displayed
+          width/height; aspect ratio, fit, crop, scaling/interpolation,
+          alignment, border/stroke, alt text.
+        - **Captions [C,T]** — position; kind/prefix, counter and number format,
+          separator/punctuation; single/multiline alignment; shared width;
+          distance to object and following flow.
+      - **Tables [C]** — semantic kind; total width; column count and width
+        policy; grid/stroke sides, thickness, style and color; header repetition;
+        counter/reset, label/reference semantics; caption position; page/column
+        span and break behavior.
+        - **Rows [C]** — header/body/footer role; natural/min/fixed height;
+          separators; keep/split/repeat behavior; zebra/background styling.
+          - **Cells [C,T]** — column/row span; content kind; width/height policy;
+            padding; horizontal/vertical alignment; wrapping and overflow;
+            background; per-edge strokes.
+      - **Citations [T]** — citation key/target semantics; numeric/author-year
+        form; cluster ordering and ranges; prefix/suffix, locator, brackets,
+        punctuation, spacing, links, and line breaking.
+  - **References [C,T]** — bibliography source and placement; heading and
+    outline behavior; sorting, filtering, numbering/counter, columns and page
+    flow.
+    - **Bibliography entries [C,T]** — author/title/container/year and other
+      field semantics; label/number format; punctuation and emphasis; hanging
+      indent; entry spacing; URL/DOI/link treatment; wrapping, keep, and breaks.
 
-```text
-order | component/semantic range | property | source evidence | confidence |
-target value | standard Typst author syntax | implementation choice |
-official crop/anchor | variation fixture
-```
+## Cross-Checks
 
-For each `present` component, cover every applicable item below:
-
-- semantic range: the exact text, object, repeated class, page region, or
-  transition governed by the row;
-- font: family, face, size, weight, style, tracking, and width/scale;
-- horizontal alignment, baseline, and vertical alignment;
-- color when evidenced;
-- line behavior: leading, available line width, wrapping, and intentional
-  breaks;
-- block behavior: width, inset/indent, space above, space below, and break/keep
-  policy;
-- element-specific behavior: numbering, equation-number position, prefix,
-  strokes, table grid/column widths, and cell padding where applicable;
-- table row height, cell vertical alignment, and repeated-header behavior where
-  applicable;
-- figure intrinsic extent and displayed extent;
-- flow: relation to the preceding/following element, columns, and pages;
-- source evidence: file, style/instance/line/page, extracted fact, and visual
-  crop or anchor;
-- confidence: `direct` for an explicit normative or editable value, `repeated`
-  for consistent behavior across occurrences, `inferred` for a testable
-  interpretation, or `unresolved`;
-- positive target value, including its unit and coordinate system;
-- standard Typst author syntax or evidenced wrapper argument;
-- chosen implementation rule;
-- official crop/anchor used to remeasure it;
-- the frontmatter or body-flow variation that challenges the rule.
-
-Do not start implementation while any reference-present component has a blank
-applicable property, an unresolved semantic range, an unsupported target value,
-or an unexplained implementation choice. A single bbox or pixel hotspot cannot
-fill a property row without structural/source evidence.
-
-## 3. Choose the Least Specialized Implementation
-
-For each completed component, use this ladder and record the first rung that can
-express the evidenced rule:
-
-1. standard Typst `set`/`show` rules and standard elements;
-2. `measure`, `layout`, or `context` for genuinely content-dependent behavior;
-3. a local helper only for a repeated project semantic gap that standard
-   elements cannot express clearly;
-4. an external library only when a documented requirement remains unmet and
-   the dependency's concrete benefit is recorded.
-
-Select the rung from the positive semantic/property requirement. A pixel
-residual supplies a measurement target, not a technology choice. Author content
-remains in author syntax; reusable publication policy remains in the template.
-
-Implement and positively match components in dependency order:
-
-```text
-page + fonts
-  -> each frontmatter element, one by one
-  -> body paragraph + each heading level
-  -> equation + number
-  -> figure + caption
-  -> table + caption
-  -> citations + bibliography
-```
-
-After each element, compile the official fixture and compare its declared crop,
-anchors, font facts, and flow target before integrating the next element. Then
-rerun every official page and both variation fixtures. A downstream element
-must not be used to compensate for an upstream mismatch.
-
-## 4. Completion Evidence
-
-The ledger is complete only when:
-
-- every known and newly discovered semantic role is `present` or `verified
-  absent` with evidence;
-- all applicable property rows for present roles are resolved;
-- the official measurement reaches its positive target across every page;
-- the corresponding variation exercises the same governing rule successfully;
-- generated bibliography data and any positively justified bibliography style
-  asset are consumed through standard citation/bibliography semantics;
-- no fixture-only compensation is carrying template policy.
-
-The absence of checker failures does not replace this evidence.
+Inspect relationships as well as isolated elements: inherited versus local
+fonts, parent content width versus child wrapping, spacing collapse, baseline
+alignment between mixed content, counter continuity, label/reference targets,
+frontmatter-to-body transition, column/page continuation, and final-page tails.
+Then vary the smallest relevant content dimension to test whether the chosen
+rule generalizes.
