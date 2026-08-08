@@ -121,17 +121,11 @@ evidence assigns that space to publication policy.
    smallest public-API change in the consolidated variation that activates and
    distinguishes the current skeleton contract. This first pair precedes
    repeated geometry tuning and supplies early architectural feedback.
-4. **Complete elements in dependency order.** Keep one hierarchy branch active.
-   Open its packet after its `Requires` context exists and close it through its
-   `Emits` and `Recheck` relations. Within a composite packet, keep one direct
-   child active at a time and complete the children in reading order. Apply the
-   Element Completion Loop to establish each active element's exact official
-   content, semantic API, and first meaningful variation before geometry tuning.
-   Keep that branch current until paired renders support its official local
-   observation, activating variation observation, and applicable packet
-   `Recheck` relations; record those observations, then advance through every
-   element on every reference page. Reopen the earliest governing branch when
-   later evidence refines an upstream contract.
+4. **Complete elements in dependency order.** Let the router select one active
+   hierarchy branch and its packet. Apply the Element Completion Loop below,
+   then record the official local observation, activating variation observation,
+   and packet `Recheck` relations that close the branch. Reopen the earliest
+   governing branch when later evidence refines an upstream contract.
 5. **Deepen uncertain rules.** The element loop renders its first official and
    varied instances before geometry tuning. When that pair leaves competing
    inferences, temporarily isolate the minimal content or flow needed to
