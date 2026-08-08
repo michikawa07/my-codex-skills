@@ -49,6 +49,10 @@ overrides, an author template exposes the intended author workflow and official
 content, and compiled output shows realized geometry and pagination. Treat the
 structural definitions as primary evidence for semantics and rule ownership,
 and the render as primary evidence for their realized effects.
+When the structural source that owns a target rule states a direct value,
+implement that value exactly. When the realized render suggests a different
+value, surface the conflict and governing sources instead of replacing the rule
+with a nearby calibration.
 
 Promote a choice to a template default, public API, or document semantic when
 the closed evidence or explicit user direction assigns it that reusable role.
@@ -65,22 +69,37 @@ when evidence identifies a recurring author-controlled semantic field.
    geometry, embedded fonts, and images; render editable sources with their
    established application or compiler to expose appearance and pagination.
 2. **Map the top level.** Read
-   [the element and parameter checklist](references/component-property-ledger.md)
-   and use relevant branches in scratch notes. From the shallow pass, identify
-   the wrapper, page roles, major containers, reading order, repeated regions,
-   and author-editable slots. Map detailed elements and parameters when each
-   becomes active.
-3. **Build and compile the skeleton.** When the closed evidence includes a named
-   working Typst template or document, use its standard-element plumbing and
-   responsibility structure as architecture evidence. Derive the target's
-   semantic API, publication policy, content-dependent rules, and calibration,
-   including fixed offsets, from the target structural and rendered evidence.
-   Expose observed author slots and preserve their free-form content while
-   keeping publication rules private. Establish page setup, major containers,
-   and rough natural flow, then compile. This first Typst compile precedes deep
-   inspection of later elements or pages and creates an early feedback point;
-   it is not evidence of fidelity or completion by itself.
+   [the element router](references/component-property-ledger.md) once. From the
+   shallow pass, identify the wrapper, page roles, major containers, reading
+   order, repeated regions, and author-editable slots. For each step, load the
+   packet linked by the router for the single active branch; its detailed
+   prompts become current when their parent context exists.
+3. **Build and compile the skeleton.** Rank a named target-adjacent working
+   Typst template or document above the bundled
+   [`template.typ` + `usage.typ`](assets/scaffold/) starting pair as architecture
+   evidence, and use the highest-ranked available structure. Copy that pair into
+   the fresh output before adapting it. The bundled pair provides one public
+   wrapper with a positional body and one private
+   `_render_body(body) = body` hook. Replace that hook from target evidence when
+   the body needs a different flow such as `columns(...)`. Keep page, column
+   count, gutter, break, and flow policy private in the template; treat them as
+   body-container parameters rather than scaffold variants or author controls.
+   Derive the target's semantic API, publication policy, content-dependent
+   rules, and calibration, including fixed offsets, from the target structural
+   and rendered evidence. Expose observed author slots and preserve their
+   free-form content while keeping publication rules private. Establish page
+   setup, major containers, and rough natural flow, then compile and immediately
+   render the official instance plus the smallest public-API variation that
+   activates and distinguishes the current skeleton contract. Later elements
+   receive their own variations when they become active. This first pair
+   precedes repeated geometry tuning and creates
+   an early feedback point; it is not evidence of fidelity or completion by
+   itself.
 4. **Complete elements in dependency order.** Keep one hierarchy branch active.
+   Open its packet after its `Requires` context exists and close it through
+   its `Emits` and `Recheck` relations. Within a composite packet, keep one
+   direct child active at a time in the packet's route. Reopen the earliest
+   governing packet when later evidence changes an upstream contract.
    Establish a composite parent's contract enough to define its children,
    complete those children in reading order, and then close the parent contract;
    work upstream before downstream through page, containers, frontmatter,
@@ -109,6 +128,11 @@ Use fresh output directories so stale artifacts cannot appear current. Ask the
 user only when source authority, intended semantics, edit scope, or acceptable
 residuals require their decision.
 
+For a roughly 30-minute optimization, note elapsed time at the first activating
+pair and final paired closure. When a run exceeds the target, identify its
+longest avoidable interval and change that part of the next run; time informs
+prioritization, not acceptance.
+
 ## Element Completion Loop
 
 Use the document hierarchy and semantic elements as the unit of progress. Keep
@@ -126,9 +150,11 @@ for that causal and document-level judgment.
 
 Treat each element as a semantic layout contract within its parent context.
 Recover its purpose, author-facing boundary, invariant behavior under justified
-content and flow changes, and ownership of governing rules. Use checklist
-branches to surface questions; let source and render evidence determine the
-actual contract and its coherent parameter bundle. The target is a positive
+content and flow changes, and ownership of governing rules. Use the current
+branch packet to surface questions; let source and render evidence determine
+the actual contract and its coherent parameter bundle. A packet supplies the
+current branch's questions while the router preserves the whole capability
+horizon. The target is a positive
 rule that generates both the official instance and justified variations;
 compilation, avoided failures, or a small undifferentiated pixel residual alone
 cannot establish that rule.
@@ -170,7 +196,8 @@ view when later evidence refines it:
 7. **Paired confirmation.** Compare the official local target and the varied
    case through exact content, crops, bboxes, fonts, line formation, and their
    relations to parent, neighbors, and following flow. Confirm the predicted
-   invariant or change and use the earliest governing rule to explain residuals.
+   invariant or change, including that the variation activates its intended
+   branch, and use the earliest governing rule to explain residuals.
 8. **Branch closure.** Rerender both cases through the public author workflow
    and recheck the parent, completed children and neighbors, and affected
    document-wide flow. Close a leaf when one coherent contract explains both
@@ -191,6 +218,11 @@ and equation placement. Advance only when evidence supports the target or the
 user explicitly accepts that specific residual. Ask the user only when source
 authority or acceptance actually requires their decision; a renderer-origin
 diagnosis alone leaves the residual unaccepted.
+
+For every claimed author route, trace author syntax to its expected output or
+policy and its observed extracted or rendered output. Do this for standard
+Typst routes as well as wrapper fields, including references and bibliography
+entries.
 
 ## Mechanical Evidence Helpers
 
@@ -246,6 +278,9 @@ Use positive evidence to distinguish:
 - upstream container errors from downstream accumulated displacement;
 - asset differences from layout differences;
 - renderer-only raster differences from structural differences.
+
+Classify a residual as renderer-only after the direct rules and semantic output
+agree; otherwise use the disagreement to continue causal inspection.
 
 Treat a coherent block displacement as evidence to inspect its shared
 alignment, inset, or placement rule. Treat accumulating vertical drift as

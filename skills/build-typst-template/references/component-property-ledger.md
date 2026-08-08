@@ -1,36 +1,45 @@
-# Document Element and Parameter Checklist
+# Document Element Router
 
-Use this as a thinking aid while reading the actual sources. Copy useful prompts
-into scratch notes in whatever form helps the task. It is not a required
-artifact, fixed schema, exhaustive taxonomy, or completion gate. Add unknown
-elements under their real parent and omit branches that evidence does not
-support.
+Use this router to open only the branch currently being completed. The target
+is a reusable authoring system: the template owns publication policy, authors
+use semantic fields and standard Typst content, the official instance matches,
+and justified content changes remain coherent.
 
-First inspect the source structure and rendered pages; then choose semantics,
-targets, author syntax, and Typst rules from that evidence.
+First inspect the source structure and rendered pages. Establish a parent
+enough to define its children's coordinate and flow context, then complete its
+children in reading order. Open one packet at a time:
 
-Work down the hierarchy one element at a time. For the active element, first
-recover its contract: semantic content, parent and sibling relationships,
-fixed versus content-dependent behavior, inherited versus local policy,
-author-editable fields, and invariants under ordinary content changes. Then
-apply the relevant parameter bundles below as properties owned by that element.
-This ordering matters: the same numerical width or spacing means something
-different when it belongs to a page, a frontmatter container, a title, or a
-sample-only content workaround.
+1. [Document and page](ledger-document-page.md)
+2. [Frontmatter](ledger-frontmatter.md)
+3. [Body flow](ledger-body-flow.md)
+4. [Lists](ledger-lists.md)
+5. [Equations](ledger-equations.md)
+6. [Figures](ledger-figures.md)
+7. [Tables](ledger-tables.md)
+8. [Citations and references](ledger-citations-references.md)
 
-The hierarchy is also the default progress order. Establish a parent enough to
-define its children's coordinate and flow context, then complete its children
-in reading order. A whole-page scan may identify the next suspect element, but
-focused structural and visual evidence completes that element. When a later
-element reveals that a parent rule was wrong, reopen the parent and repeat the
-affected descendants rather than accumulating local offsets.
+At each branch, recover its semantic contract, establish exact official
+content, render the smallest author-facing variation that distinguishes the
+rule, derive the owned parameter bundle, implement one generative rule, and
+compare both cases. Close a leaf only when one coherent contract explains both.
+Close a composite parent after its active children preserve the parent
+contract.
 
-## Parameter Bundles
+Open a later packet when its required parent context and upstream flow are
+stable enough to interpret it. Reopen the earliest governing packet when later
+evidence changes a coordinate system, inherited rule, available width, flow
+policy, counter, or other upstream contract. Keep a scratch cursor containing
+the active branch, active direct child, established parent contract, and closure
+rechecks. Add an unknown element under its real parent and route it by the
+contract it depends on. Evidence-backed contracts and the document-level goal
+govern completion; this index supplies the default coverage and dependencies.
 
-Apply **C** to every container: width and height policy (fixed, intrinsic,
-fill-parent, measured, min/max); horizontal and vertical alignment; padding or
-insets on every edge; internal and external spacing; columns, gutters, flow,
-overflow, keep/break, and page behavior.
+## Common Property Vocabulary
+
+Apply **C** to every container: width and height policy (fixed,
+intrinsic, fill-parent, measured, min/max); horizontal and vertical alignment;
+padding or insets on every edge; internal and external spacing; columns,
+gutters, flow, overflow, keep/break, and page behavior.
 
 Apply **T** to every text-bearing element: font family, face, and fallback;
 size; weight and style; glyph horizontal scale or character width; tracking and
@@ -41,83 +50,6 @@ keep-lines, widow/orphan, and page-break behavior.
 
 For each applicable prompt, first inspect normative or structural values,
 repeated instances, and visual measurements; then choose the semantic owner,
-target, confidence, author syntax, and implementation. A scratch note may be a
-sentence, table, annotated crop, or source comment.
-
-## Hierarchical Element Prompts
-
-- **Document [C]** — document metadata and language; authoring boundary;
-  section/page sequence; global counters, outlines, labels, links, and color.
-  - **Page [C]** — paper size and orientation; margins/content box; background;
-    first/odd/even page variants; numbering and page counter resets.
-    - **Header [C,T]** — semantic content, fields, running-title rules, rule or
-      stroke, distance from page/body, first/odd/even visibility.
-    - **Footer [C,T]** — semantic content, page-number format/alignment, rule or
-      stroke, distance from page/body, first/odd/even visibility.
-  - **Frontmatter container [C]** — reading order; optional-field collapse;
-    atomic versus growing behavior; transition into body.
-    - **Title [T]** — semantic/localized variants; grouping; prominence;
-      punctuation; optionality.
-    - **Subtitle [T]** — relation to title; optionality and collapsed spacing.
-    - **Authors [C,T]** — order, grouping, separators, line formation; links to
-      affiliations; correspondence semantics.
-      - **Presenter mark [T]** — glyph/string, attachment target, placement,
-        repetition, legend meaning, and interaction with wrapping.
-    - **Affiliations [C,T]** — marker/link semantics; grouping, order,
-      separators, and line formation.
-    - **Abstract [C,T]** — label/prefix, language variants, run-in versus block,
-      width and paragraph behavior.
-    - **Keywords [C,T]** — label/prefix, separator and punctuation, item order,
-      line formation, optionality.
-  - **Body container [C]** — usable region; section flow; frontmatter
-    transition; page and column balancing policy.
-    - **Columns [C]** — count, widths, gutter, rules, balance, span behavior,
-      reading order, column/page breaks.
-      - **Paragraphs [T]** — paragraph semantics; justification and hyphenation;
-        first/hanging indent; inter-paragraph policy.
-      - **Heading level 1..N [C,T]** — identify every observed level separately;
-        hierarchy, counter/reset, numbering/prefix/suffix, punctuation, outline
-        and bookmark behavior; run-in/block form; keep with following content.
-      - **Lists [C,T]** — ordered/unordered/description semantics; nesting;
-        marker or counter style, prefix/suffix, alignment, marker-body gap,
-        counter reset/continuation, page flow.
-        - **Items [C,T]** — marker attachment; item indentation and spacing;
-          paragraph children; keep/break and split behavior.
-      - **Equations [C,T]** — inline/display semantics; math font and glyph
-        treatment; alignment and indent; counter/reset, number format and
-        prefix/suffix; number position; label/reference semantics; keep/break.
-      - **Figures [C]** — semantic kind, placement/float policy, counter/reset,
-        label/reference semantics, keep with caption, page/column span.
-        - **Images [C]** — source asset and intrinsic dimensions; displayed
-          width/height; aspect ratio, fit, crop, scaling/interpolation,
-          alignment, border/stroke, alt text.
-        - **Captions [C,T]** — position; kind/prefix, counter and number format,
-          separator/punctuation; single/multiline alignment; shared width;
-          distance to object and following flow.
-      - **Tables [C]** — semantic kind; total width; column count and width
-        policy; grid/stroke sides, thickness, style and color; header repetition;
-        counter/reset, label/reference semantics; caption position; page/column
-        span and break behavior.
-        - **Rows [C]** — header/body/footer role; natural/min/fixed height;
-          separators; keep/split/repeat behavior; zebra/background styling.
-          - **Cells [C,T]** — column/row span; content kind; width/height policy;
-            padding; horizontal/vertical alignment; wrapping and overflow;
-            background; per-edge strokes.
-      - **Citations [T]** — citation key/target semantics; numeric/author-year
-        form; cluster ordering and ranges; prefix/suffix, locator, brackets,
-        punctuation, spacing, links, and line breaking.
-  - **References [C,T]** — bibliography source and placement; heading and
-    outline behavior; sorting, filtering, numbering/counter, columns and page
-    flow.
-    - **Bibliography entries [C,T]** — author/title/container/year and other
-      field semantics; label/number format; punctuation and emphasis; hanging
-      indent; entry spacing; URL/DOI/link treatment; wrapping, keep, and breaks.
-
-## Cross-Checks
-
-Inspect relationships as well as isolated elements: inherited versus local
-fonts, parent content width versus child wrapping, spacing collapse, baseline
-alignment between mixed content, counter continuity, label/reference targets,
-frontmatter-to-body transition, column/page continuation, and final-page tails.
-Then vary the smallest relevant content dimension to test whether the chosen
-rule generalizes.
+target, confidence, author syntax, and implementation. Apply the bundle parts
+relevant to the active element; its branch packet supplies the current
+acceptance context.
