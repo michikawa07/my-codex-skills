@@ -76,6 +76,13 @@ Record every comparison-only exclusion and its masked region or object so that
 it cannot hide a publication-content mismatch. Reclassify an item only when
 new source evidence or the user changes its role.
 
+For each exclusion, distinguish its visible ink or object, occupied layout
+extent, and effect on surrounding and downstream flow. When editable source is
+available and the excluded item participated in flow, create a clean reference
+render with that item removed and compare the resulting natural reflow. For an
+overlay, mask only its ink or object. Retain excluded space only when separate
+evidence assigns that space to publication policy.
+
 ## Core Workflow
 
 1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
@@ -128,7 +135,9 @@ new source evidence or the user changes its role.
    Use the Element Completion Loop below to establish each active element's
    official content, semantic API, and first meaningful variation before
    geometry tuning. Close each branch from paired evidence, then continue
-   through every reference page.
+   through every reference page. Before opening the next packet, record the
+   official local observation and activating variation observation that close
+   the current branch.
 5. **Deepen uncertain rules.** The element loop renders its first official and
    varied instances before geometry tuning. When that pair leaves competing
    inferences, temporarily isolate only the content or flow needed to
@@ -148,6 +157,12 @@ new source evidence or the user changes its role.
 Use fresh output directories so stale artifacts cannot appear current. Ask the
 user only when source authority, intended semantics, edit scope, or acceptable
 residuals require their decision.
+
+After a context compaction or resumed run, restore the North Star, router
+cursor, active packet, and roughly the five most recent causal observations
+before editing or judging completion. Resume the open branch at its first
+unsupported closure relation, and advance the cursor from supported branch
+closure evidence.
 
 Record elapsed time as secondary evidence. First obtain exact official fidelity,
 reusable author behavior, and an independent acceptance with no unaccepted
@@ -205,6 +220,11 @@ view when later evidence refines it:
    smallest author-controlled content or flow change that can distinguish its
    generative rule from an official-instance workaround. Include any
    project-specific element the checklist does not name.
+   For prose references, exercise the ordinary standard reference route,
+   normally `@label` and explicitly `#ref(<label>)` where a lexical boundary
+   requires it. Let template-owned reference styling derive the target-kind
+   prefix, punctuation, and numbering form; keep this distinct from caption
+   supplements and verify equation, figure, and table prose separately.
 3. **Official content.** Establish exact correspondence for the active element's
    wording, symbols, equations, assets, citations, order, and deliberate breaks.
 4. **Activated variation.** Before rendering, record the intended behavior and
@@ -221,6 +241,13 @@ view when later evidence refines it:
    and rendered evidence. Assign each rule to the element whose semantics it
    governs, covering applicable typography, alignment, width/wrap, spacing,
    breaks, numbering, strokes, padding, markers, and asset treatment.
+   When a source names a geometric relation, record its definition and
+   endpoints, then map it to the Typst control that governs the same relation.
+   Verify that relation at two repeated instances, or record why the element is
+   unique, instead of tuning a later anchor as its proxy. Resolve evidenced font
+   faces with the exact font paths used for the final compile, treat text and
+   math font routes separately, and test source-backed candidates before
+   classifying a substitution as unavoidable.
 6. **Generative implementation.** Express one contract for the official and
    varied instances with the selected ordinary Typst syntax, template-owned
    `set`/`show` rules, and natural flow. Use contextual measurement when local
@@ -312,6 +339,11 @@ content-dependent layout or ownership is unclear. Read the
 needs focused diagnosis. Neither reference defines a required artifact or
 acceptance gate.
 
+When the active issue involves natural-versus-wrapped measurement, combined
+math accents, or reference shorthand beside CJK text, read the small
+[Typst reconstruction tips](references/typst-reconstruction-tips.md). These are
+engine techniques, not target defaults; load them only for a matching issue.
+
 ## Judgment Guide
 
 Use positive evidence to distinguish:
@@ -356,6 +388,11 @@ or intended answer. Treat executor self-report and numeric scores as evidence,
 not acceptance. A critical failure in official local fidelity, varied author
 behavior, or API/ownership makes the document unfinished even when the other
 two pass.
+
+After the last change to the template, usage, asset, bibliography data, or style,
+compile the official instance and every accepted variation into a new empty
+final directory. Audit only those outputs and record the source/output hashes
+and compile commands so the accepted render is bound to the reviewed inputs.
 
 Report the evidence used, API and implementation choices, render commands,
 pages and focused regions inspected, causal repairs tested, remaining residuals
