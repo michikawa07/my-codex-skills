@@ -27,6 +27,10 @@ parent against placement, heading, ordering, and page flow.
     field semantics; label/number format; punctuation and emphasis; hanging
     indent; entry spacing; URL/DOI/link treatment; wrapping, keep, and breaks.
 
+Represent each bibliographic fact once in its canonical data field. Let the
+CSL and template turn those facts into labels, localized prefixes, punctuation,
+emphasis, range notation, the bibliography heading, typography, and placement.
+
 Trace citation and bibliography author syntax to expected policy and observed
 extracted/rendered output. Require semantic agreement for field order,
 punctuation, emphasis, and localized prose before interpreting raster residuals.

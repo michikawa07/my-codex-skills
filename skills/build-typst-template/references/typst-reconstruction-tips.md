@@ -59,3 +59,22 @@ template styling, extract equation, figure, and table references separately
 because their target kinds and punctuation can differ.
 
 Re-probe the matching minimal case after an engine upgrade.
+
+## Materialize injected indented prose as a paragraph
+
+Use this when a template injects a content value into an isolated text block
+and the publication requires a first-line indent. In a Typst 0.14.2 minimal
+probe, a local `set par(first-line-indent: ...)` left the injected first line at
+the block edge even with `all: true`. Materializing the content as an explicit
+paragraph established the intended relation:
+
+```typst
+#par(first-line-indent: (amount: 1em, all: true))[
+  #injected-prose
+]
+```
+
+Keep the evidenced indent and paragraph properties at their semantic owner.
+Confirm the first and continuation line edges in the integrated render; source
+presence of the setting is not the observed result. Re-probe this case after an
+engine upgrade.

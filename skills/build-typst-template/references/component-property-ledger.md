@@ -21,10 +21,13 @@ children in reading order. Open one packet at a time:
 At each branch, recover its semantic contract and ordinary author syntax,
 establish exact official content, activate the smallest distinguishing change
 in the consolidated variation source or one of its input cases, derive the
-owned parameter bundle, implement one generative rule, and compare both cases.
-Close a leaf only when official internal fidelity and varied author behavior
-are each supported by that coherent contract. Close a composite parent after
-its active children preserve the parent contract.
+owned parameter bundle, and implement one generative rule. After adding the
+active element, freshly compile the official source and that exact edited
+variation case. Close a leaf only when official internal fidelity and varied
+author behavior are each supported by the coherent contract and every
+applicable packet `Recheck` relation not already exercised by the official is
+observed in the render. Close a composite parent after its active children
+preserve the parent contract. Only then advance the router.
 
 Open a later packet when its required parent context and upstream flow are
 stable enough to interpret it. Reopen the earliest governing packet when later

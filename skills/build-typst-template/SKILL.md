@@ -254,11 +254,14 @@ view when later evidence refines it:
    available space governs the result. Place reusable constants at their
    semantic owner rather than compensating in sample content.
 7. **Official local confirmation.** Compare the active official element against
-   its source through exact text and symbols, math form, glyphs/fonts, line
-   formation, alignment, widths/heights, padding, strokes/borders, and its
-   relations to parent, neighbors, and following flow. Outer anchors or a low
-   aggregate pixel residual cannot substitute for the element's internal
-   structure.
+   its source through exact text and symbols, math form, glyphs/fonts,
+   widths/heights, padding, strokes/borders, and its relations to parent,
+   neighbors, and following flow. Close parent placement and extent separately
+   from each applicable direct child's internal formation. For prose, observe
+   first, continuation, and final line edges, alignment, wrapping, line pitch,
+   and indents. For structured children, observe shared edges, row/cell
+   alignment, padding, wrapping, rules, and boundaries. Outer anchors or a low
+   aggregate pixel residual cannot substitute for these internal relations.
 8. **Varied route confirmation.** Confirm the declared activating observation,
    the predicted invariant/change, standard author syntax, ownership boundary,
    and downstream behavior. Trace the actual author input through the template
@@ -340,7 +343,8 @@ needs focused diagnosis. Neither reference defines a required artifact or
 acceptance gate.
 
 When the active issue involves natural-versus-wrapped measurement, combined
-math accents, or reference shorthand beside CJK text, read the small
+math accents, reference shorthand beside CJK text, or required first-line
+indentation on injected or isolated prose, read the small
 [Typst reconstruction tips](references/typst-reconstruction-tips.md). These are
 engine techniques, not target defaults; load them only for a matching issue.
 
