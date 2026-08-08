@@ -24,5 +24,5 @@ number before closing Equations.
     observed inline result.
 
 Trace each claimed author syntax to its expected semantic output and its
-observed extracted or rendered output. Confirm display policy does not alter
-inline math.
+observed extracted or rendered output. Confirm inline math retains its own
+evidenced policy after display-equation styling.

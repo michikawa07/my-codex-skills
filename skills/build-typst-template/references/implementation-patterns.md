@@ -1,7 +1,8 @@
 # Typst Template Implementation Patterns
 
 Read this reference when converting observed document behavior into reusable
-Typst rules. The examples show responsibility placement, not a required API.
+Typst rules. Choose the API from the target evidence; the examples illustrate
+responsibility placement.
 
 ## Contents
 
@@ -25,12 +26,11 @@ Typst rules. The examples show responsibility placement, not a required API.
 | Literal wording from one official sample | official fixture |
 | Non-public producer guidance excluded by user decision | recorded comparison mask |
 
-Classify each item before implementation as author semantic, publication
-policy, official-fixture literal, or comparison-only exclusion. An API name
-does not fix a responsibility leak. If authors must understand an internal
-offset or pagination trick, the control is still in the wrong layer. A
-comparison mask identifies an excluded object or region precisely; it does not
-cover nearby publication content.
+Use the ownership already assigned through `SKILL.md`. Place author semantics in
+the usage route, publication policy in the template, official literals in the
+official fixture, and comparison exclusions in an exact recorded mask. Keep
+internal offsets and pagination rules behind the author-facing API, and keep
+neighboring publication content visible around every mask.
 
 Derive the document wrapper from the structural source. These are equally valid
 when their projects support them:
@@ -49,7 +49,7 @@ when their projects support them:
 )
 ```
 
-Do not normalize both into a universal metadata record.
+Preserve the wrapper shape supported by the target structural source.
 
 ## 2. Prefer Standard Elements
 
@@ -67,9 +67,9 @@ Keep headings as `heading`, tables as `table`, and equations as
 `math.equation`. This preserves counters, labels, references, queries, and
 pagination behavior. Start each route by recording the ordinary author syntax,
 the target rendered output, and the observed output after template styling.
-Create a helper only when a concrete additional manuscript semantic cannot be
-represented cleanly with standard syntax; source-language convenience macros
-alone establish output policy, not a need for a Typst helper.
+Create a helper when the source contains a concrete additional manuscript
+semantic beyond standard syntax. Treat source-language convenience macros as
+evidence for output policy and test the corresponding standard Typst route.
 
 ## 3. Measure at the Local Width
 
@@ -84,33 +84,34 @@ where the object will render:
 })
 ```
 
-Do not measure at full page width and reuse the result inside a narrower parent.
-Preliminary measurement can also expose zero or unbounded dimensions; defer a
-decision until the local layout provides finite space.
+Measure inside the actual parent layout after it provides finite local space.
+Defer calculations that encounter preliminary zero or unbounded dimensions to
+that finite layout pass.
 
 ## 4. Let Breakable Content Break
 
-Tables and lists should normally use natural flow. Keep their internal start and
-end markers in the content when testing a page crossing. External page breaks
-prove only that the surrounding document reached another page.
+Keep breakable tables and lists in natural flow. Place internal start and end
+markers in their content when testing a page crossing so the render shows the
+element itself traversing the boundary.
 
-Do not place a breakable table in a fixed-height or unbreakable wrapper. If a
-caption or repeated header needs special treatment, preserve the underlying
-table as a table and style that structure.
+Preserve the underlying table as a breakable `table`, and style captions and
+repeated headers through that structure.
 
 Atomic figures and equations need a different rule:
 
 - keep the object whole when it fits the usable local region;
-- scale only when the publication rule permits scaling;
-- reject it with an actionable message when it cannot fit;
-- never silently clip it.
+- apply evidenced publication scaling when it can fit through that policy;
+- emit an actionable error when the object exceeds the evidenced fit policy.
+
+Produce either the complete object under the evidenced fit/scale policy or the
+actionable error.
 
 ## 5. Make Frontmatter Grow Naturally
 
-Model source-supported optional fields explicitly, but let absent fields remove
-their own spacing. Measure a title or author block when the publication requires
-it to remain atomic. Avoid fixed heights copied from the official fixture: a
-longer title must increase the block and move the body transition.
+Emit each source-supported optional field together with its adjacent spacing in
+the same content branch. Measure a title or author block when the publication
+requires it to remain atomic. Derive frontmatter height from its content so a
+longer title increases the block and moves the body transition.
 
 When this behavior is uncertain, render a focused frontmatter variation that
 changes only this dimension. Use it to judge whether the API value is consumed
@@ -124,10 +125,9 @@ Publication-fixed values can be named private constants with a source note:
 #let _caption-gap = 3.2mm // official rule, section 4.2
 ```
 
-A raster-measured value without normative provenance can still be a private
-calibration value, but verify it with varied content before treating it as a
-general rule. Do not export `_caption-gap`, `placement`, `continuation`, or an
-equivalent flag solely to position one sample.
+A raster-measured value can serve as a private calibration value after varied
+content confirms its reusable role. Keep `_caption-gap`, placement, continuation,
+and similar sample-positioning controls private at their semantic owner.
 
 ## 7. Recheck Downstream Flow
 
@@ -140,4 +140,5 @@ equation, caption, table, or reference layout:
 4. rerender the relevant content variations;
 5. rerun the official all-page comparison when the change can affect it.
 
-Local visual improvement is not sufficient when it changes pagination.
+Evaluate the repair through the changed region, affected downstream pagination,
+and relevant author variations together.

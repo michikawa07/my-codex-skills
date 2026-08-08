@@ -15,7 +15,7 @@ column/page flow.
 
 Route one direct child at a time after establishing Figures: Images, Captions,
 then Figure references. The reference route is closed against the already
-observed caption supplement and counter. Close the figure only after their
+observed caption supplement and counter. Close the figure after their
 composition preserves numbering, attachment, placement, and downstream flow.
 
 - **Figures [C]** — semantic kind, placement/float policy, counter/reset,
@@ -30,6 +30,6 @@ composition preserves numbering, attachment, placement, and downstream flow.
     prefix and number format; spacing and link target; distinction from
     the caption supplement; observed inline result.
 
-Render the official asset and the smallest meaningful variation that activates
-the intended sizing, wrapping, placement, or span branch. Predict which extent
-changes and which relationships remain invariant before tuning geometry.
+Activate the relevant sizing, wrapping, placement, or span change in the
+consolidated variation. Predict which extent changes and which relationships
+remain invariant before tuning geometry.

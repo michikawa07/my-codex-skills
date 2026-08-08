@@ -14,9 +14,9 @@ links, long abstract/keywords, omitted optional fields, and the body start.
 
 Route one direct child at a time in evidenced reading order: Title, Subtitle,
 Authors, Affiliations, Abstract, then Keywords when present. Presenter mark is
-opened only while Authors is active. Close each child against its immediate
-siblings; close the container only after the composition preserves optional
-collapse and the body transition.
+opened as an Authors child. Close each child against its immediate siblings;
+close the container after the composition preserves optional collapse and the
+body transition.
 
 - **Frontmatter container [C]** — reading order; optional-field collapse;
   atomic versus growing behavior; transition into body.

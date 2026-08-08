@@ -1,8 +1,8 @@
 # Visual Comparison Playbook
 
 Use this reference when whole-page comparison reveals a residual that needs
-focused diagnosis. The outputs are observations for Codex to interpret, not a
-schema, acceptance threshold, or readiness decision.
+focused diagnosis. Interpret its observations through the active element's
+semantic contract and the document-level completion conditions in `SKILL.md`.
 
 ## Establish Comparable Inputs
 
@@ -35,7 +35,8 @@ separately:
 | text or ink bbox | signed position and extent differences |
 | row/column projections | rules, baselines, and repeated bands |
 
-No one signal establishes semantic correctness or visual acceptability.
+Combine the complementary signals that expose the element's content, geometry,
+formation, and flow.
 
 ## Focus on a Semantic Region
 
@@ -49,10 +50,11 @@ python3 <skill-dir>/scripts/compare_pdfs.py detail \
 ```
 
 Inspect the element together with enough parent and following context to reveal
-alignment, available width, spacing, and downstream flow. Preserve displacement
-evidence by avoiding registration or rescaling. Compare the element's internal
-text/math form, glyphs/fonts, rows/cells, rules/borders, padding, and alignment
-as applicable; matching outer anchors alone does not establish fidelity.
+alignment, available width, spacing, and downstream flow. Compare in native page
+coordinates to preserve displacement evidence. Confirm its outer placement in
+the parent, direct-child placement and spacing inside its container, and internal
+text/math form, glyphs/fonts, rows/cells, rules/borders, padding, and alignment as
+applicable.
 
 ## Form and Test a Repair Hypothesis
 
@@ -72,15 +74,13 @@ Useful causal patterns include:
 
 State the predicted signed change, edit the smallest reusable Typst rule, and
 rerender. First check the focused region; then inspect downstream elements, all
-affected pages, and a relevant content variation. If the observation moves in a
-different direction, revise the causal hypothesis instead of hiding it with a
-sample-only offset.
+affected pages, and a relevant content variation. When the observation moves in
+a different direction, revise the causal hypothesis and rerender.
 
 ## Record the Judgment
 
-Keep only the notes useful for explaining the result: region and page,
-observation, likely cause, rule changed, predicted and observed direction,
-affected scope, and remaining uncertainty. Codex decides when the evidence is
-sufficient and reports material residuals to the user. Record official local
-fidelity and varied author-route behavior separately; both are required for an
-element to close.
+Record the region and page, observation, likely cause, rule changed, predicted
+and observed direction, affected scope, and remaining uncertainty. Codex decides
+when the evidence is sufficient and reports material residuals to the user.
+Record official local fidelity and varied author-route behavior separately; both
+are required for an element to close.

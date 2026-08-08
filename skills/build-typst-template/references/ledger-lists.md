@@ -23,5 +23,5 @@ short, multiline, and split content before closing the list composition.
     paragraph children; keep/break and split behavior.
 
 Trace each claimed author syntax to its expected semantic output and observed
-rendered output. Confirm page flow does not require authors to switch APIs.
-
+rendered output. Confirm the same author API carries the list through page and
+column flow.

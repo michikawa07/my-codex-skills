@@ -14,7 +14,7 @@ cells, vertical stroke continuity, repeated headers, references in prose,
 caption attachment, and following flow.
 
 Route one direct child at a time after establishing Tables: Rows, Table
-captions, then Table references. Open Cells only while Rows is active. Close
+captions, then Table references. Open Cells as Rows children. Close
 the reference route against the already observed caption supplement and
 counter, then close the table after child composition preserves widths,
 strokes, numbering, caption attachment, and downstream flow.
