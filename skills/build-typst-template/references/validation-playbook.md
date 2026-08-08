@@ -11,6 +11,10 @@ the project's Typst command. Then confirm that meaningful content, page order,
 paper boxes, rotation, and intended assets correspond. Record renderer and font
 paths when they can affect the result.
 
+Record any user-confirmed comparison-only guidance as an explicit object or
+region mask. Inspect the mask boundary so neighboring publication content
+remains part of the comparison.
+
 Use fresh output directories:
 
 ```bash
@@ -46,7 +50,9 @@ python3 <skill-dir>/scripts/compare_pdfs.py detail \
 
 Inspect the element together with enough parent and following context to reveal
 alignment, available width, spacing, and downstream flow. Preserve displacement
-evidence by avoiding registration or rescaling.
+evidence by avoiding registration or rescaling. Compare the element's internal
+text/math form, glyphs/fonts, rows/cells, rules/borders, padding, and alignment
+as applicable; matching outer anchors alone does not establish fidelity.
 
 ## Form and Test a Repair Hypothesis
 
@@ -75,4 +81,6 @@ sample-only offset.
 Keep only the notes useful for explaining the result: region and page,
 observation, likely cause, rule changed, predicted and observed direction,
 affected scope, and remaining uncertainty. Codex decides when the evidence is
-sufficient and reports material residuals to the user.
+sufficient and reports material residuals to the user. Record official local
+fidelity and varied author-route behavior separately; both are required for an
+element to close.

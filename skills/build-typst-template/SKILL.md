@@ -60,8 +60,21 @@ Let structural publication rules and exact official content and formatting
 govern the intended target. When portability, a generic convention, or
 implementation convenience suggests an alternative, treat it as a reported
 constraint or candidate user decision while preserving the evidenced target.
-Keep literal one-off guidance in the official fixture; expose it through the API
-when evidence identifies a recurring author-controlled semantic field.
+
+Before implementation, assign each observed item to exactly one owner:
+
+- **author semantic** — content a new author is expected to supply or vary;
+- **publication policy** — reusable behavior owned privately by the template;
+- **official-fixture literal** — sample content needed only to reproduce the
+  official instance; or
+- **comparison-only exclusion** — non-public guidance or producer artifact that
+  the user confirms is absent from authored/submitted output.
+
+Let the public API contain the author-semantic set and the template internals
+contain publication policy. Keep official-fixture literals in `usage.typ`.
+Record every comparison-only exclusion and its masked region or object so that
+it cannot hide a publication-content mismatch. Reclassify an item only when
+new source evidence or the user changes its role.
 
 ## Core Workflow
 
@@ -87,11 +100,19 @@ when evidence identifies a recurring author-controlled semantic field.
    Derive the target's semantic API, publication policy, content-dependent
    rules, and calibration, including fixed offsets, from the target structural
    and rendered evidence. Expose observed author slots and preserve their
-   free-form content while keeping publication rules private. Establish page
-   setup, major containers, and rough natural flow, then compile and immediately
-   render the official instance plus the smallest public-API variation that
-   activates and distinguishes the current skeleton contract. Later elements
-   receive their own variations when they become active. This first pair
+   free-form content while keeping publication rules private. Start with the
+   template, an official `usage.typ`, and one representative `variation.typ`.
+   Populate the variation early with the ordinary authoring horizon so that
+   architectural mistakes surface, while leaving each future element open until
+   its own branch is examined. Reuse and extend these sources as the analytical
+   focus changes. Select mutually exclusive document states from the same
+   variation source through an input case. Create a temporary focused source
+   only when one causal ambiguity cannot be distinguished in the consolidated
+   manuscript, and retain it only when its continuing diagnostic value is
+   demonstrated. Establish page setup, major containers, and rough natural
+   flow, then compile and immediately render the official instance plus the
+   smallest public-API change in the consolidated variation that activates and
+   distinguishes the current skeleton contract. This first pair
    precedes repeated geometry tuning and creates
    an early feedback point; it is not evidence of fidelity or completion by
    itself.
@@ -110,9 +131,9 @@ when evidence identifies a recurring author-controlled semantic field.
    through every reference page.
 5. **Deepen uncertain rules.** The element loop renders its first official and
    varied instances before geometry tuning. When that pair leaves competing
-   inferences, add a focused temporary example that varies only the content or
-   flow needed to distinguish them. Retain a project fixture in proportion to
-   its demonstrated use.
+   inferences, temporarily isolate only the content or flow needed to
+   distinguish them, then carry the supported rule and activating case back to
+   the primary documents.
 6. **Compare hierarchically.** First compare page count, page boxes, content,
    fonts, and whole-page alignment. Then inspect the riskiest elements with
    crops, overlays, diffs, text/image bboxes, and high-resolution rasterization.
@@ -128,10 +149,10 @@ Use fresh output directories so stale artifacts cannot appear current. Ask the
 user only when source authority, intended semantics, edit scope, or acceptable
 residuals require their decision.
 
-For a roughly 30-minute optimization, note elapsed time at the first activating
-pair and final paired closure. When a run exceeds the target, identify its
-longest avoidable interval and change that part of the next run; time informs
-prioritization, not acceptance.
+Record elapsed time as secondary evidence. First obtain exact official fidelity,
+reusable author behavior, and an independent acceptance with no unaccepted
+material residual. Only then profile that accepted path and shorten it toward a
+roughly 30-minute workflow while preserving the same result and evidence.
 
 ## Element Completion Loop
 
@@ -173,37 +194,55 @@ view when later evidence refines it:
 1. **Parent context.** Establish the coordinate system, available width,
    inherited rules, flow context, sibling relationships, and downstream effects
    supplied by the established parent and earlier elements.
-2. **Meaning and API.** State the element's semantic purpose, boundary,
-   author-editable fields, template-owned policy, and invariants. Select the
+2. **Meaning, ownership, and author route.** State the element's semantic
+   purpose, boundary, invariants, and one of the four owners above. For a
+   standard document element, first write the ordinary Typst author syntax:
+   headings, lists, equations, figures, tables, labels/references, citations,
+   or bibliography as applicable. Put publication behavior in template
+   `set`/`show` rules. Introduce a public helper only for a genuine additional
+   manuscript semantic that ordinary Typst syntax cannot express cleanly, and
+   record the attempted standard route and the concrete limitation. Select the
    smallest author-controlled content or flow change that can distinguish its
    generative rule from an official-instance workaround. Include any
    project-specific element the checklist does not name.
 3. **Official content.** Establish exact correspondence for the active element's
    wording, symbols, equations, assets, citations, order, and deliberate breaks.
-4. **Early variation.** Materialize the selected change through the public
-   author workflow and render it before parameter or geometry tuning. Predict
-   what remains invariant, what changes, and how both cases affect the parent,
-   neighbors, and downstream flow.
+4. **Activated variation.** Before rendering, record the intended behavior and
+   the direct output observation that will prove it occurred. Materialize the
+   change through the public author workflow before parameter or geometry
+   tuning, then record the observed result. Increase or alter semantic input and
+   rerender the same source until the event actually occurs. Multiple title
+   baselines, start/end sentinels on different pages or columns, first/last
+   table-row identifiers across a boundary, a repeated header, or a normal next
+   anchor after optional-field omission are direct observations; a filename or
+   input length is not. Predict what remains invariant, what changes, and how
+   both cases affect the parent, neighbors, and downstream flow.
 5. **Owned parameter bundle.** Infer a coherent governing bundle from structural
    and rendered evidence. Assign each rule to the element whose semantics it
    governs, covering applicable typography, alignment, width/wrap, spacing,
    breaks, numbering, strokes, padding, markers, and asset treatment.
 6. **Generative implementation.** Express one contract for the official and
-   varied instances with standard Typst semantics, `set`/`show` rules, and
-   natural flow. Use contextual measurement when local available space governs
-   the result. Place reusable constants at their semantic owner rather than
-   compensating in sample content.
-7. **Paired confirmation.** Compare the official local target and the varied
-   case through exact content, crops, bboxes, fonts, line formation, and their
-   relations to parent, neighbors, and following flow. Confirm the predicted
-   invariant or change, including that the variation activates its intended
-   branch, and use the earliest governing rule to explain residuals.
-8. **Branch closure.** Rerender both cases through the public author workflow
+   varied instances with the selected ordinary Typst syntax, template-owned
+   `set`/`show` rules, and natural flow. Use contextual measurement when local
+   available space governs the result. Place reusable constants at their
+   semantic owner rather than compensating in sample content.
+7. **Official local confirmation.** Compare the active official element against
+   its source through exact text and symbols, math form, glyphs/fonts, line
+   formation, alignment, widths/heights, padding, strokes/borders, and its
+   relations to parent, neighbors, and following flow. Outer anchors or a low
+   aggregate pixel residual cannot substitute for the element's internal
+   structure.
+8. **Varied route confirmation.** Confirm the declared activating observation,
+   the predicted invariant/change, standard author syntax, ownership boundary,
+   and downstream behavior. Trace the actual author input through the template
+   to its extracted and rendered output.
+9. **Branch closure.** Rerender both cases through the public author workflow
    and recheck the parent, completed children and neighbors, and affected
-   document-wide flow. Close a leaf when one coherent contract explains both
-   cases. Close a composite parent after its supported children are closed and
-   their composition preserves the parent contract. Then advance in hierarchy
-   and reading order; reopen the branch when later evidence refines an upstream
+   document-wide flow. Close a leaf only when official local confirmation and
+   varied route confirmation both hold under one coherent contract. Close a
+   composite parent after its supported children are closed and their
+   composition preserves the parent contract. Then advance in hierarchy and
+   reading order; reopen the branch when later evidence refines an upstream
    rule.
 
 Element completion is Codex's evidence-based judgment, not a numeric gate. It
@@ -261,6 +300,12 @@ signals. Do not register or rescale the candidate into agreement. Choose crops
 from semantic elements and suspected causal boundaries, not merely the largest
 pixel hotspot.
 
+Automate only judgment-free operations such as compile, render, extract,
+inventory, count, and observation of a declared activation event. Let the
+project choose its source/case layout. Numeric thresholds and fixed fixture
+kinds may summarize evidence, but they do not decide semantic ownership,
+element completion, residual acceptance, or document readiness.
+
 Read [implementation patterns](references/implementation-patterns.md) when
 content-dependent layout or ownership is unclear. Read the
 [visual comparison playbook](references/validation-playbook.md) when a residual
@@ -279,8 +324,11 @@ Use positive evidence to distinguish:
 - asset differences from layout differences;
 - renderer-only raster differences from structural differences.
 
-Classify a residual as renderer-only after the direct rules and semantic output
-agree; otherwise use the disagreement to continue causal inspection.
+Classify a residual as renderer-only only after exact content, semantic
+structure, applicable font/glyph choice, line formation, strokes, and governing
+layout rules agree. Agreement of selected anchors, page count, or aggregate
+pixel metrics alone is insufficient; otherwise use the disagreement to
+continue causal inspection.
 
 Treat a coherent block displacement as evidence to inspect its shared
 alignment, inset, or placement rule. Treat accumulating vertical drift as
@@ -299,6 +347,15 @@ official instance and justified variations must render robustly, every reference
 page must be inspected, and each material residual must have an understood cause
 and scope. This is Codex's evidence-based judgment, not the result of a machine
 threshold.
+
+Before declaring readiness, perform a separate final audit from the raw sources,
+all reference pages, all varied pages, and the public template/usage source.
+When fresh-agent evaluation is authorized, use a fresh evaluator that receives
+the artifact, fixed scenarios, and requirements but not the executor's diagnosis
+or intended answer. Treat executor self-report and numeric scores as evidence,
+not acceptance. A critical failure in official local fidelity, varied author
+behavior, or API/ownership makes the document unfinished even when the other
+two pass.
 
 Report the evidence used, API and implementation choices, render commands,
 pages and focused regions inspected, causal repairs tested, remaining residuals

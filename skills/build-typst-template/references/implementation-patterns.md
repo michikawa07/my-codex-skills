@@ -23,9 +23,14 @@ Typst rules. The examples show responsibility placement, not a required API.
 | Ordinary heading, figure, table, equation, list, label, reference | standard Typst syntax |
 | Repeated project-specific semantic structure | project-named helper |
 | Literal wording from one official sample | official fixture |
+| Non-public producer guidance excluded by user decision | recorded comparison mask |
 
-An API name does not fix a responsibility leak. If authors must understand an
-internal offset or pagination trick, the control is still in the wrong layer.
+Classify each item before implementation as author semantic, publication
+policy, official-fixture literal, or comparison-only exclusion. An API name
+does not fix a responsibility leak. If authors must understand an internal
+offset or pagination trick, the control is still in the wrong layer. A
+comparison mask identifies an excluded object or region precisely; it does not
+cover nearby publication content.
 
 Derive the document wrapper from the structural source. These are equally valid
 when their projects support them:
@@ -60,8 +65,11 @@ Style semantics through show rules:
 
 Keep headings as `heading`, tables as `table`, and equations as
 `math.equation`. This preserves counters, labels, references, queries, and
-pagination behavior. Create a helper only when standard syntax cannot represent
-the author-facing meaning cleanly.
+pagination behavior. Start each route by recording the ordinary author syntax,
+the target rendered output, and the observed output after template styling.
+Create a helper only when a concrete additional manuscript semantic cannot be
+represented cleanly with standard syntax; source-language convenience macros
+alone establish output policy, not a need for a Typst helper.
 
 ## 3. Measure at the Local Width
 
