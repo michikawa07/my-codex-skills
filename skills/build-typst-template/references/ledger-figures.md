@@ -13,7 +13,7 @@ single/multiline captions and justified asset/flow variations.
 caption wrapping, figure-caption attachment, reference prose, and following
 column/page flow.
 
-Route one direct child at a time after establishing Figures: Images, Captions,
+Process one direct child at a time after establishing Figures: Images, Captions,
 then Figure references. The reference route is closed against the already
 observed caption supplement and counter. Close the figure after their
 composition preserves numbering, attachment, placement, and downstream flow.

@@ -13,7 +13,7 @@ text, punctuation, emphasis, numbering, and layout agree with the target.
 bibliography heading spacing, field order and punctuation, long entries,
 column/page breaks, and final-page/footer relations.
 
-Route Citations and References as separate direct children of body flow. Within
+Process Citations and References as separate direct children of body flow. Within
 References, open Bibliography entries as its one direct child, then close the
 parent against placement, heading, ordering, and page flow.
 
@@ -33,4 +33,4 @@ emphasis, range notation, the bibliography heading, typography, and placement.
 
 Trace citation and bibliography author syntax to expected policy and observed
 extracted/rendered output. Require semantic agreement for field order,
-punctuation, emphasis, and localized prose before interpreting raster residuals.
+punctuation, emphasis, and localized prose before interpreting remaining raster differences.

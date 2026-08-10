@@ -12,6 +12,7 @@ the intended relation:
 ]
 ```
 
-Keep the indent and paragraph properties at their semantic owner. Confirm the
+Keep the indent and paragraph properties in the file assigned by the four owner
+categories in `SKILL.md`. Confirm the
 first and continuation line edges in the integrated render, and re-probe after
 an engine upgrade.

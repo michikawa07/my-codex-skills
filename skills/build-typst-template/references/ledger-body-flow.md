@@ -12,7 +12,7 @@ lists, equations, figures, tables, citations, and references.
 **Recheck** — Frontmatter-to-body transition, column/page continuation,
 heading-to-content attachment, downstream displacement, and final-page tails.
 
-Route one direct child at a time: establish Columns, then complete Paragraphs
+Process one direct child at a time: establish Columns, then complete Paragraphs
 and each observed Heading level separately in reading order. Reopen Columns
 when a child exposes a wrong available width, gutter, span, or break context.
 

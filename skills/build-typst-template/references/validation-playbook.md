@@ -1,8 +1,9 @@
 # Visual Comparison Playbook
 
-Use this reference when whole-page comparison reveals a residual that needs
+Use this reference when whole-page comparison reveals a remaining difference that needs
 focused diagnosis. Interpret its observations through the active element's
-semantic contract and the document-level completion conditions in `SKILL.md`.
+author syntax, owner category, official relations, activating variation, and
+document-level completion conditions in `SKILL.md`.
 
 ## Establish Comparable Inputs
 
@@ -58,11 +59,11 @@ applicable.
 
 ## Form and Test a Repair Hypothesis
 
-First classify the residual as content, font/glyph, fixed geometry,
+First classify the difference as content, font/glyph, fixed geometry,
 content-dependent flow, stroke, asset, or renderer rasterization. Then locate
-the earliest governing element and inspect its parent parameters.
+the first affected branch defined in `SKILL.md` and inspect its parent parameters.
 
-Useful causal patterns include:
+Useful source-to-output patterns include:
 
 - coherent `dx`/`dy`: shared container alignment, inset, or placement;
 - progressively growing vertical `dy`: earliest repeated line pitch or gap;
@@ -75,12 +76,14 @@ Useful causal patterns include:
 State the predicted signed change, edit the smallest reusable Typst rule, and
 rerender. First check the focused region; then inspect downstream elements, all
 affected pages, and a relevant content variation. When the observation moves in
-a different direction, revise the causal hypothesis and rerender.
+a different direction, revise the predicted cause/direction and rerender.
 
 ## Record the Judgment
 
 Record the region and page, observation, likely cause, rule changed, predicted
-and observed direction, affected scope, and remaining uncertainty. Codex decides
-when the evidence is sufficient and reports material residuals to the user.
-Record official local fidelity and varied author-route behavior separately; both
+and observed direction, affected elements/pages, and remaining uncertainty. Codex decides
+when the evidence is sufficient and reports remaining differences that change
+content, formation, placement, or flow to the user.
+Record the official element's content/formation/placement match and varied
+author syntax/call-path behavior separately; both
 are required for an element to close.

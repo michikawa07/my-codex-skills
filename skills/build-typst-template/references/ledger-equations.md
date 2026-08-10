@@ -12,7 +12,7 @@ instances place, number, and render coherently.
 **Recheck** — Inline/display math, tall and long equations, equation numbers,
 references in prose, links, and following flow.
 
-Route Equations first, then open Equation references as its one direct child.
+Process Equations first, then open Equation references as its one direct child.
 Close reference prose against the established counter, label, and display
 number before closing Equations.
 

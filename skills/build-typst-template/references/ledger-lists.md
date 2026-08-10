@@ -13,7 +13,7 @@ flow remain coherent under justified content changes.
 source; nested and continued lists; split items; sibling paragraphs; and
 following flow.
 
-Route Lists first, then open Items as its one direct child. Close Items across
+Process Lists first, then open Items as its one direct child. Close Items across
 short, multiline, and split content before closing the list composition.
 
 - **Lists [C,T]** — ordered/unordered/description semantics; nesting;

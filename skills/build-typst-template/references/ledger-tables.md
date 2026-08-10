@@ -13,7 +13,7 @@ available width, and evidenced publication policy.
 cells, vertical stroke continuity, repeated headers, references in prose,
 caption attachment, and following flow.
 
-Route one direct child at a time after establishing Tables: Rows, Table
+Process one direct child at a time after establishing Tables: Rows, Table
 captions, then Table references. Open Cells as Rows children. Close
 the reference route against the already observed caption supplement and
 counter, then close the table after child composition preserves widths,

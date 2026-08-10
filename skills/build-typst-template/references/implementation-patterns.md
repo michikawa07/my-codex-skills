@@ -127,7 +127,8 @@ Publication-fixed values can be named private constants with a source note:
 
 A raster-measured value can serve as a private calibration value after varied
 content confirms its reusable role. Keep `_caption-gap`, placement, continuation,
-and similar sample-positioning controls private at their semantic owner.
+and similar sample-positioning controls private in the file assigned by the four
+owner categories in `SKILL.md`.
 
 ## 7. Recheck Downstream Flow
 

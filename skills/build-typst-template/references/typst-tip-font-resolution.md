@@ -1,4 +1,4 @@
-# Font Resolution Through the Final Compile Route
+# Font Resolution in the Final Compile Environment
 
 Use the same font directories for discovery, calibration, every variation, and
 the accepted final compile:
@@ -14,7 +14,7 @@ when the target requires resolution from the named directories, and
 `--ignore-embedded-fonts` when the target evidence also excludes Typst's
 embedded faces.
 
-Resolve body text and math as separate rendering routes. Apply the evidenced
-math face at the equation route when needed, for example with
+Resolve body text and math as separate font configurations. Apply the evidenced
+math face in equation styling when needed, for example with
 `show math.equation: set text(font: "...")`. Inspect the embedded PDF faces and
 focused glyphs before calibrating wrapping or spacing.

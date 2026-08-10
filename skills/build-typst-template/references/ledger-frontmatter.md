@@ -12,7 +12,7 @@ the body container.
 **Recheck** — Short and multiline titles, changed author counts and affiliation
 links, long abstract/keywords, omitted optional fields, and the body start.
 
-Route one direct child at a time in evidenced reading order: Title, Subtitle,
+Process one direct child at a time in evidenced reading order: Title, Subtitle,
 Authors, Affiliations, Abstract, then Keywords when present. Presenter mark is
 opened as an Authors child. Close each child against its immediate siblings;
 close the container after the composition preserves optional collapse and the

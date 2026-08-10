@@ -1,6 +1,7 @@
 # Document Element Router
 
-Use this router to open the packet for the branch currently being completed.
+Use `router`, `packet`, `branch`, and `closure entry` exactly as defined in
+`SKILL.md`. Open the packet for the active branch.
 The target remains a reusable authoring system: the template owns publication
 policy, authors use semantic fields and standard Typst content, the official
 instance matches, and justified content changes remain coherent.
@@ -18,17 +19,15 @@ children in reading order. Open one packet at a time:
 7. [Tables](ledger-tables.md)
 8. [Citations and references](ledger-citations-references.md)
 
-Keep a scratch cursor containing the active branch, active direct child,
-established parent contract, and remaining packet `Recheck` relations. Apply
-the Element Completion Loop in `SKILL.md` to that branch and advance the cursor
-from the observations that close it.
+Use the `router-cursor.yaml` schema in `SKILL.md`; it records the active branch,
+active direct child, observed parent coordinate/width/inheritance/flow, and
+remaining packet `Recheck` relations. Advance only from a closure entry.
 
-Open a later packet when its required parent context and upstream flow are
-stable enough to interpret it. Reopen the earliest governing packet when later
-evidence changes a coordinate system, inherited rule, available width, flow
-policy, counter, or other upstream contract. Add an unknown element under its
-real parent and route it by the contract it depends on. This index supplies the
-default coverage and dependencies.
+Open a later packet only when every observation named by its `Requires` section
+is present in valid closure entries. When later evidence changes a coordinate
+system, inherited rule, available width, flow policy, or counter, reopen the
+first affected branch as defined in `SKILL.md`. Add an unknown element under its
+real parent and place it after every element whose recorded output it requires.
 
 ## Common Property Vocabulary
 
@@ -48,7 +47,7 @@ continuation, final, hanging, left, and right line edges and indents; space befo
 and after; keep-with-next, keep-lines, widow/orphan, and page-break behavior.
 
 For each applicable prompt, first inspect normative or structural values,
-repeated instances, and visual measurements; then choose the semantic owner,
+repeated instances, and visual measurements; then choose one of the four owner categories in `SKILL.md`,
 target, confidence, author syntax, and implementation. For an element marked
 `[C,T]`, record its parent placement, direct-child placement, and internal text
-formation separately. Its branch packet supplies the current closure context.
+formation separately. Its packet and closure entry supply the current evidence.

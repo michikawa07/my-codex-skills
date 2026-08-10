@@ -13,15 +13,15 @@ available regions into which frontmatter and body flow render.
 behavior, page transitions, global counters/links, and body-region wrapping
 after a page-level change.
 
-For the active element, first recover its contract: semantic content, parent
+For the active element, first record its semantic content, parent
 and sibling relationships, fixed versus content-dependent behavior, inherited
 versus local policy, author-editable fields, and invariants under ordinary
 content changes.
 
-Establish Page enough to define its children, then route Header and Footer in
+Establish Page enough to define its children, then process Header and Footer in
 the source-established order, using Header followed by Footer as the default.
 Close Page after its coordinate system, page variants, Header, and Footer
-preserve the page-level contract. Reopen Page when a child changes the body
+preserve those page observations. Reopen Page when a child changes the body
 coordinate system.
 
 - **Document [C]** — document metadata and language; authoring boundary;
