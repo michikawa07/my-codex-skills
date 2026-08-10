@@ -143,6 +143,12 @@ evidence assigns that space to publication policy.
 7. **Repair causally.** State the reusable rule and signed change predicted to
    explain a material residual. Use the visual comparison playbook to test that
    hypothesis and recheck its affected scope.
+8. **Critique and refactor the author usage.** After the element and fidelity
+   loop produces a coherent candidate, bind the current sources and outputs to
+   their hashes and run the Author-Usage Critic Loop. Preserve the established
+   render while addressing supported usage findings. When a finding exposes a
+   flawed element contract rather than a local source-structure problem, reopen
+   the earliest governing element branch and repeat this outer candidate loop.
 
 Request a user decision when source authority, intended semantics, edit scope,
 or residual acceptance depends on it.
@@ -277,6 +283,78 @@ policy and its observed extracted or rendered output. Do this for standard
 Typst routes as well as wrapper fields, including references and bibliography
 entries.
 
+## Author-Usage Critic Loop
+
+Run this loop after the element and fidelity loop reaches a coherent candidate.
+First stage all deliverable authoring-system artifacts and required dependencies
+in a fixed candidate root, and stage only the allowed raw publication evidence
+in a separate evidence root. Hash both roots and the compile configuration.
+Then compile the explicit official and accepted variation entry points from that
+staged candidate root into a new empty baseline directory. Add the baseline
+outputs and exact commands to the manifest, and make the staged roots and
+baseline outputs read-only. Record a separate probe-safe command template whose
+source and output paths the critic may substitute. Verify the complete manifest
+before and after criticism, and keep every hashed item unchanged.
+
+Start one fresh subagent without inherited conversation context and with high
+reasoning effort. Give it only the fixed candidate root and manifest, staged
+evidence root, baseline outputs and commands, explicit official and accepted
+variation entry points, probe command template, empty probe-output directory,
+report path, and the critic guide
+[`author-usage-critic.md`](references/author-usage-critic.md). Withhold the
+main agent's diagnosis, intended answer, prior findings, working notes, rejected
+candidates, and conversation history. Instruct the critic to read that file
+completely, judge the candidate as a new author, choose implementation-specific
+probes, and remain read-only on the candidate.
+
+Use this handoff, filling in the paths and commands:
+
+```text
+Act as a fresh, independent critic of the generated Typst authoring system.
+Read CRITIC_GUIDE completely. Verify CANDIDATE_MANIFEST, then review the fixed
+CANDIDATE_ROOT as a new author who did not participate in its construction.
+The reviewed baseline is BASELINE_OUTPUT_ROOT, produced from OFFICIAL_ENTRIES
+and VARIATION_ENTRIES by BASELINE_COMPILE_COMMANDS. Use PROBE_COMMAND_TEMPLATE
+for mutations, substituting only its declared source and output placeholders.
+Read raw publication evidence only from EVIDENCE_ROOT. Write all mutation
+probes and renders under OUTPUT_ROOT and the final report to REPORT_PATH.
+
+Do not inspect prior audits, working notes, conversation history, rejected
+candidates, repository parents, sibling directories, or the main agent's
+diagnosis. Do not modify CANDIDATE_ROOT, EVIDENCE_ROOT, or BASELINE_OUTPUT_ROOT.
+Verify CANDIDATE_MANIFEST again before returning. Choose
+probes that expose the actual implementation rather than merely matching names
+from the historical examples.
+
+For every material finding, report the exact artifact location, author action,
+probe or call trace, observed consequence, authoring-system harm, earliest
+governing element or ownership boundary, smallest repair direction, and exact
+retest. Treat compilation, page count, hashes, and aggregate pixel scores as
+prerequisites or observations, never substantive author-usage proof by
+themselves.
+```
+
+Reject a generic report that lacks artifact locations, author actions, executed
+probes or call traces, and observed consequences. Route each supported finding
+to a local usage refactor, the earliest governing element or parent, or a user
+decision. Reproduce decisive evidence before rejecting the finding; do not
+accept or dismiss it from authority alone.
+
+Maintain an accumulated finding ledger. After every repair, rerender the
+affected official and varied cases. Any change to a hashed candidate artifact,
+evidence file, dependency, compile configuration, or baseline output invalidates
+the previous report; bind the new candidate and use a new fresh critic. Close
+the current iteration only after both the main agent and critic verify the
+unchanged manifest and either: the latest report is `CLEAR` and every earlier
+material or blocked ledger item is repaired and retested or otherwise resolved;
+or every material or blocked item in the accumulated ledger, including those in
+the latest valid report, is individually accepted or otherwise resolved by the
+user.
+`INVALID` always requires a new review, and an unaccepted `REVISE` or `BLOCKED`
+leaves the loop open. Do not interpret scoped closure as a perfect global pass.
+If no fresh subagent is available, continue other safe work where possible but
+do not claim this loop complete.
+
 ## Mechanical Evidence Helpers
 
 Use the bundled inspector when it supports the input formats available. Pass it
@@ -372,19 +450,21 @@ official instance and justified variations must render robustly, every reference
 page must be inspected, and each material residual must have an understood cause
 and scope. Base readiness on that integrated evidence-based judgment.
 
-Before declaring readiness, perform a separate final audit from the raw sources,
-all reference pages, all varied pages, and the public template/usage source.
-When fresh-agent evaluation is authorized, use a fresh evaluator that receives
-the artifact, fixed scenarios, and requirements with the executor's diagnosis
-and intended answer withheld. Combine the evaluator's raw observations with the
-sources and renders. Readiness requires official local fidelity, varied author
-behavior, and correct API/ownership together.
-
 After the last change to the template, usage, asset, bibliography data, or style,
-compile the official instance and every accepted variation into a new empty
-final directory. Use those outputs as the audit subject and record the
-source/output hashes and compile commands so the accepted render is bound to the
-reviewed inputs.
+stage and hash every candidate artifact, allowed evidence file, required
+dependency, and compile configuration. Compile the official instance and every
+accepted variation from that staged root into a new empty final directory, then
+add the exact commands and final-output hashes to the manifest. Run the
+Author-Usage Critic Loop on this bound snapshot, or reuse its latest report only
+when candidate, evidence, dependency, compile-configuration, and baseline-output
+hashes all match exactly.
+
+Then perform the separate final audit from the raw sources, all reference pages,
+all varied pages, the public template/usage source, and those same bound final
+outputs. Do not change or regenerate the candidate after either review; any
+change invalidates both and requires a new final build. Combine the critic's raw
+observations with the source and render audit. Readiness requires official local
+fidelity, varied author behavior, and correct API/ownership together.
 
 Report the evidence used, API and implementation choices, render commands,
 pages and focused regions inspected, causal repairs tested, remaining residuals
