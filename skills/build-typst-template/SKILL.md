@@ -99,10 +99,10 @@ verified result or an individually user-accepted exception into one `evidence/`
 directory in the authoring root. These two roots contain the complete generated
 workspace. Use critic findings exclusively as internal repair input and keep the
 task active until closure.
-Maintain one router-cursor record in scratch with the active branch, its closure
-entries, both critic state fields, and unresolved critic finding IDs.
+Maintain `<scratch>/router-cursor.yaml` with the exact record and transitions in
+step 9.
 
-1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
+1. **Collect mechanical evidence.** Inventory files, formats, page
    geometry, embedded fonts, and images; render editable sources with their
    established application or compiler to expose appearance and pagination.
 2. **Map the top level.** Read
@@ -274,23 +274,54 @@ next. Revisit an earlier element when later evidence invalidates its record:
 8. **Varied route confirmation.** Record the author input changed, its actual
    call path, the predicted visible event and invariants, the observed semantic
    or rendered event, and downstream behavior.
-9. **Branch closure and transition.** After the last change to the active branch,
-   rerender the official case and its activating variation through the public
-   author workflow. Append one closure entry to the router cursor containing:
-   the branch and packet; the source and output regions inspected; separate
-   observations for container placement/extent, direct-child placement/insets/
-   alignment/spacing/flow, child internal formation, and downstream relations;
-   the variation author edit, prediction, call path, and observed event; every
-   applicable packet `Recheck` result; and every remaining mismatch with either
-   its repair state or the user's explicit acceptance of that exact item.
-   Compilation, warnings, page count, hashes, visited files, and aggregate pixel
-   scores are prerequisites or observations, not substitutes for these fields.
-   Keep a leaf active until every applicable field contains a post-last-change
-   observation and no unaccepted mismatch remains. Keep a composite parent
-   active until each observed direct child has its own closure entry and a new
-   render records their composition. Then advance the router cursor, trigger the
-   critic, and begin the next branch in hierarchy and reading order. Reopen the
-   earliest entry whose recorded relation a later change invalidates.
+9. **Branch closure and transition.** After the last branch edit, rerender the
+   official case and its activating variation through the public author workflow.
+   Update `<scratch>/router-cursor.yaml` in this shape:
+
+```yaml
+active:
+  branch: ""
+  packet: ""
+  status: open
+  last_change_recompiled: false
+  official:
+    source_regions: []
+    output_regions: []
+    container: ""
+    direct_children: ""
+    internal_formation: ""
+    downstream: ""
+  variation:
+    author_edit: ""
+    predicted_event: ""
+    call_path: ""
+    observed_event: ""
+  rechecks: []
+  child_closures: []
+  unresolved_mismatches: []
+  accepted_mismatches: []
+closures: []
+suspended: []
+critic:
+  state: idle
+  refresh_pending: false
+  unresolved_findings: []
+```
+
+   Every observation names both locations and the visible, extracted, or measured
+   relation. Use `not_applicable: <reason>` only where justified; each accepted
+   mismatch records the exact item and user decision. Apply these transitions:
+
+| Guard or event | Required transition |
+| --- | --- |
+| A required field is empty, `last_change_recompiled` is false, or `unresolved_mismatches` is nonempty | Keep `active.status: open`; continue this branch. |
+| Every required string and region list is populated, `last_change_recompiled` is true, `rechecks` records each packet relation, and `unresolved_mismatches` is empty | For a composite, also require every direct child in `child_closures` and a composition result in `rechecks`; set `active.status: closed`, append it to `closures`, create the next open `active` record in dependency/reading order, and trigger the critic. |
+| A later observation contradicts a closure | Move the earliest governing entry from `closures` to `active`, set it open, and record the interrupted branch in `suspended`. |
+| Source authority or acceptance is missing | Keep the branch open and request the user's decision. |
+
+   Compilation, warnings, page count, visited files, and aggregate pixel
+   scores cannot populate the relation fields. Resume a suspended branch at its
+   first empty or contradicted field after the reopened branch closes again.
 
 Request the user's decision when source authority or acceptance leaves a closure
 field unresolved. Classify a difference as renderer-origin only after recording
@@ -303,80 +334,48 @@ entries.
 
 ## Author-Usage Critic Loop
 
-Use the router cursor fields `critic_in_flight` and
-`critic_refresh_pending`. Each branch transition triggers a review. First
-compile the official usage and every current accepted variation from the live
-dependency set and wait for their PDFs. When no critic is active, start one fresh
-subagent without inherited conversation context and with maximum reasoning
-effort, set `critic_in_flight`, and pass the current authoring-root source,
-dependency, asset, and matching-PDF paths directly. Give it the critic guide
-[`author-usage-critic.md`](references/author-usage-critic.md) and a
-`TEMP_CRITIC_REPORT_PATH` in system-temporary scratch. Ask it to inspect every
-supplied source, public route, dependency, and PDF. Withhold the builder
-diagnosis, intended answer, prior findings, working notes, rejected candidates,
-and conversation history. The critic reads the current artifacts immediately,
-treats them as read-only, and sends `INPUTS_LOADED` after reading every supplied
-text source and inspecting every page of each PDF. It uses system-temporary
-copies only for dependencies needed by an adaptive mutation probe.
-Begin the next element branch after receiving `INPUTS_LOADED`. Continue the
-builder's element and all-page fidelity work against the live authoring root
-while the critic analyzes those loaded inputs independently. If another branch
-closes while a critic is active, set `critic_refresh_pending` instead of starting
-a second critic.
-When the critic returns, publish its completed report atomically as the
-authoring root's `critic-findings.md`, clear `critic_in_flight`, and reproduce
-each reported mechanism against the current live version. Mark an already-fixed
-finding only after a direct retest; route every surviving finding to its earliest
-governing usage, element, parent, or user decision. An upstream or whole-system
-finding reopens that branch immediately: record the current branch's first
-incomplete field, make the governing branch the sole active branch, then return
-to the suspended field after the reopened branch closes again. Apply a local
-finding after the current edit either compiles or is reverted, and before
-appending that branch's closure entry. When `critic_refresh_pending` is set,
-clear it and start a fresh full-artifact critic at the next branch transition.
+Every branch closure triggers a review. Compile the official usage and all
+current accepted variations from the live dependency set first. Start a fresh
+maximum-reasoning subagent without conversation history. Pass the current
+authoring sources, dependencies, assets, matching PDFs, a system-temporary
+`TEMP_CRITIC_REPORT_PATH`, and
+[`author-usage-critic.md`](references/author-usage-critic.md). Withhold the
+builder diagnosis, intended answer, prior reports, notes, and rejected outputs.
 
-Use this handoff, filling in the current paths:
+| Critic state and event | Required transition |
+| --- | --- |
+| `idle` + branch closure | Set `loading`; start one fresh whole-artifact critic. |
+| `loading` + `INPUTS_LOADED` | Set `running`; begin the next element and continue all-page fidelity work. |
+| `loading` or `running` + another closure | Set `refresh_pending: true`; keep one critic. |
+| `running` + completed report | Publish it atomically as `critic-findings.md`, set `idle`, and process its findings. |
+| `idle` + pending refresh at the next transition | Clear `refresh_pending`; start a fresh review. |
+| No fresh subagent slot | Preserve builder state, consult the user immediately, and await the decision. |
+
+For each returned mechanism, retest the current live version. Close an
+already-fixed finding only from that retest. Route a surviving finding to its
+earliest governing usage, element, parent, or user decision. For an upstream or
+whole-system finding, put the current `active` record in `suspended` and reopen
+the governing branch; resume the suspended record after it recloses. Apply a
+local finding after the current edit compiles or is reverted and before closure.
+
+Use this handoff with the current paths:
 
 ```text
 Act as a fresh, independent critic of the generated Typst authoring system.
-Read CRITIC_GUIDE completely. Review CURRENT_SOURCE_FILES and their matching
-CURRENT_OUTPUT_PDFS directly as a new author who did not participate in their
-construction. Read every supplied source, public route, dependency, and PDF.
-Keep the supplied files read-only. Send INPUTS_LOADED to the builder after every
-text source has been read and every PDF page inspected. If an adaptive compile
-probe is needed, copy only its required source dependencies into a system
-temporary directory and run the probe there.
-
-Write the concise required findings document to TEMP_CRITIC_REPORT_PATH in
-system temporary scratch. In your final response, return that path and overall
-status to the builder.
-
-Restrict review context to CRITIC_GUIDE, CURRENT_SOURCE_FILES,
-CURRENT_OUTPUT_PDFS, and probe copies created in the system temporary directory.
-Choose probes that expose the actual implementation rather than merely matching
-names from the historical examples.
-
-For every material finding, compactly report the artifact location and owner,
-author action and decisive probe, observed consequence and harm, smallest repair
-direction, exact retest, and any evidence gap. Keep detailed commands,
-inventories, and passing prerequisites in temporary scratch. Base substantive
-author-usage conclusions on the author action, route trace, and observed
-semantic or rendered consequence.
+Read CRITIC_GUIDE completely. Read every CURRENT_SOURCE_FILE and inspect every
+page of every CURRENT_OUTPUT_PDF, then send INPUTS_LOADED. Keep them read-only.
+Use system-temporary copies for adaptive probes. Review the whole supplied
+authoring system using only these inputs. Write the guide's bounded report to
+TEMP_CRITIC_REPORT_PATH and return its path and status.
 ```
 
 Maintain an accumulated finding ledger in scratch and use a new fresh critic for
-each review. An intermediate `CLEAR` is repair feedback, not a completion gate.
-After no later edit has invalidated a branch closure entry and all earlier
-findings are repaired, retested, individually accepted, or resolved by the user,
-wait for any active critic and process its report. Clear
-`critic_refresh_pending`, compile all accepted documents, and hold the live
-sources, dependencies, assets, and PDFs unchanged. Run the final fresh critic
-and the builder's raw-source, all-page, and variation audit concurrently on those
-live files. Finish only after that critic reports `CLEAR`, the builder audit
-records no unaccepted mismatch, and the accumulated ledger has no unresolved
-item. A finding from either review reopens its earliest governing loop. If no
-fresh subagent slot is available at a trigger, consult the user immediately,
-preserve the current builder state, and await the user's decision.
+each review; intermediate `CLEAR` is repair input. After all closure entries are
+valid and earlier findings resolved, process any active report, clear pending,
+compile all accepted documents, and hold the live inputs unchanged. Run the
+final fresh critic and builder's raw-source/all-page/variation audit concurrently.
+Finish only with final `CLEAR`, no builder mismatch, and no unresolved ledger
+item; otherwise reopen the earliest governing loop.
 
 ## Mechanical Evidence Helpers
 
@@ -492,7 +491,8 @@ records, and a new final review.
 After every branch has a non-invalidated closure entry, the final critic reports
 `CLEAR`, the final builder audit records no unaccepted mismatch, and the finding
 ledger has no unresolved item, return the generated template, usage, variation,
-and PDF paths with a concise statement of the validation completed. Leave
+and PDF paths with one sentence naming the compiled documents, inspected pages,
+activated variations, and final critic status. Leave
 regenerable bulk renders and superseded iterations in the system-temporary
 scratch root. When unavailable source authority or a required user choice leaves
 a closure field unresolved, consult the user and keep that branch active until

@@ -30,7 +30,7 @@ Report concrete material findings and their earliest governing causes.
   and keep those files read-only.
 - Notify the builder with `INPUTS_LOADED` after reading every supplied text source
   and inspecting every page of each PDF, before adaptive probes.
-- Write the completed concise critic-to-builder report to the supplied
+- Write the completed critic-to-builder report to the supplied
   `TEMP_CRITIC_REPORT_PATH` in system temporary scratch.
 - Restrict review evidence to the current author sources, template dependencies,
   and matching PDFs explicitly supplied by the builder.
@@ -69,8 +69,8 @@ its semantic role, call path, author behavior, and rendered consequences.
    result rather than accepting source inspection alone.
 6. Check whether a local usage refactor can preserve the established render. If
    not, locate the earliest element or parent contract that must be reopened.
-7. Cover inspected surfaces and uncertainty in the review, then publish only
-   actionable findings, concise evidence gaps, and the overall status.
+7. Cover inspected surfaces and uncertainty in the review, then publish findings,
+   evidence gaps, and status using the required findings format below.
 
 For each compile probe, retain the exact copied source, mutation, command, and
 output inspected in system temporary scratch. Cite its short probe ID and
@@ -446,7 +446,8 @@ action, call path, and observed consequence.
 
 ## Evidence and severity
 
-For every material finding, supply:
+For every candidate material or blocked root cause, keep a full evidence record
+under its ID in system-temporary scratch. Include:
 
 - the exact candidate files and lines;
 - the author action or semantic route under review;
@@ -456,6 +457,9 @@ For every material finding, supply:
 - the earliest governing element, parent, or ownership boundary;
 - the smallest repair direction and exact retest;
 - confidence and any evidence still missing.
+
+Merge downstream symptoms that share the same earliest governing cause into one
+finding and list the affected surfaces in that evidence record.
 
 Use these statuses:
 
@@ -474,35 +478,54 @@ asking the critic to conceal it.
 
 ## Required findings file
 
-Write a concise Markdown document to `TEMP_CRITIC_REPORT_PATH` containing the
-overall status, material findings in severity order, a compact
-advisory list, and unresolved evidence gaps or blocked decisions. Keep detailed
-artifact inventories, hashes, full command transcripts, passing prerequisites,
-and repeated route summaries in system temporary scratch. Let report length
-scale with findings rather than files or probes; use roughly six compact bullets
-per material finding and one or two sentences per bullet.
+Write at most 60 lines and 900 words to `TEMP_CRITIC_REPORT_PATH`; count both
+before returning. Merge findings only when they have the same earliest governing
+cause and the same repair and retest; name every affected surface in the merged
+entry. Put input inventories, commands, methods, passing prerequisites,
+historical-precedent narration, advisories, confidence, and repeated evidence in
+scratch only.
 
-Return the file path and overall status to the builder after writing it.
+Under `Repair now`, detail at most three material or blocked findings, ordered by
+earliest governing branch and then author harm. Use exactly the four fields below
+and one sentence per field:
 
-Use this finding shape:
+- `Return`: status, earliest branch, exact file/line, and governing owner; at most
+  25 words.
+- `Failure`: one author action, decisive observed result, author-visible harm,
+  and affected surfaces; at most 50 words.
+- `Repair / decision`: one causal repair direction, or the exact user decision
+  required for `BLOCKED`; at most 30 words.
+- `Retest`: exact author action and semantic or rendered relation that must be
+  observed; at most 35 words.
+
+Put every remaining material or blocked finding in exactly one table row. Use
+these cells: ID and status; earliest branch plus file/line; demonstrated failure
+and author harm in at most 30 words; repair or required decision plus exact retest
+in at most 35 words. The finding ID addresses its full scratch evidence record.
+A `CLEAR` report contains only its heading and `- Status: CLEAR`; uncertainty
+that changes a builder or user action is `BLOCKED`, not a `CLEAR` footnote.
+
+Use this exact report shape:
 
 ```markdown
 # Author-Usage Critic Findings
 
 - Status: CLEAR | REVISE | BLOCKED
 
-## U-001 — Short causal title
+## Repair now
 
-- Status / return: MATERIAL; USAGE-REFACTOR | ELEMENT:<name> | PARENT:<name> | USER-DECISION
-- Location / owner: exact file and lines; governing owner
-- Author action / probe: action, route, short probe ID
-- Consequence / harm: decisive semantic and rendered observation; author harm
-- Repair: smallest causal direction
-- Retest / confidence: exact retest; confidence and remaining evidence gap
+## U-001 — <earliest governing cause>
+
+- Return: MATERIAL; ELEMENT:<name>; file:line; governing owner. (≤25 words)
+- Failure: author action; observed result; harm and affected surfaces. (≤50 words)
+- Repair / decision: causal repair, or exact decision for BLOCKED. (≤30 words)
+- Retest: action and required semantic or rendered observation. (≤35 words)
+
+## Remaining queue
+
+| ID / status | Return / location | Failure / harm | Repair or decision / retest |
+| --- | --- | --- | --- |
+| U-004 / MATERIAL | PARENT:<name>; file:line | demonstrated failure and harm (≤30 words) | repair; exact retest (≤35 words) |
 ```
 
-Support every material finding with reproducible artifact evidence and an
-author-visible consequence. Summarize advisories and evidence gaps in one line
-each unless they require a user decision. A `CLEAR` report identifies the
-covered author surfaces in a short list, then records any remaining non-material
-uncertainty.
+Return the file path and overall status after writing and counting the report.
