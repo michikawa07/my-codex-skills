@@ -88,16 +88,16 @@ evidence assigns that space to publication policy.
 For generated run artifacts, use one authoring root and one system-temporary
 scratch root. The authoring root contains the current `template.typ`, official
 `usage.typ`, consolidated `variation.typ`, required dependencies and assets,
-and their current PDFs. The scratch root contains inspector and comparator
+their current PDFs, and one `critic-findings.md` file containing the latest
+critic-to-builder findings. The scratch root contains inspector and comparator
 output, probe copies, focused sources, logs, and rejected or intermediate
 builds. Reuse that scratch root during the run,
 creating a new or empty subdirectory there only when a tool requires one. At
 completion, copy only decisive probe or comparison artifacts that support the
 verified result or an individually user-accepted exception into one `evidence/`
-directory in the authoring root. Separate persistent candidate, baseline,
-staging, critic-output, render, or log trees are not part of this workflow.
-Treat critic findings as internal repair input, not as a deliverable or a reason
-to end the task.
+directory in the authoring root. These two roots contain the complete generated
+workspace. Use critic findings exclusively as internal repair input and keep the
+task active until closure.
 
 1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
    geometry, embedded fonts, and images; render editable sources with their
@@ -308,16 +308,19 @@ edits while the critic reads those current source files and their matching PDFs.
 Start one fresh subagent without inherited conversation context and with maximum
 reasoning effort. Give it only the latest official and varied author sources,
 the template and dependencies needed to understand them, their matching output
-PDFs, and the critic guide
+PDFs, the exact authoring-root path `CRITIC_FINDINGS_PATH` for
+`critic-findings.md`, and the critic guide
 [`author-usage-critic.md`](references/author-usage-critic.md). Withhold the
-main agent's diagnosis, intended answer, prior findings, working notes, rejected
+builder's diagnosis, intended answer, prior findings, working notes, rejected
 candidates, and conversation history. Instruct the critic to read that file
 completely, judge the current result as a new author, choose implementation-
 specific probes, and remain read-only on the supplied sources and PDFs. The
 critic may create its own system temporary directory for a probe, copying only
-the dependencies needed for that probe. It returns structured findings in its
-response for the builder to act on; do not give it a report path or persistent
-output directory.
+the dependencies needed for that probe. Before starting each fresh critic,
+remove the previous `critic-findings.md` so it cannot reveal earlier findings.
+The critic writes its complete structured findings only to
+`CRITIC_FINDINGS_PATH`; the builder reads that file and acts on it. Use this
+authoring-root file as the sole persistent critic output.
 
 Use this handoff, filling in the current paths:
 
@@ -325,40 +328,43 @@ Use this handoff, filling in the current paths:
 Act as a fresh, independent critic of the generated Typst authoring system.
 Read CRITIC_GUIDE completely. Review CURRENT_SOURCE_FILES and their matching
 CURRENT_OUTPUT_PDFS directly as a new author who did not participate in their
-construction. Do not modify them. If an adaptive compile probe is needed, copy
+construction. Keep them read-only. If an adaptive compile probe is needed, copy
 only the minimum required source dependencies into a system temporary directory
 and run the probe there.
 
-Do not inspect prior audits, working notes, conversation history, rejected
-candidates, repository parents, sibling directories, or the main agent's
-diagnosis. Choose probes that expose the actual implementation rather than
-merely matching names from the historical examples.
+Write the complete required findings document to CRITIC_FINDINGS_PATH. Outside
+your system temporary probe directory, write only that file. In your final
+response, return its path and overall status to the builder.
+
+Restrict review context to CRITIC_GUIDE, CURRENT_SOURCE_FILES,
+CURRENT_OUTPUT_PDFS, and probe copies created in the system temporary directory.
+Choose probes that expose the actual implementation rather than merely matching
+names from the historical examples.
 
 For every material finding, report the exact artifact location, author action,
 probe or call trace, observed consequence, authoring-system harm, earliest
 governing element or ownership boundary, smallest repair direction, and exact
 retest. Treat compilation, page count, hashes, and aggregate pixel scores as
-prerequisites or observations, never substantive author-usage proof by
-themselves.
+prerequisites or observations. Base substantive author-usage conclusions on the
+author action, route trace, and observed semantic or rendered consequence.
 ```
 
-Reject a generic report that lacks artifact locations, author actions, executed
-probes or call traces, and observed consequences. Route each supported finding
+Require artifact locations, author actions, executed probes or call traces, and
+observed consequences for every material finding. Route each supported finding
 to a local usage refactor, the earliest governing element or parent, or a user
-decision. Reproduce decisive evidence before rejecting the finding; do not
-accept or dismiss it from authority alone.
+decision. Reproduce decisive evidence before deciding whether to accept a
+finding.
 
 Maintain an accumulated finding ledger. After every repair, rerender the
 affected official and varied cases. Any change to a reviewed source, dependency,
-or output PDF invalidates the previous report; use a new fresh critic on the new
-current files. Close the current iteration only when the latest report is
-`CLEAR` and every earlier material or blocked ledger item is repaired and
-retested or otherwise resolved, or when every such item is individually accepted
-or otherwise resolved by the user. An unaccepted `REVISE` or `BLOCKED` leaves
-the loop open. Do not interpret scoped closure as a perfect global pass. If no
-fresh subagent slot is available, consult the user immediately and keep the
-builder paused; do not end the builder, self-substitute, or invent a different
-workflow.
+or output PDF invalidates the previous findings file; use a new fresh critic on
+the new current files. Close the current iteration only when the latest findings
+file is `CLEAR` and every earlier material or blocked ledger item is repaired
+and retested or otherwise resolved, or when every such item is individually
+accepted or otherwise resolved by the user. An unaccepted `REVISE` or `BLOCKED`
+leaves the loop open. Treat `CLEAR` as scoped to the inspected current files and
+executed probes. If no fresh subagent slot is available, consult the user
+immediately and keep the builder paused until the user decides how to proceed.
 
 ## Mechanical Evidence Helpers
 
@@ -393,8 +399,8 @@ python3 <skill-dir>/scripts/compare_pdfs.py detail \
 ```
 
 Here `<scratch>` is the run's single system-temporary scratch root. Prepare the
-named subdirectory as new or empty when the helper requires it; do not place
-these disposable trees in the authoring root.
+named subdirectory as new or empty when the helper requires it, and place all
+such disposable trees in that scratch root.
 
 Read `index.json`, page rasters, overlays, absolute differences, text diffs,
 font inventories, bboxes, and projection/band measurements as complementary
@@ -464,21 +470,20 @@ After the last change to the template, usage, asset, bibliography data, or style
 compile the official instance and every accepted variation from the current
 source. Run the Author-Usage Critic Loop directly on those source files and their
 matching PDFs. Keep them unchanged while the critic reads them; if any reviewed
-source or PDF changes, discard that report and run a new fresh critic.
+source or PDF changes, discard that findings file and run a new fresh critic.
 
 Then perform the separate final audit from the raw sources, all reference pages,
 all varied pages, the public template/usage source, and those same current
-outputs. Do not change or regenerate the candidate after either review; any
-change invalidates both and requires a new final build and critic. Combine the
+outputs. Keep the candidate unchanged through both reviews; any change
+invalidates both and requires a new final build and critic. Combine the
 critic's raw observations with the source and render audit. Readiness requires
 official local fidelity, varied author behavior, and correct API/ownership
 together. If this audit or the critic exposes a material failure, route it back
-to the earliest governing loop and continue; do not replace repair with an
-interim assessment.
+to the earliest governing loop and continue through repair and retest.
 
 After all completion conditions close, return the paths to the generated
 template, usage, variation, and PDFs with a concise statement of the validation
 completed. Leave regenerable bulk renders and superseded iterations in the
 system-temporary scratch root. When unavailable source authority or a required
-user choice prevents closure, consult the user at that point instead of ending
-with an unresolved evaluation.
+user choice prevents closure, consult the user at that point and keep the loop
+open until the decision is available.

@@ -3,13 +3,13 @@
 ## Contents
 
 - [Role](#role)
-- [Non-goals and isolation](#non-goals-and-isolation)
+- [Scope and isolation](#scope-and-isolation)
 - [Review method](#review-method)
 - [Abstract review lenses](#abstract-review-lenses)
 - [Adaptive probe families](#adaptive-probe-families)
 - [Historical failure catalog](#historical-failure-catalog)
 - [Evidence and severity](#evidence-and-severity)
-- [Required critic response](#required-critic-response)
+- [Required findings file](#required-findings-file)
 
 ## Role
 
@@ -24,26 +24,24 @@ public imports and functions, standard Typst elements, template ownership,
 counters and references, content changes, and resulting page or column flow.
 Report concrete material findings and their earliest governing causes.
 
-## Non-goals and isolation
+## Scope and isolation
 
-- Do not edit the supplied current source files or output PDFs.
-- Read only the current author sources, template dependencies, and matching PDFs
-  explicitly supplied by the main agent.
-- If a mutation probe is needed, copy only its required dependencies into a
-  system temporary directory and write the probe and outputs there.
-- Do not inspect main-agent notes, prior reports, conversation history, rejected
-  candidates, git history, or sibling trial directories.
-- Do not infer the expected answer from names in this catalog.
-- Do not replace source/reference fidelity review. When a judgment would require
-  raw evidence that was not supplied, report that evidence gap instead of
-  exploring other files.
-- Do not demand zero helpers. Permit a public helper when it represents a
-  genuine additional manuscript semantic that standard Typst does not express.
-- Do not ban layout primitives mechanically. Distinguish source-explicit author
-  actions and intrinsic object dimensions from publication policy and fixture
-  calibration.
-- Do not call a candidate globally correct. Report only what the inspected
-  scope and executed probes support.
+- Keep the supplied current source files and output PDFs read-only.
+- Write the complete critic-to-builder findings to the supplied
+  `CRITIC_FINDINGS_PATH` in the authoring root.
+- Restrict review evidence to the current author sources, template dependencies,
+  and matching PDFs explicitly supplied by the builder.
+- For a mutation probe, copy its required dependencies into a system temporary
+  directory and write the probe and outputs there.
+- Select findings from observed mechanisms rather than names in this catalog.
+- Leave source/reference fidelity review with the builder. Record an evidence
+  gap when a judgment requires raw evidence outside the supplied set.
+- Permit a public helper when it represents a genuine additional manuscript
+  semantic that standard Typst does not express.
+- Distinguish source-explicit author actions and intrinsic object dimensions
+  from publication policy and fixture calibration when judging layout
+  primitives.
+- Scope every conclusion to the current files and executed probes.
 
 The examples below are precedents, not name-based failure rules. Find the same
 failure mechanism when names and implementation details differ. Conversely, do
@@ -200,8 +198,9 @@ and publication policy was duplicated across usages.
 **Probe.** Lengthen, omit, or reorder adjacent content and remove the
 calibration. Test whether the template can generate the relation. Allow a
 source-explicit author spacing action, such as an evidenced TeX `vspace`, and an
-intrinsic image dimension when the source actually assigns that role; do not
-generalize rendered-only Word blank lines into author spacing automatically.
+intrinsic image dimension when the source actually assigns that role. Treat
+rendered-only Word blank lines as fixture calibration or policy evidence rather
+than automatic author spacing.
 
 ### F05 — Fixed placement or atomic grouping of independent elements
 
@@ -296,8 +295,8 @@ adaptation, and references stopped following semantic input.
 
 **Probe.** Change a variable, citation order, bibliography field, or object
 number and inspect extracted text, semantic query, counters, and render. Permit
-an image when the source truly owns it as artwork; do not use that exception for
-ordinary author-editable math or records.
+an image when the source truly owns it as artwork. Keep ordinary author-editable
+math and records semantic.
 
 ### F11 — Document ontology changed for positioning
 
@@ -461,15 +460,15 @@ Use these statuses:
   demonstrated material author consequence;
 - **BLOCKED** — the required evidence or source authority is unavailable;
 
-Do not manufacture a global PASS. A report may state **CLEAR** only when the
-inspected snapshot has no material finding within the declared scope and all
-uncertainty is listed. The user retains final authority over residual
-acceptance; the main loop may separately record an individually accepted
-material or blocked item without asking the critic to conceal it.
+Use **CLEAR** only when the inspected snapshot has no material finding within
+the declared scope and all uncertainty is listed. The user retains final
+authority over residual acceptance; the builder loop may separately record an
+individually accepted material or blocked item without asking the critic to
+conceal it.
 
-## Required critic response
+## Required findings file
 
-Return a Markdown response to the builder containing:
+Write a Markdown document to `CRITIC_FINDINGS_PATH` containing:
 
 1. current source files and matching output PDFs inspected;
 2. public author surfaces inspected;
@@ -480,6 +479,8 @@ Return a Markdown response to the builder containing:
 7. evidence gaps and blocked decisions;
 8. the earliest return route for each material finding;
 9. status: `CLEAR`, `REVISE`, or `BLOCKED`.
+
+Return the file path and overall status to the builder after writing it.
 
 Use this finding shape:
 
@@ -504,5 +505,5 @@ Use this finding shape:
 - Confidence and missing evidence:
 ```
 
-Do not submit generic style advice. A finding without reproducible artifact
-evidence and an author-visible consequence is not material.
+Support every material finding with reproducible artifact evidence and an
+author-visible consequence; classify other style advice as advisory.
