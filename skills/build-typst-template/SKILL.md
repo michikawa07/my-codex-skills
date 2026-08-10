@@ -92,11 +92,12 @@ and their current PDFs. The scratch root contains inspector and comparator
 output, probe copies, focused sources, logs, and rejected or intermediate
 builds. Reuse that scratch root during the run,
 creating a new or empty subdirectory there only when a tool requires one. At
-reporting time, copy only the decisive probe or comparison artifacts cited by a
-material finding into one `evidence/` directory in the authoring root. Separate
-persistent candidate, baseline, staging, critic-output, render, or log trees are
-not part of this workflow. Return critic and final assessments in the agents'
-responses instead of duplicating them as report files.
+completion, copy only decisive probe or comparison artifacts that support the
+verified result or an individually user-accepted exception into one `evidence/`
+directory in the authoring root. Separate persistent candidate, baseline,
+staging, critic-output, render, or log trees are not part of this workflow.
+Treat critic findings as internal repair input, not as a deliverable or a reason
+to end the task.
 
 1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
    geometry, embedded fonts, and images; render editable sources with their
@@ -314,8 +315,9 @@ candidates, and conversation history. Instruct the critic to read that file
 completely, judge the current result as a new author, choose implementation-
 specific probes, and remain read-only on the supplied sources and PDFs. The
 critic may create its own system temporary directory for a probe, copying only
-the dependencies needed for that probe. It returns its Markdown report in its
-response; do not give it a report path or persistent output directory.
+the dependencies needed for that probe. It returns structured findings in its
+response for the builder to act on; do not give it a report path or persistent
+output directory.
 
 Use this handoff, filling in the current paths:
 
@@ -448,14 +450,15 @@ Treat a wrong image extent as evidence to inspect its intrinsic asset, sizing,
 fit, and container width. First inspect the implicated element and its parents;
 then choose a repair from the semantic and structural evidence.
 
-## Finish and Report
+## Finish
 
 Finish when a new author can create and revise representative manuscripts
 through the semantic public API and standard Typst content, while the template
 owns publication policy and expresses the inferred document semantics. The
 official instance and justified variations must render robustly, every reference
-page must be inspected, and each material residual must have an understood cause
-and scope. Base readiness on that integrated evidence-based judgment.
+page must be inspected, and each material residual must be repaired and retested
+or individually accepted by the user. Base readiness on that integrated
+evidence-based judgment.
 
 After the last change to the template, usage, asset, bibliography data, or style,
 compile the official instance and every accepted variation from the current
@@ -469,13 +472,13 @@ outputs. Do not change or regenerate the candidate after either review; any
 change invalidates both and requires a new final build and critic. Combine the
 critic's raw observations with the source and render audit. Readiness requires
 official local fidelity, varied author behavior, and correct API/ownership
-together.
+together. If this audit or the critic exposes a material failure, route it back
+to the earliest governing loop and continue; do not replace repair with an
+interim assessment.
 
-Return the evidence used, API and implementation choices, render commands,
-pages and focused regions inspected, causal repairs tested, remaining residuals
-and their likely causes, and any decision still needed from the user. Record the
-paths and hashes of the reviewed current sources and PDFs in the final response,
-without making duplicate staged copies. Link each retained file under
-`evidence/` to the material finding it supports; leave regenerable bulk renders
-and superseded iterations in the system-temporary scratch root. Preserve the
-user's final authority to accept the result.
+After all completion conditions close, return the paths to the generated
+template, usage, variation, and PDFs with a concise statement of the validation
+completed. Leave regenerable bulk renders and superseded iterations in the
+system-temporary scratch root. When unavailable source authority or a required
+user choice prevents closure, consult the user at that point instead of ending
+with an unresolved evaluation.

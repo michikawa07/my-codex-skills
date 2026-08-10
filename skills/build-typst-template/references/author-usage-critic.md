@@ -9,7 +9,7 @@
 - [Adaptive probe families](#adaptive-probe-families)
 - [Historical failure catalog](#historical-failure-catalog)
 - [Evidence and severity](#evidence-and-severity)
-- [Required report](#required-report)
+- [Required critic response](#required-critic-response)
 
 ## Role
 
@@ -467,9 +467,9 @@ uncertainty is listed. The user retains final authority over residual
 acceptance; the main loop may separately record an individually accepted
 material or blocked item without asking the critic to conceal it.
 
-## Required report
+## Required critic response
 
-Return a Markdown report containing:
+Return a Markdown response to the builder containing:
 
 1. current source files and matching output PDFs inspected;
 2. public author surfaces inspected;
