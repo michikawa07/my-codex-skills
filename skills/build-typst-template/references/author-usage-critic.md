@@ -26,10 +26,10 @@ Report concrete material findings and their earliest governing causes.
 
 ## Scope and isolation
 
-- Keep the supplied current source files and output PDFs read-only.
-- Write the complete critic-to-builder findings to the supplied
-  `CRITIC_FINDINGS_PATH` in the authoring root.
-- Restrict review evidence to the current author sources, template dependencies,
+- Keep the supplied snapshot source files and output PDFs read-only.
+- Write the completed concise critic-to-builder report to the supplied
+  `TEMP_CRITIC_REPORT_PATH` in system temporary scratch.
+- Restrict review evidence to the snapshot author sources, template dependencies,
   and matching PDFs explicitly supplied by the builder.
 - For a mutation probe, copy its required dependencies into a system temporary
   directory and write the probe and outputs there.
@@ -41,7 +41,7 @@ Report concrete material findings and their earliest governing causes.
 - Distinguish source-explicit author actions and intrinsic object dimensions
   from publication policy and fixture calibration when judging layout
   primitives.
-- Scope every conclusion to the current files and executed probes.
+- Scope every conclusion to the snapshot files and executed probes.
 
 The examples below are precedents, not name-based failure rules. Find the same
 failure mechanism when names and implementation details differ. Conversely, do
@@ -53,7 +53,7 @@ its semantic role, call path, author behavior, and rendered consequences.
 1. Read every official and varied author source and inventory its public imports,
    standard Typst constructs, custom calls, labels, references, citations, and
    layout primitives.
-2. Inspect each matching PDF and identify which current source produced it.
+2. Inspect each matching PDF and identify which snapshot source produced it.
 3. Trace each reusable official document concept to its renderer. Compare that
    route with the corresponding varied or ordinary-author route. Treat a
    comparison-only overlay as an exception only when its ink, extent, and flow
@@ -66,10 +66,13 @@ its semantic role, call path, author behavior, and rendered consequences.
    result rather than accepting source inspection alone.
 6. Check whether a local usage refactor can preserve the established render. If
    not, locate the earliest element or parent contract that must be reopened.
-7. Report inspected surfaces and untested uncertainty as well as findings.
+7. Cover inspected surfaces and uncertainty in the review, then publish only
+   actionable findings, concise evidence gaps, and the overall status.
 
-For each compile probe, record the exact copied source, mutation, command, and
-output inspected. Never redirect or overwrite a current candidate output.
+For each compile probe, retain the exact copied source, mutation, command, and
+output inspected in system temporary scratch. Cite its short probe ID and
+decisive observation in the findings file. Never redirect or overwrite a
+current candidate output.
 
 ## Abstract review lenses
 
@@ -468,42 +471,37 @@ conceal it.
 
 ## Required findings file
 
-Write a Markdown document to `CRITIC_FINDINGS_PATH` containing:
+Write a concise Markdown document to `TEMP_CRITIC_REPORT_PATH` containing the
+snapshot ID, overall status, material findings in severity order, a compact
+advisory list, and unresolved evidence gaps or blocked decisions. Keep detailed
+artifact inventories, hashes, full command transcripts, passing prerequisites,
+and repeated route summaries in system temporary scratch. Let report length
+scale with findings rather than files or probes; use roughly six compact bullets
+per material finding and one or two sentences per bullet.
 
-1. current source files and matching output PDFs inspected;
-2. public author surfaces inspected;
-3. custom calls and standard routes traced;
-4. adaptive probes executed with commands and outputs;
-5. material findings in severity order;
-6. advisory findings;
-7. evidence gaps and blocked decisions;
-8. the earliest return route for each material finding;
-9. status: `CLEAR`, `REVISE`, or `BLOCKED`.
-
-Return the file path and overall status to the builder after writing it.
+Return the file path, snapshot ID, and overall status to the builder after
+writing it.
 
 Use this finding shape:
 
 ```markdown
-## Finding U-001
+# Author-Usage Critic Findings
 
-- Status: MATERIAL | ADVISORY | BLOCKED
-- Review lens:
-- Historical precedent:
-- Artifact evidence:
-- File and lines:
-- Author action attempted:
-- Probe or call trace:
-- Compile command:
-- Observed semantic behavior:
-- Observed rendered behavior:
-- Author-visible consequence:
-- Likely governing owner:
-- Return route: USAGE-REFACTOR | ELEMENT:<name> | PARENT:<name> | USER-DECISION
-- Smallest repair direction:
-- Exact retest:
-- Confidence and missing evidence:
+- Snapshot: S3
+- Status: CLEAR | REVISE | BLOCKED
+
+## U-001 — Short causal title
+
+- Status / return: MATERIAL; USAGE-REFACTOR | ELEMENT:<name> | PARENT:<name> | USER-DECISION
+- Location / owner: exact file and lines; governing owner
+- Author action / probe: action, route, short probe ID
+- Consequence / harm: decisive semantic and rendered observation; author harm
+- Repair: smallest causal direction
+- Retest / confidence: exact retest; confidence and remaining evidence gap
 ```
 
 Support every material finding with reproducible artifact evidence and an
-author-visible consequence; classify other style advice as advisory.
+author-visible consequence. Summarize advisories and evidence gaps in one line
+each unless they require a user decision. A `CLEAR` report identifies the
+snapshot and covered author surfaces in a short list, then records any remaining
+non-material uncertainty.
