@@ -2,7 +2,7 @@
 
 ## Contents
 
-- [Operational terms](#operational-terms)
+- [Terms used in this review](#terms-used-in-this-review)
 - [Role](#role)
 - [Inputs and isolation](#inputs-and-isolation)
 - [Review method](#review-method)
@@ -12,7 +12,7 @@
 - [Evidence and severity](#evidence-and-severity)
 - [Required findings file](#required-findings-file)
 
-## Operational terms
+## Terms used in this review
 
 - **current authoring system** — the supplied current author sources, template
   dependencies, assets, and each **matching PDF**, meaning the PDF compiled from
@@ -495,8 +495,8 @@ under its ID in system-temporary scratch. Include:
 Merge downstream symptoms that share the same governing cause into one finding
 and list every affected author action and PDF page/region in its evidence record.
 
-Assign the finding and report statuses defined under Operational terms. The user
-retains final authority over accepting a named remaining mismatch; the builder
+Assign the finding and report statuses defined under Terms used in this review.
+The user retains final authority over accepting a named remaining mismatch; the builder
 may separately
 record an accepted `MATERIAL` or `BLOCKED` item without asking the critic to
 conceal it.

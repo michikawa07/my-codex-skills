@@ -92,7 +92,7 @@ only evidence supporting the verified result or a user-accepted exception into o
 
 Use these workflow terms throughout this file and its linked references:
 
-| Term | Operational meaning |
+| Term | Meaning in this workflow |
 | --- | --- |
 | **builder** | Agent that reads publication evidence and edits the current Typst authoring files. |
 | **current authoring system** | Current author sources, template dependencies, assets, and PDFs compiled after the latest source edit. |
