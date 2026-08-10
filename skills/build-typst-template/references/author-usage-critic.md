@@ -13,7 +13,7 @@
 
 ## Role
 
-Judge the fixed Typst candidate as a new author who did not participate in its
+Judge the current Typst candidate as a new author who did not participate in its
 construction. Inspect whether the official usage is a faithful, readable
 example of the reusable authoring system, not merely whether the official PDF
 looks close. Trace actual author syntax through the template to semantic and
@@ -26,17 +26,17 @@ Report concrete material findings and their earliest governing causes.
 
 ## Non-goals and isolation
 
-- Do not edit the fixed candidate.
-- Put mutation fixtures, compiled outputs, renders, and the report only in the
-  supplied empty output directory.
-- Read candidate inputs, baseline outputs, and raw publication evidence only
-  from the explicitly staged roots. Do not inspect their parents or siblings.
+- Do not edit the supplied current source files or output PDFs.
+- Read only the current author sources, template dependencies, and matching PDFs
+  explicitly supplied by the main agent.
+- If a mutation probe is needed, copy only its required dependencies into a
+  system temporary directory and write the probe and outputs there.
 - Do not inspect main-agent notes, prior reports, conversation history, rejected
   candidates, git history, or sibling trial directories.
 - Do not infer the expected answer from names in this catalog.
-- Do not replace source/reference fidelity review. Consult raw user-named
-  evidence only when author semantics, ownership, or a claimed source literal
-  requires it.
+- Do not replace source/reference fidelity review. When a judgment would require
+  raw evidence that was not supplied, report that evidence gap instead of
+  exploring other files.
 - Do not demand zero helpers. Permit a public helper when it represents a
   genuine additional manuscript semantic that standard Typst does not express.
 - Do not ban layout primitives mechanically. Distinguish source-explicit author
@@ -52,11 +52,10 @@ its semantic role, call path, author behavior, and rendered consequences.
 
 ## Review method
 
-1. Verify the supplied manifest for every staged candidate input and baseline
-   output. Record its identity and verify it again before returning.
-2. Read every official and varied author source and inventory its public imports,
+1. Read every official and varied author source and inventory its public imports,
    standard Typst constructs, custom calls, labels, references, citations, and
    layout primitives.
+2. Inspect each matching PDF and identify which current source produced it.
 3. Trace each reusable official document concept to its renderer. Compare that
    route with the corresponding varied or ordinary-author route. Treat a
    comparison-only overlay as an exception only when its ink, extent, and flow
@@ -71,10 +70,8 @@ its semantic role, call path, author behavior, and rendered consequences.
    not, locate the earliest element or parent contract that must be reopened.
 7. Report inspected surfaces and untested uncertainty as well as findings.
 
-Treat baseline commands as provenance. Use only the supplied probe command
-template for mutations, substituting its declared source and output placeholders
-and recording every substitution. Do not redirect a baseline command with a
-fixed output path into the probe directory implicitly.
+For each compile probe, record the exact copied source, mutation, command, and
+output inspected. Never redirect or overwrite a current candidate output.
 
 ## Abstract review lenses
 
@@ -463,8 +460,6 @@ Use these statuses:
 - **ADVISORY** — a supported maintainability or clarity improvement without a
   demonstrated material author consequence;
 - **BLOCKED** — the required evidence or source authority is unavailable;
-- **INVALID** — a candidate input or baseline output changed, the manifest
-  failed, or the critic edited a reviewed source.
 
 Do not manufacture a global PASS. A report may state **CLEAR** only when the
 inspected snapshot has no material finding within the declared scope and all
@@ -474,10 +469,9 @@ material or blocked item without asking the critic to conceal it.
 
 ## Required report
 
-Write a Markdown report containing:
+Return a Markdown report containing:
 
-1. candidate manifest identity and before/after verification of every staged
-   input and baseline output;
+1. current source files and matching output PDFs inspected;
 2. public author surfaces inspected;
 3. custom calls and standard routes traced;
 4. adaptive probes executed with commands and outputs;
@@ -485,7 +479,7 @@ Write a Markdown report containing:
 6. advisory findings;
 7. evidence gaps and blocked decisions;
 8. the earliest return route for each material finding;
-9. status: `CLEAR`, `REVISE`, `BLOCKED`, or `INVALID`.
+9. status: `CLEAR`, `REVISE`, or `BLOCKED`.
 
 Use this finding shape:
 

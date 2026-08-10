@@ -15,14 +15,14 @@ Record any user-confirmed comparison-only guidance as an explicit object or
 region mask. Inspect the mask boundary so neighboring publication content
 remains part of the comparison.
 
-Use fresh output directories:
+Use a new or empty subdirectory inside the run's system-temporary scratch root:
 
 ```bash
 python3 <skill-dir>/scripts/compare_pdfs.py scan \
-  reference.pdf candidate.pdf audit/scan --dpi 200
+  reference.pdf candidate.pdf <scratch>/scan --dpi 200
 ```
 
-Start with `audit/scan/index.json` and inspect every page. Read these signals
+Start with `<scratch>/scan/index.json` and inspect every page. Read these signals
 separately:
 
 | Signal | Useful evidence |
@@ -46,7 +46,7 @@ request high-resolution detail for a reported finding or an explicit box:
 
 ```bash
 python3 <skill-dir>/scripts/compare_pdfs.py detail \
-  audit/scan audit/detail --finding <finding-id> --dpi 300
+  <scratch>/scan <scratch>/detail --finding <finding-id> --dpi 300
 ```
 
 Inspect the element together with enough parent and following context to reveal

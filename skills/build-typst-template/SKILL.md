@@ -85,6 +85,18 @@ evidence assigns that space to publication policy.
 
 ## Core Workflow
 
+For generated run artifacts, use one authoring root and one system-temporary
+scratch root. The authoring root contains the current `template.typ`, official
+`usage.typ`, consolidated `variation.typ`, required dependencies and assets,
+their current PDFs, the critic report, and the final report. The scratch root
+contains inspector and comparator output, probe copies, focused sources, logs,
+and rejected or intermediate builds. Reuse that scratch root during the run,
+creating a new or empty subdirectory there only when a tool requires one. At
+reporting time, copy only the decisive probe or comparison artifacts cited by a
+material finding into one `evidence/` directory in the authoring root. Separate
+persistent candidate, baseline, staging, critic-output, render, or log trees are
+not part of this workflow.
+
 1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
    geometry, embedded fonts, and images; render editable sources with their
    established application or compiler to expose appearance and pagination.
@@ -98,7 +110,7 @@ evidence assigns that space to publication policy.
    Typst template or document above the bundled
    [`template.typ` + `usage.typ`](assets/scaffold/) starting pair as architecture
    evidence, and use the highest-ranked available structure. Copy that pair into
-   the fresh output before adapting it. The bundled pair provides one public
+   the authoring root before adapting it. The bundled pair provides one public
    wrapper with a positional body and one private
    `_render_body(body) = body` hook. Replace that hook from target evidence when
    the body needs a different flow such as `columns(...)`. Keep page, column
@@ -113,9 +125,10 @@ evidence assigns that space to publication policy.
    architectural mistakes surface, while leaving each future element open until
    its own branch is examined. Reuse and extend these sources as the analytical
    focus changes. Select mutually exclusive document states from the same
-   variation source through an input case. Use a temporary focused source to
-   distinguish a causal ambiguity left unresolved by the consolidated
-   manuscript, and retain it when it continues to provide diagnostic value.
+   variation source through an input case. Use a temporary focused source under
+   the scratch root to distinguish a causal ambiguity left unresolved by the
+   consolidated manuscript, then carry any lasting diagnostic case into the
+   consolidated variation rather than persisting a separate focused source.
    Establish page setup, major containers, and rough natural
    flow, then compile and immediately render the official instance plus the
    smallest public-API change in the consolidated variation that activates and
@@ -144,11 +157,12 @@ evidence assigns that space to publication policy.
    explain a material residual. Use the visual comparison playbook to test that
    hypothesis and recheck its affected scope.
 8. **Critique and refactor the author usage.** After the element and fidelity
-   loop produces a coherent candidate, bind the current sources and outputs to
-   their hashes and run the Author-Usage Critic Loop. Preserve the established
-   render while addressing supported usage findings. When a finding exposes a
-   flawed element contract rather than a local source-structure problem, reopen
-   the earliest governing element branch and repeat this outer candidate loop.
+   loop produces a coherent candidate, compile its current sources and run the
+   Author-Usage Critic Loop directly on those sources and PDFs. Preserve the
+   established render while addressing supported usage findings. When a finding
+   exposes a flawed element contract rather than a local source-structure
+   problem, reopen the earliest governing element branch and repeat this outer
+   candidate loop.
 
 Request a user decision when source authority, intended semantics, edit scope,
 or residual acceptance depends on it.
@@ -286,45 +300,35 @@ entries.
 ## Author-Usage Critic Loop
 
 Run this loop after the element and fidelity loop reaches a coherent candidate.
-First stage all deliverable authoring-system artifacts and required dependencies
-in a fixed candidate root, and stage only the allowed raw publication evidence
-in a separate evidence root. Hash both roots and the compile configuration.
-Then compile the explicit official and accepted variation entry points from that
-staged candidate root into a new empty baseline directory. Add the baseline
-outputs and exact commands to the manifest, and make the staged roots and
-baseline outputs read-only. Record a separate probe-safe command template whose
-source and output paths the critic may substitute. Verify the complete manifest
-before and after criticism, and keep every hashed item unchanged.
+Compile the latest official usage and accepted variations, then pause candidate
+edits while the critic reads those current source files and their matching PDFs.
 
-Start one fresh subagent without inherited conversation context and with high
-reasoning effort. Give it only the fixed candidate root and manifest, staged
-evidence root, baseline outputs and commands, explicit official and accepted
-variation entry points, probe command template, empty probe-output directory,
-report path, and the critic guide
+Start one fresh subagent without inherited conversation context and with maximum
+reasoning effort. Give it only the latest official and varied author sources,
+the template and dependencies needed to understand them, their matching output
+PDFs, and the critic guide
 [`author-usage-critic.md`](references/author-usage-critic.md). Withhold the
 main agent's diagnosis, intended answer, prior findings, working notes, rejected
 candidates, and conversation history. Instruct the critic to read that file
-completely, judge the candidate as a new author, choose implementation-specific
-probes, and remain read-only on the candidate.
+completely, judge the current result as a new author, choose implementation-
+specific probes, and remain read-only on the supplied sources and PDFs. The
+critic may create its own system temporary directory for a probe, copying only
+the dependencies needed for that probe.
 
-Use this handoff, filling in the paths and commands:
+Use this handoff, filling in the current paths:
 
 ```text
 Act as a fresh, independent critic of the generated Typst authoring system.
-Read CRITIC_GUIDE completely. Verify CANDIDATE_MANIFEST, then review the fixed
-CANDIDATE_ROOT as a new author who did not participate in its construction.
-The reviewed baseline is BASELINE_OUTPUT_ROOT, produced from OFFICIAL_ENTRIES
-and VARIATION_ENTRIES by BASELINE_COMPILE_COMMANDS. Use PROBE_COMMAND_TEMPLATE
-for mutations, substituting only its declared source and output placeholders.
-Read raw publication evidence only from EVIDENCE_ROOT. Write all mutation
-probes and renders under OUTPUT_ROOT and the final report to REPORT_PATH.
+Read CRITIC_GUIDE completely. Review CURRENT_SOURCE_FILES and their matching
+CURRENT_OUTPUT_PDFS directly as a new author who did not participate in their
+construction. Do not modify them. If an adaptive compile probe is needed, copy
+only the minimum required source dependencies into a system temporary directory
+and run the probe there.
 
 Do not inspect prior audits, working notes, conversation history, rejected
 candidates, repository parents, sibling directories, or the main agent's
-diagnosis. Do not modify CANDIDATE_ROOT, EVIDENCE_ROOT, or BASELINE_OUTPUT_ROOT.
-Verify CANDIDATE_MANIFEST again before returning. Choose
-probes that expose the actual implementation rather than merely matching names
-from the historical examples.
+diagnosis. Choose probes that expose the actual implementation rather than
+merely matching names from the historical examples.
 
 For every material finding, report the exact artifact location, author action,
 probe or call trace, observed consequence, authoring-system harm, earliest
@@ -341,19 +345,16 @@ decision. Reproduce decisive evidence before rejecting the finding; do not
 accept or dismiss it from authority alone.
 
 Maintain an accumulated finding ledger. After every repair, rerender the
-affected official and varied cases. Any change to a hashed candidate artifact,
-evidence file, dependency, compile configuration, or baseline output invalidates
-the previous report; bind the new candidate and use a new fresh critic. Close
-the current iteration only after both the main agent and critic verify the
-unchanged manifest and either: the latest report is `CLEAR` and every earlier
-material or blocked ledger item is repaired and retested or otherwise resolved;
-or every material or blocked item in the accumulated ledger, including those in
-the latest valid report, is individually accepted or otherwise resolved by the
-user.
-`INVALID` always requires a new review, and an unaccepted `REVISE` or `BLOCKED`
-leaves the loop open. Do not interpret scoped closure as a perfect global pass.
-If no fresh subagent is available, continue other safe work where possible but
-do not claim this loop complete.
+affected official and varied cases. Any change to a reviewed source, dependency,
+or output PDF invalidates the previous report; use a new fresh critic on the new
+current files. Close the current iteration only when the latest report is
+`CLEAR` and every earlier material or blocked ledger item is repaired and
+retested or otherwise resolved, or when every such item is individually accepted
+or otherwise resolved by the user. An unaccepted `REVISE` or `BLOCKED` leaves
+the loop open. Do not interpret scoped closure as a perfect global pass. If no
+fresh subagent slot is available, consult the user immediately and keep the
+builder paused; do not end the builder, self-substitute, or invent a different
+workflow.
 
 ## Mechanical Evidence Helpers
 
@@ -363,7 +364,7 @@ inventory beside the structural sources and renders:
 
 ```bash
 python3 <skill-dir>/scripts/inspect_evidence.py \
-  audit/inspect source.docx source.tex reference.pdf
+  <scratch>/inspect source.docx source.tex reference.pdf
 ```
 
 For a user-named directory, enumerate the regular files physically contained in
@@ -381,11 +382,15 @@ Use the PDF comparator for disposable all-page evidence:
 
 ```bash
 python3 <skill-dir>/scripts/compare_pdfs.py scan \
-  reference.pdf candidate.pdf audit/scan --dpi 200
+  reference.pdf candidate.pdf <scratch>/scan --dpi 200
 
 python3 <skill-dir>/scripts/compare_pdfs.py detail \
-  audit/scan audit/detail --finding <finding-id> --dpi 300
+  <scratch>/scan <scratch>/detail --finding <finding-id> --dpi 300
 ```
+
+Here `<scratch>` is the run's single system-temporary scratch root. Prepare the
+named subdirectory as new or empty when the helper requires it; do not place
+these disposable trees in the authoring root.
 
 Read `index.json`, page rasters, overlays, absolute differences, text diffs,
 font inventories, bboxes, and projection/band measurements as complementary
@@ -451,22 +456,24 @@ page must be inspected, and each material residual must have an understood cause
 and scope. Base readiness on that integrated evidence-based judgment.
 
 After the last change to the template, usage, asset, bibliography data, or style,
-stage and hash every candidate artifact, allowed evidence file, required
-dependency, and compile configuration. Compile the official instance and every
-accepted variation from that staged root into a new empty final directory, then
-add the exact commands and final-output hashes to the manifest. Run the
-Author-Usage Critic Loop on this bound snapshot, or reuse its latest report only
-when candidate, evidence, dependency, compile-configuration, and baseline-output
-hashes all match exactly.
+compile the official instance and every accepted variation from the current
+source. Run the Author-Usage Critic Loop directly on those source files and their
+matching PDFs. Keep them unchanged while the critic reads them; if any reviewed
+source or PDF changes, discard that report and run a new fresh critic.
 
 Then perform the separate final audit from the raw sources, all reference pages,
-all varied pages, the public template/usage source, and those same bound final
+all varied pages, the public template/usage source, and those same current
 outputs. Do not change or regenerate the candidate after either review; any
-change invalidates both and requires a new final build. Combine the critic's raw
-observations with the source and render audit. Readiness requires official local
-fidelity, varied author behavior, and correct API/ownership together.
+change invalidates both and requires a new final build and critic. Combine the
+critic's raw observations with the source and render audit. Readiness requires
+official local fidelity, varied author behavior, and correct API/ownership
+together.
 
 Report the evidence used, API and implementation choices, render commands,
 pages and focused regions inspected, causal repairs tested, remaining residuals
-and their likely causes, and any decision still needed from the user. Preserve
-the user's final authority to accept the result.
+and their likely causes, and any decision still needed from the user. Record the
+paths and hashes of the reviewed current sources and PDFs in the final report,
+without making duplicate staged copies. Link each retained file under
+`evidence/` to the material finding it supports; leave regenerable bulk renders
+and superseded iterations in the system-temporary scratch root. Preserve the
+user's final authority to accept the result.
