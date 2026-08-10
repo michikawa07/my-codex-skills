@@ -88,14 +88,15 @@ evidence assigns that space to publication policy.
 For generated run artifacts, use one authoring root and one system-temporary
 scratch root. The authoring root contains the current `template.typ`, official
 `usage.typ`, consolidated `variation.typ`, required dependencies and assets,
-their current PDFs, the critic report, and the final report. The scratch root
-contains inspector and comparator output, probe copies, focused sources, logs,
-and rejected or intermediate builds. Reuse that scratch root during the run,
+and their current PDFs. The scratch root contains inspector and comparator
+output, probe copies, focused sources, logs, and rejected or intermediate
+builds. Reuse that scratch root during the run,
 creating a new or empty subdirectory there only when a tool requires one. At
 reporting time, copy only the decisive probe or comparison artifacts cited by a
 material finding into one `evidence/` directory in the authoring root. Separate
 persistent candidate, baseline, staging, critic-output, render, or log trees are
-not part of this workflow.
+not part of this workflow. Return critic and final assessments in the agents'
+responses instead of duplicating them as report files.
 
 1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
    geometry, embedded fonts, and images; render editable sources with their
@@ -313,7 +314,8 @@ candidates, and conversation history. Instruct the critic to read that file
 completely, judge the current result as a new author, choose implementation-
 specific probes, and remain read-only on the supplied sources and PDFs. The
 critic may create its own system temporary directory for a probe, copying only
-the dependencies needed for that probe.
+the dependencies needed for that probe. It returns its Markdown report in its
+response; do not give it a report path or persistent output directory.
 
 Use this handoff, filling in the current paths:
 
@@ -469,10 +471,10 @@ critic's raw observations with the source and render audit. Readiness requires
 official local fidelity, varied author behavior, and correct API/ownership
 together.
 
-Report the evidence used, API and implementation choices, render commands,
+Return the evidence used, API and implementation choices, render commands,
 pages and focused regions inspected, causal repairs tested, remaining residuals
 and their likely causes, and any decision still needed from the user. Record the
-paths and hashes of the reviewed current sources and PDFs in the final report,
+paths and hashes of the reviewed current sources and PDFs in the final response,
 without making duplicate staged copies. Link each retained file under
 `evidence/` to the material finding it supports; leave regenerable bulk renders
 and superseded iterations in the system-temporary scratch root. Preserve the
