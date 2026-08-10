@@ -412,38 +412,6 @@ aggregate dimensions matched.
 **Probe.** Change one child at a time and inspect its internal formation,
 container relation, siblings, and downstream flow without rewriting the parent.
 
-### F18 — Prerequisites treated as substantive quality evidence
-
-**Observed pattern.** Compilation, zero warnings, page-count equality, matching
-hashes, visited files, existing variations, or an aggregate pixel score were
-listed beside semantic and structural evidence as if they established quality.
-
-**Why it looked successful.** These facts were objective and easy to automate.
-
-**Authoring harm.** A compiling, hash-bound, correctly paginated parallel
-fixture renderer could be called complete while the author workflow remained
-wrong.
-
-**Probe.** Treat those facts only as prerequisites or observations. Require an
-actual author operation, route trace, semantic observation, or local render
-relation for every author-usage conclusion.
-
-### F19 — Semantic ownership decided by token scanning
-
-**Observed pattern.** Scans for `#v`, helper prefixes, or selected layout tokens
-were used to infer ownership or architecture, missing renamed helpers and
-misclassifying comments, strings, code mode, or legitimate source spacing.
-
-**Why it looked successful.** A mechanical gate appeared exhaustive and
-repeatable.
-
-**Authoring harm.** It encouraged evasive renaming, false positives, complex
-parser branches, and confidence unsupported by semantics.
-
-**Probe.** Use automation only to inventory candidates, hashes, compiles, calls,
-and declared activation events. Judge ownership from source evidence, author
-action, call path, and observed consequence.
-
 ## Evidence and severity
 
 For every candidate material or blocked root cause, keep a full evidence record
