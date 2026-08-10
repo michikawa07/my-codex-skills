@@ -99,6 +99,8 @@ verified result or an individually user-accepted exception into one `evidence/`
 directory in the authoring root. These two roots contain the complete generated
 workspace. Use critic findings exclusively as internal repair input and keep the
 task active until closure.
+Maintain one router-cursor record in scratch with the active branch, its closure
+entries, both critic state fields, and unresolved critic finding IDs.
 
 1. **Collect mechanical evidence.** Inventory files, hashes, formats, page
    geometry, embedded fonts, and images; render editable sources with their
@@ -143,42 +145,44 @@ task active until closure.
    child active at a time and complete the children in reading order. Apply the
    Element Completion Loop to establish each active element's exact official
    content, semantic API, and first meaningful variation before geometry tuning.
-   Keep that branch current until paired renders support its official local
-   observation, activating variation observation, and applicable packet
-   `Recheck` relations; record those observations, then advance through every
-   element on every reference page. Reopen the earliest governing branch when
-   later evidence refines an upstream contract.
+   Keep that branch current until its router-cursor closure record contains the
+   official, activating-variation, and packet `Recheck` observations required by
+   step 9 below. Advance through every element on every reference page only from
+   such a record. Reopen the earliest governing branch when a later observation
+   invalidates one of its recorded relations.
 5. **Deepen uncertain rules.** The element loop renders its first official and
    varied instances before geometry tuning. When that pair leaves competing
    inferences, temporarily isolate the minimal content or flow needed to
-   distinguish them, then carry the supported rule and activating case back to
-   the primary documents.
+   distinguish them, then carry the rule selected by the observed difference and
+   its activating case back to the primary documents.
 6. **Compare hierarchically.** Run the all-page comparison, then use the
    [visual comparison playbook](references/validation-playbook.md) to inspect
    semantic regions, internal formation, downstream flow, and the last page.
-7. **Repair causally.** State the reusable rule and signed change predicted to
-   explain a material residual. Use the visual comparison playbook to test that
-   hypothesis and recheck its affected scope.
-8. **Critique and refactor the author usage.** After the element and fidelity
-   loop produces a coherent candidate, compile its current sources and run the
-   Author-Usage Critic Loop on an ephemeral snapshot of those sources and PDFs.
-   Address supported usage findings while continuing fidelity work.
-   Reopen the earliest governing element branch when a finding exposes a flawed
-   element contract, then repeat this outer candidate loop.
+7. **Repair causally.** For a mismatch recorded by step 9, state the reusable rule
+   and signed change predicted to remove it. Test that prediction, then record
+   the new parent, child, internal-formation, and downstream observations it can
+   affect.
+8. **Critique and refactor the author usage.** Each time step 9 closes an element
+   and advances the router cursor, trigger the Author-Usage Critic Loop on the
+   complete current authoring system. Let the critic inspect the whole current
+   usage and implementation rather than a builder-selected branch. Start the next
+   element branch while that critic runs. Route each returned finding to its
+   earliest governing usage, element, parent, or user decision and retest it.
 
 Request a user decision when source authority, intended semantics, edit scope,
 or residual acceptance depends on it.
 
 After a context compaction or resumed run, restore the North Star, router
 cursor, active packet, and roughly the five most recent causal observations
-before editing or judging completion. Resume the open branch at its first
-unsupported closure relation, and advance the cursor from supported branch
-closure evidence.
+before editing or judging completion. Resume the open branch at the first
+closure field lacking a post-last-change observation or containing an
+unaccepted mismatch. Advance only from the step 9 closure entry.
 
-Record elapsed time as secondary evidence. First obtain exact official fidelity,
-reusable author behavior, and an independent acceptance covering every material
-residual decision. Profile that accepted path afterward and shorten it toward a
-roughly 30-minute workflow while preserving the same result and evidence.
+Record elapsed time as secondary evidence. First obtain complete step 9 closure
+records, reusable author behavior, a final critic `CLEAR`, and a final builder
+audit with no unaccepted mismatch. Profile that path afterward and shorten it
+toward a roughly 30-minute workflow while preserving the same result and
+observations.
 
 ## Element Completion Loop
 
@@ -187,20 +191,18 @@ its semantic owner and close the branch through its packet relations.
 
 Connect each active branch to the complete authoring system. Before changing it,
 identify the author action or publication invariant it must support and the
-upstream and downstream contracts it touches. After changing it, judge its
-focused evidence and its contribution to the usable whole. Use pixel scores,
-elapsed time, compiled fixtures, and visited elements as observations within
-that causal and document-level judgment.
+upstream and downstream contracts it touches. After changing it, record its
+local formation and its effect on those named upstream and downstream relations.
+Treat pixel scores, elapsed time, compiled fixtures, and visited elements only
+as auxiliary observations.
 
 Treat each element as a semantic layout contract within its parent context.
 Recover its purpose, author-facing boundary, invariant behavior under justified
 content and flow changes, and ownership of governing rules. Use the current
-branch packet to surface questions; let source and render evidence determine
-the actual contract and its coherent parameter bundle. A packet supplies the
-current branch's questions while the router preserves the whole capability
-horizon. Derive a positive rule that generates the official instance and
-justified variations, then confirm it through semantic output, local formation,
-and affected document flow.
+branch packet to enumerate the relations to inspect. For every implemented rule,
+identify its source evidence, Typst control, official observation, activating
+author change, and observed varied result. A packet supplies the current
+branch's questions while the router preserves the whole capability horizon.
 
 The parent container establishes the child's coordinate system, available
 width, inherited rules, and flow context. Interpret and tune child parameters
@@ -209,9 +211,8 @@ size, tracking, and line pitch change wrapping and element extent, which moves
 downstream content. Therefore establish parents before children, close composite
 parents after their children, and work earlier flow elements before later ones.
 
-Raise one active element from a rough implementation to a supported semantic
-contract before moving to the next. Follow this order, revisiting an earlier
-view when later evidence refines it:
+Complete the following observations for one active element before moving to the
+next. Revisit an earlier element when later evidence invalidates its record:
 
 1. **Parent context.** Establish the coordinate system, available width,
    inherited rules, flow context, sibling relationships, and downstream effects
@@ -242,10 +243,10 @@ view when later evidence refines it:
    column, table-row identifiers around a boundary and its repeated header, or
    the next normal anchor after optional-field omission. Record how the result
    affects the parent, neighbors, and downstream flow.
-5. **Owned parameter bundle.** Infer a coherent governing bundle from structural
-   and rendered evidence. Assign each rule to the element whose semantics it
-   governs, covering applicable typography, alignment, width/wrap, spacing,
-   breaks, numbering, strokes, padding, markers, and asset treatment.
+5. **Owned parameter bundle.** List the governing controls inferred from
+   structural and rendered evidence. Assign each rule to the element whose
+   semantics it governs, covering applicable typography, alignment, width/wrap,
+   spacing, breaks, numbering, strokes, padding, markers, and asset treatment.
    When a source names a geometric relation, record its definition and
    endpoints, then map it to the Typst control that governs the same relation.
    Verify that relation at two repeated instances, or record the unique
@@ -267,32 +268,33 @@ view when later evidence refines it:
    each child's internal formation. For prose, observe first, continuation, and
    final line edges, alignment, wrapping, line pitch, and indents. For structured
    children, observe shared edges, row/cell alignment, padding, wrapping, rules,
-   and boundaries. Require agreement in all applicable relations.
-8. **Varied route confirmation.** Confirm the declared activating observation,
-   the predicted invariant/change, standard author syntax, ownership boundary,
-   and downstream behavior. Trace the actual author input through the template
-   to its extracted and rendered output.
-9. **Branch closure.** Rerender both cases through the public author workflow
-   and recheck the parent, completed children and neighbors, and affected
-   document-wide flow. A leaf closes after official local confirmation and
-   varied route confirmation hold under one coherent contract. Close a
-   composite parent after its supported children are closed and their
-   composition preserves the parent contract. Then advance in hierarchy and
-   reading order; reopen the branch when later evidence refines an upstream
-   rule.
+   and boundaries. Record a match or the exact mismatch for every applicable
+   relation; a missing observation or unaccepted mismatch leaves the branch
+   active.
+8. **Varied route confirmation.** Record the author input changed, its actual
+   call path, the predicted visible event and invariants, the observed semantic
+   or rendered event, and downstream behavior.
+9. **Branch closure and transition.** After the last change to the active branch,
+   rerender the official case and its activating variation through the public
+   author workflow. Append one closure entry to the router cursor containing:
+   the branch and packet; the source and output regions inspected; separate
+   observations for container placement/extent, direct-child placement/insets/
+   alignment/spacing/flow, child internal formation, and downstream relations;
+   the variation author edit, prediction, call path, and observed event; every
+   applicable packet `Recheck` result; and every remaining mismatch with either
+   its repair state or the user's explicit acceptance of that exact item.
+   Compilation, warnings, page count, hashes, visited files, and aggregate pixel
+   scores are prerequisites or observations, not substitutes for these fields.
+   Keep a leaf active until every applicable field contains a post-last-change
+   observation and no unaccepted mismatch remains. Keep a composite parent
+   active until each observed direct child has its own closure entry and a new
+   render records their composition. Then advance the router cursor, trigger the
+   critic, and begin the next branch in hierarchy and reading order. Reopen the
+   earliest entry whose recorded relation a later change invalidates.
 
-Complete an element when an author can use its standard input route and vary its
-content while the rendered result follows the evidenced publication rule. Check
-the exact official content and appearance, placement and extent within the
-parent, direct-child placement/insets/alignment/spacing/flow inside the
-container, internal line or cell formation, neighboring spacing, and affected
-column/page flow. Confirm the relevant variation through the same public route.
-Keep the branch active for each material local or semantic mismatch, including
-bibliography field order or punctuation and equation placement. Advance when
-the target is supported or the user accepts that specific residual. Request the
-user's decision when source authority or acceptance requires it. Classify a
-renderer-origin residual after its content, semantics, fonts, formation, and
-governing layout rule agree.
+Request the user's decision when source authority or acceptance leaves a closure
+field unresolved. Classify a difference as renderer-origin only after recording
+matching content, semantics, font/glyph choice, formation, and layout relation.
 
 For every claimed author route, trace author syntax to its expected output or
 policy and its observed extracted or rendered output. Do this for standard
@@ -301,57 +303,56 @@ entries.
 
 ## Author-Usage Critic Loop
 
-Run this loop after the element and fidelity loop reaches a coherent candidate.
-For each intermediate iteration, compile the official usage and every accepted
-variation from the exact live dependency set and wait for all outputs. Copy that
-complete source, dependency, asset, and matching-PDF set into one numbered
-critic snapshot under the system-temporary scratch root. Give that ephemeral
-snapshot an ID such as `S3`; keep the authoring root as the builder's live latest
-version.
-
-Start one fresh subagent without inherited conversation context and with maximum
-reasoning effort. Give it only the snapshot's official and varied author
-sources, the template and dependencies needed to understand them, their
-matching output PDFs, the snapshot ID, a `TEMP_CRITIC_REPORT_PATH` in system
-temporary scratch, and the critic guide
-[`author-usage-critic.md`](references/author-usage-critic.md). Withhold the
-builder's diagnosis, intended answer, prior findings, working notes, rejected
-candidates, and conversation history. Instruct the critic to read the guide
-completely, judge the current result as a new author, choose implementation-
-specific probes, and keep the supplied snapshot read-only. The critic writes its
-completed report to `TEMP_CRITIC_REPORT_PATH` and returns that path, snapshot ID,
-and status. The builder then copies it to a temporary sibling of
-`critic-findings.md` in the authoring root and renames that sibling over the old
-report. This published file is the sole persistent critic output.
-
-Immediately after the critic starts on snapshot `S_n`, resume the builder's
-element and fidelity loop in the live authoring root. Compare the live output
-against every raw-source page, locate material visual and flow residuals, and
-repair them while the critic works independently on `S_n`. Keep builder
-observations in scratch and outside the critic's context. When the critic
-returns, reproduce each reported mechanism against the current live version:
-close a finding already repaired by a direct retest, and route every surviving
-finding to its earliest governing usage, element, parent, or user decision.
-Rerender affected official and varied cases as repair evidence, then begin the
-next iteration; its opening full compile refreshes every PDF before the fresh
-critic starts on the new snapshot.
+Use the router cursor fields `critic_in_flight` and
+`critic_refresh_pending`. Each branch transition triggers a review. First
+compile the official usage and every current accepted variation from the live
+dependency set and wait for their PDFs. When no critic is active, start one fresh
+subagent without inherited conversation context and with maximum reasoning
+effort, set `critic_in_flight`, and pass the current authoring-root source,
+dependency, asset, and matching-PDF paths directly. Give it the critic guide
+[`author-usage-critic.md`](references/author-usage-critic.md) and a
+`TEMP_CRITIC_REPORT_PATH` in system-temporary scratch. Ask it to inspect every
+supplied source, public route, dependency, and PDF. Withhold the builder
+diagnosis, intended answer, prior findings, working notes, rejected candidates,
+and conversation history. The critic reads the current artifacts immediately,
+treats them as read-only, and sends `INPUTS_LOADED` after reading every supplied
+text source and inspecting every page of each PDF. It uses system-temporary
+copies only for dependencies needed by an adaptive mutation probe.
+Begin the next element branch after receiving `INPUTS_LOADED`. Continue the
+builder's element and all-page fidelity work against the live authoring root
+while the critic analyzes those loaded inputs independently. If another branch
+closes while a critic is active, set `critic_refresh_pending` instead of starting
+a second critic.
+When the critic returns, publish its completed report atomically as the
+authoring root's `critic-findings.md`, clear `critic_in_flight`, and reproduce
+each reported mechanism against the current live version. Mark an already-fixed
+finding only after a direct retest; route every surviving finding to its earliest
+governing usage, element, parent, or user decision. An upstream or whole-system
+finding reopens that branch immediately: record the current branch's first
+incomplete field, make the governing branch the sole active branch, then return
+to the suspended field after the reopened branch closes again. Apply a local
+finding after the current edit either compiles or is reverted, and before
+appending that branch's closure entry. When `critic_refresh_pending` is set,
+clear it and start a fresh full-artifact critic at the next branch transition.
 
 Use this handoff, filling in the current paths:
 
 ```text
 Act as a fresh, independent critic of the generated Typst authoring system.
-Read CRITIC_GUIDE completely. Review SNAPSHOT_ID, SNAPSHOT_SOURCE_FILES, and
-their matching SNAPSHOT_OUTPUT_PDFS directly as a new author who did not
-participate in their construction. Keep the snapshot read-only. If an adaptive
-compile probe is needed, copy only the minimum required source dependencies into
-a system temporary directory and run the probe there.
+Read CRITIC_GUIDE completely. Review CURRENT_SOURCE_FILES and their matching
+CURRENT_OUTPUT_PDFS directly as a new author who did not participate in their
+construction. Read every supplied source, public route, dependency, and PDF.
+Keep the supplied files read-only. Send INPUTS_LOADED to the builder after every
+text source has been read and every PDF page inspected. If an adaptive compile
+probe is needed, copy only its required source dependencies into a system
+temporary directory and run the probe there.
 
 Write the concise required findings document to TEMP_CRITIC_REPORT_PATH in
-system temporary scratch. In your final response, return that path, SNAPSHOT_ID,
-and overall status to the builder.
+system temporary scratch. In your final response, return that path and overall
+status to the builder.
 
-Restrict review context to CRITIC_GUIDE, SNAPSHOT_SOURCE_FILES,
-SNAPSHOT_OUTPUT_PDFS, and probe copies created in the system temporary directory.
+Restrict review context to CRITIC_GUIDE, CURRENT_SOURCE_FILES,
+CURRENT_OUTPUT_PDFS, and probe copies created in the system temporary directory.
 Choose probes that expose the actual implementation rather than merely matching
 names from the historical examples.
 
@@ -363,23 +364,19 @@ author-usage conclusions on the author action, route trace, and observed
 semantic or rendered consequence.
 ```
 
-Maintain an accumulated finding ledger in scratch. Associate each critic report
-with its snapshot ID, and use a new fresh critic for every later version. Treat
-`CLEAR` as scoped to the inspected snapshot and executed probes. Continue the
-pipeline until the builder's fidelity loop is closed and every earlier material
-or blocked ledger item is repaired and retested, individually accepted, or
-otherwise resolved by the user.
-
-For the final iteration, compile all accepted documents, create one final
-snapshot, and hold its candidate payload—sources, dependencies, assets, and
-PDFs—unchanged. Run the fresh critic and the builder's raw-source, all-page, and
-variation audit concurrently on that same snapshot; keep builder audit output in
-scratch while publishing the completed critic report as above. Finish after the
-critic reports `CLEAR`, the builder audit closes every material residual, and
-the accumulated ledger is closed. A finding from either review reopens its
-earliest governing loop and resumes the intermediate pipeline. If no fresh
-subagent slot is available, consult the user immediately and keep the builder
-paused until the user decides how to proceed.
+Maintain an accumulated finding ledger in scratch and use a new fresh critic for
+each review. An intermediate `CLEAR` is repair feedback, not a completion gate.
+After no later edit has invalidated a branch closure entry and all earlier
+findings are repaired, retested, individually accepted, or resolved by the user,
+wait for any active critic and process its report. Clear
+`critic_refresh_pending`, compile all accepted documents, and hold the live
+sources, dependencies, assets, and PDFs unchanged. Run the final fresh critic
+and the builder's raw-source, all-page, and variation audit concurrently on those
+live files. Finish only after that critic reports `CLEAR`, the builder audit
+records no unaccepted mismatch, and the accumulated ledger has no unresolved
+item. A finding from either review reopens its earliest governing loop. If no
+fresh subagent slot is available at a trigger, consult the user immediately,
+preserve the current builder state, and await the user's decision.
 
 ## Mechanical Evidence Helpers
 
@@ -463,7 +460,7 @@ applicable font/glyph choice, line formation, strokes, and governing layout
 rules agree. Use disagreement in any of those relations to continue causal
 inspection.
 
-Treat a coherent block displacement as evidence to inspect its shared
+Treat a uniform block displacement as evidence to inspect its shared
 alignment, inset, or placement rule. Treat accumulating vertical drift as
 evidence to inspect the earliest repeated line pitch or block spacing. Treat
 matching text anchors with differing rules as evidence to inspect strokes.
@@ -477,23 +474,26 @@ Finish when a new author can create and revise representative manuscripts
 through the semantic public API and standard Typst content, while the template
 owns publication policy and expresses the inferred document semantics. The
 official instance and justified variations must render robustly, every reference
-page must be inspected, and each material residual must be repaired and retested
-or individually accepted by the user. Base readiness on that integrated
-evidence-based judgment.
+page must be inspected, and each recorded mismatch must be repaired and retested
+or individually accepted by the user. Apply the step 9 closure records and final
+critic conditions below to decide readiness.
 
 After the last change to the template, usage, asset, bibliography data, or style,
 compile the official instance and every accepted variation from the current
 source. Enter the final iteration of the Author-Usage Critic Loop: run the fresh
 critic and the builder's raw-source, all-reference-page, all-varied-page, public
-API, ownership, and render audit concurrently on the same fixed snapshot.
+API, ownership, and render audit concurrently while those live files remain
+unchanged.
 Readiness requires official local fidelity, varied author behavior, and correct
 API/ownership together. Route a material finding from either review back to the
-earliest governing loop and continue through repair, retest, and a new final
-snapshot.
+earliest governing loop and continue through repair, retest, refreshed closure
+records, and a new final review.
 
-After all completion conditions close, return the paths to the generated
-template, usage, variation, and PDFs with a concise statement of the validation
-completed. Leave regenerable bulk renders and superseded iterations in the
-system-temporary scratch root. When unavailable source authority or a required
-user choice prevents closure, consult the user at that point and keep the loop
-open until the decision is available.
+After every branch has a non-invalidated closure entry, the final critic reports
+`CLEAR`, the final builder audit records no unaccepted mismatch, and the finding
+ledger has no unresolved item, return the generated template, usage, variation,
+and PDF paths with a concise statement of the validation completed. Leave
+regenerable bulk renders and superseded iterations in the system-temporary
+scratch root. When unavailable source authority or a required user choice leaves
+a closure field unresolved, consult the user and keep that branch active until
+the decision is available.
