@@ -481,6 +481,26 @@ aggregate dimensions matched.
 **Probe.** Change one child at a time and inspect its internal formation,
 container relation, siblings, and downstream flow without rewriting the parent.
 
+### F18 — Visually similar Unicode symbols treated as interchangeable
+
+**Observed pattern.** A presenter mark written as `○` (U+25CB WHITE CIRCLE)
+was replaced with `〇` (U+3007 IDEOGRAPHIC NUMBER ZERO), or the reverse,
+because both characters appeared circular in the selected font.
+
+**Why it looked successful.** At ordinary zoom or in a low-resolution page
+image, the two glyphs could appear equivalent even though the author source,
+PDF text extraction, and font metrics differed.
+
+**Authoring harm.** The output changed the exact source literal and could change
+the mark's width, baseline, line formation, search, extraction, and meaning when
+authors or fonts changed.
+
+**Probe.** Compare the exact character and U+ value in the author record, any
+template-generated marker, and PDF text extraction; inspect a focused 600 dpi
+crop for glyph formation. Reorder the marked author and verify that the same
+character follows that record. If the supplied files do not determine the
+intended character, report `BLOCKED` instead of choosing one character.
+
 ## Evidence and severity
 
 For every candidate `MATERIAL` or `BLOCKED` cause, keep a full evidence record
