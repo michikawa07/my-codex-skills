@@ -100,8 +100,9 @@ Use these workflow terms throughout this file and its linked references:
 | **element** | One source container or content unit: page, title block, paragraph, list, equation, figure, table, etc. |
 | **packet** | Linked reference for one element type; `Requires` lists prerequisites, `Owns` its rules/relations, `Emits` outputs, and `Recheck` later observations. |
 | **router** | Ordered element list and packet links in `component-property-ledger.md`. |
-| **router cursor** | YAML record of `active`, `closures`, `suspended` (paused while an earlier branch is repaired), and critic `idle`/`loading`/`running`/`refresh_pending`. |
-| **branch / active branch** | One concrete element, its packet, and named source/output regions / the only branch currently edited. |
+| **target element list / inventory** | Router-defined target-specific list of default and discovered elements, occurrences, planned checks, and its completeness status. |
+| **router cursor** | YAML record of inventory status, the target element list, `open_parents` (a last-in-first-out stack holding each waiting composite ancestor's complete open `active` record), `active`, `closures`, `suspended` (ordered complete open records paused during earlier repair), and critic state. |
+| **branch / active branch** | One element type or structural role whose shared layout/semantic rule is checked across all named occurrences / the only branch currently edited. |
 | **first affected branch** | Earliest branch in router dependency order whose owned rule or recorded relation must change to remove the observed failure. |
 | **composite branch** | Branch whose direct children each require a branch record before the parent completes. |
 | **closure entry / branch closure** | Step 9 observations made after the latest edit / the event that appends a valid entry and advances the cursor. An entry remains valid only until contradicted. |
@@ -114,19 +115,15 @@ Use these workflow terms throughout this file and its linked references:
 | **governing cause** | Exact source construct or template rule whose change removes an observed failure without extra author-side layout code. |
 | **critic finding** | Demonstrated author action/failure/harm, its governing cause, a repair or user decision, and the action/observation to repeat afterward. |
 | **critic result** | `REVISE` for changed meaning, a second helper for the same concept, or wrong/overlapping/missing content or flow; otherwise `BLOCKED` if evidence/authority is missing; otherwise `CLEAR`. |
-| **Finish conditions** | Every branch has a valid closure entry, final critic is `CLEAR`, builder has no unaccepted mismatch, and every critic finding has a resolving retest. |
+| **Finish conditions** | Inventory is complete; every present or variation-required branch has a valid closure entry; every absent branch has absence evidence; final critic is `CLEAR`; builder has no unaccepted mismatch; and every critic finding has a resolving retest. |
 
-Keep the task active until every element has a valid closure entry and the Finish conditions hold. Use critic findings only as repair input. Maintain `<scratch>/router-cursor.yaml` with the exact record and transitions in step 9.
-
+Keep the task active until the Finish conditions hold. Use critic findings only as repair input. Maintain `<scratch>/router-cursor.yaml` with the exact record and transitions in step 9.
 1. **Collect mechanical evidence.** Inventory files, formats, page
    geometry, embedded fonts, and images; render editable sources with their
    established application or compiler to expose appearance and pagination.
-2. **Map the top level.** Read
-   [the element router](references/component-property-ledger.md) once. From the
-   shallow pass, identify the wrapper, page roles, major containers, reading
-   order, repeated regions, and author-editable slots. For each step, load the
-   packet linked by the router for the single active branch; apply its detailed
-   prompts only after the packet's required parent observations exist.
+2. **Map the top level.** Read [the element router](references/component-property-ledger.md) once. Before implementation,
+   complete its target element list from the structural source and every rendered reference page, including present/absent
+   defaults, discovered elements, every official occurrence, and required numeric relations. Then load the packet linked by the router for the single active branch; apply its detailed prompts only after the packet's required parent observations exist.
 3. **Build and compile the skeleton.** Prefer a user-named target-adjacent Typst template/document over the bundled
    [`template.typ` + `usage.typ`](assets/scaffold/) pair as evidence for file division, imports, wrapper calls, and
    body-flow hooks; copy the best available pair into the authoring root. The scaffold has one positional-body public
@@ -271,24 +268,26 @@ next. Revisit an earlier element when later evidence invalidates its record:
    Update `<scratch>/router-cursor.yaml` in this shape:
 
 ```yaml
+inventory:
+  status: open
+  target_elements: []
+open_parents: []
 active:
   branch: ""
   packet: ""
   status: open
   last_change_recompiled: false
   official:
-    source_regions: []
-    output_regions: []
-    container: ""
-    direct_children: ""
-    internal_formation: ""
-    downstream: ""
-  variation:
-    author_edit: ""
-    predicted_event: ""
-    call_path: ""
-    observed_event: ""
-  rechecks: []
+    container: {observation: "", result: "", observed_after_last_change: false}
+    direct_children: {observation: "", result: "", observed_after_last_change: false}
+    internal_formation: {observation: "", result: "", observed_after_last_change: false}
+    downstream: {observation: "", result: "", observed_after_last_change: false}
+  rechecks:
+    - check: ""
+      case: ""
+      observation: ""
+      result: "" # match | mismatch | accepted_mismatch
+      observed_after_last_change: false
   child_closures: []
   unresolved_mismatches: []
   accepted_mismatches: []
@@ -307,9 +306,14 @@ critic:
 
 | Guard or event | Required transition |
 | --- | --- |
-| A required field is empty, `last_change_recompiled` is false, or `unresolved_mismatches` is nonempty | Keep `active.status: open`; continue this branch. |
-| Every required string and region list is populated, `last_change_recompiled` is true, `rechecks` records each packet relation, and `unresolved_mismatches` is empty | For a composite, also require every direct child in `child_closures` and a composition result in `rechecks`; set `active.status: closed`, append it to `closures`, create the next open `active` record in dependency/reading order, and trigger the critic. |
-| A later observation contradicts a closure | Move the first affected entry in dependency order from `closures` to `active`, set it open, and record the interrupted branch in `suspended`. |
+| `inventory.status` is `open` | Keep `active` empty and finish the target element list; set it `complete` only under the inventory rules in the router, then create the first required `active` branch. |
+| An active composite has a present or variation-required direct child without a valid closure | Push the complete current `active` record onto `open_parents` and create the child's `active` record; after the child closes, restore the last parent record as `active` and add that child's branch path to `child_closures`. |
+| An active child contradicts a relation owned by an entry in `open_parents` | Move every parent above the affected parent, then the child, to `suspended` in parent-to-child order. Make the affected parent active, repair and recompile it, then push it back onto `open_parents` without closing it. Restore each moved parent from oldest ancestor to youngest, repair and recompile it, and push it back without closing it. Finally restore the moved child as active; the normal child-to-parent closures then resume. |
+| An edit can affect a branch's official or variation result | Apply the router's edit-invalidation rule before compiling, set `active.last_change_recompiled` false, and invalidate dependent closures. |
+| Any applicable branch-completion condition in the router fails; `last_change_recompiled` is false; or `unresolved_mismatches` is nonempty | Keep `active.status: open`; continue this branch. |
+| Every applicable branch-completion condition in the router holds and `last_change_recompiled` is true | Close and append `active`, then restore the last complete parent record from `open_parents` or create the next branch in dependency and reading order; trigger the critic. |
+| A later observation contradicts a closure outside the active ancestor chain | Move any complete records in `open_parents`, then `active`, to `suspended` in parent-to-child order and clear `open_parents`; move the first affected entry in dependency order from `closures` to `active` and set it open. After the repaired branch closes, restore all but the last suspended record to `open_parents` and the last to `active`; if none existed, continue with the next required branch or final review. |
+| A later pass finds an omitted occurrence or element with a different shared rule | Add the occurrence to its existing branch or add the new branch path; activate the affected branch and invalidate each closure whose direct-child placement or downstream relation depends on it. |
 | Source authority or acceptance is missing | Keep the branch open and request the user's decision. |
 
    Compilation, warnings, page count, visited files, and aggregate pixel
@@ -347,11 +351,7 @@ builder diagnosis, intended answer, prior reports, notes, and rejected outputs.
 
 Use only `idle`, `loading`, or `running` in `critic.state`; record the report's `CLEAR`, `REVISE`, or `BLOCKED` value in `critic.last_result`.
 
-For each returned cause/location, repeat its retest against the current authoring files. Mark a finding resolved only from that observation. If its source rule is
-in a parent, earlier element, or shared template path, put the current `active`
-record in `suspended` and reopen the first affected branch in dependency order;
-resume the suspended record after that branch closes again. If the source rule
-belongs to the active branch, repair and recompile it before closure.
+For each returned cause/location, repeat its retest against the current authoring files and mark a finding resolved only from that observation. Route every repair through the step 9 transition table: repair an active-branch rule there; use its active-ancestor transition for a waiting parent; otherwise use its closed-branch transition for an earlier element or shared template rule.
 
 Use this handoff with the current paths:
 
@@ -488,13 +488,10 @@ critic finding, locate
 its source rule, reopen the first affected branch in dependency order, repair and
 retest it, replace its closure entry, and run a new final review.
 
-After every branch has a valid closure entry, the final critic reports `CLEAR`,
-the final builder audit records no unaccepted mismatch, and every critic finding
-has a resolving retest observation, return the generated template, usage,
-variation,
-and PDF paths with one sentence naming the compiled documents, inspected pages,
-activated variations, and final critic status. Leave
-regenerable bulk renders and superseded iterations in the system-temporary
+After every required branch has a valid closure entry, the final critic reports `CLEAR`, the final builder audit records no
+unaccepted mismatch, and every critic finding has a resolving retest observation, return the generated template, usage,
+variation, and PDF paths with one sentence naming the compiled documents, inspected pages, activated variations, and final
+critic status. Leave regenerable bulk renders and superseded iterations in the system-temporary
 scratch root. When unavailable source authority or a required user choice leaves
 a closure field unresolved, consult the user and keep that branch active until
 the decision is available.

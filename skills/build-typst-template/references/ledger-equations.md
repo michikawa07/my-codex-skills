@@ -9,8 +9,9 @@ labels, and equation-reference rendering.
 **Emits** — Standard Typst math and reference routes whose official and varied
 instances place, number, and render coherently.
 
-**Recheck** — Inline/display math, tall and long equations, equation numbers,
-references in prose, links, and following flow.
+**Recheck** — Inline/display math, official equation extent and formation,
+tall and long equations, equation numbers, references in prose, links, and
+following flow.
 
 Process Equations first, then open Equation references as its one direct child.
 Close reference prose against the established counter, label, and display
