@@ -95,6 +95,9 @@ flow. Report demonstrated failures and their governing causes.
   element to edit next.
 - Leave comparison against raw DOCX/TeX/PDF references with the builder. Record
   an evidence gap when a judgment requires raw evidence outside the supplied set.
+- When choosing a target formatting value requires raw evidence outside the
+  supplied set, report any demonstrated ownership or call-path failure and its
+  causal repair; do not recommend a formatting value.
 - Permit a public helper when it accepts an author-supplied document concept for
   which no standard Typst element or argument provides the same meaning.
 - Treat spacing, breaks, and object dimensions written explicitly in an author
