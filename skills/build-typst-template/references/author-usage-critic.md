@@ -82,8 +82,8 @@ flow. Report demonstrated failures and their governing causes.
   and keep those files read-only.
 - Notify the builder with `INPUTS_LOADED` after reading every supplied text source
   and inspecting every page of each PDF, before adaptive probes.
-- Write the completed critic-to-builder report to the supplied
-  `TEMP_CRITIC_REPORT_PATH` in system temporary scratch.
+- Write the completed critic-to-builder report directly to the supplied
+  authoring-root `CRITIC_FINDINGS_PATH`.
 - Restrict review evidence to the current author sources, template dependencies,
   and matching PDFs explicitly supplied by the builder.
 - For an adaptive probe, copy its required dependencies into a system temporary
@@ -503,7 +503,7 @@ conceal it.
 
 ## Required findings file
 
-Write at most 60 lines and 900 words to `TEMP_CRITIC_REPORT_PATH`; count both
+Write at most 60 lines and 900 words to `CRITIC_FINDINGS_PATH`; count both
 before returning. Merge findings only when they have the same governing
 cause and the same repair and retest; name every affected author action and PDF
 page/region in the merged entry. Put input inventories, commands, methods,

@@ -330,8 +330,8 @@ Every branch closure triggers a review. Compile the official usage and every
 current case in `variation.typ` with the current dependency files first. Start a fresh
 maximum-reasoning subagent without conversation history. Pass the current
 authoring sources, dependencies, assets, the PDF compiled from each source after
-its latest edit, a system-temporary
-`TEMP_CRITIC_REPORT_PATH`, and
+its latest edit, the authoring-root
+`CRITIC_FINDINGS_PATH` for `critic-findings.md`, and
 [`author-usage-critic.md`](references/author-usage-critic.md). Withhold the
 builder diagnosis, intended answer, prior reports, notes, and rejected outputs.
 
@@ -340,7 +340,7 @@ builder diagnosis, intended answer, prior reports, notes, and rejected outputs.
 | `idle` + branch closure | Set `loading`; start one fresh critic of all supplied current authoring files and PDFs. |
 | `loading` + `INPUTS_LOADED` | Set `running`; begin the next element and compare every reference page with the PDF compiled from its source after the latest edit. |
 | `loading` or `running` + another closure | Set `refresh_pending: true`; keep one critic. |
-| `running` + completed report | Rename the complete temporary report to `critic-findings.md` in one filesystem operation, set `idle`, and process its findings. |
+| `running` + completed report | Set `idle` and process the completed `critic-findings.md`. |
 | `idle` + pending refresh at the next transition | Clear `refresh_pending`; start a fresh review. |
 | No fresh subagent slot | Preserve builder state, consult the user immediately, and await the decision. |
 
@@ -358,8 +358,8 @@ Act as a fresh, independent critic of the generated Typst authoring system.
 Read CRITIC_GUIDE completely. Read every CURRENT_SOURCE_FILE and inspect every
 page of every CURRENT_OUTPUT_PDF, then send INPUTS_LOADED. Keep them read-only.
 Use system-temporary copies for adaptive probes. Review the whole supplied
-authoring system using only these inputs. Write the guide's bounded report to
-TEMP_CRITIC_REPORT_PATH and return its path and status.
+authoring system using only these inputs. Write the guide's bounded report
+directly to CRITIC_FINDINGS_PATH and return its path and status.
 ```
 
 In scratch, record each critic finding ID, its current unresolved/resolved state,
