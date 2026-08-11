@@ -428,17 +428,19 @@ content-dependent layout or ownership is unclear. Read the
 needs focused diagnosis. These references supply implementation and diagnostic
 guidance; the Element Completion Loop owns artifact choice and acceptance.
 
-Load each short Typst engine tip when its named issue becomes active:
+Load each short Typst or CSL tip when its named issue becomes active:
 
 - [natural width versus wrapped extent](references/typst-tip-natural-width.md);
 - [source baseline pitch versus Typst leading](references/typst-tip-line-pitch.md);
 - [font resolution for text and math](references/typst-tip-font-resolution.md);
 - [combined math accents](references/typst-tip-combined-accents.md);
 - [localized standard references and CJK lexical boundaries](references/typst-tip-localized-references.md);
+- [numeric citation brackets and vertical position](references/typst-tip-csl-citation-number.md);
+- [CSL default language](references/typst-tip-csl-default-locale.md);
+- [publication-specific CSL term overrides](references/typst-tip-csl-term-overrides.md);
 - [first-line indentation on injected prose](references/typst-tip-injected-paragraph.md).
 
-These references supply reusable engine techniques. Derive target values and
-publication policies from the source evidence.
+These references supply reusable techniques. Derive target values and publication policies from source evidence.
 
 ## Judgment Guide
 

@@ -17,6 +17,11 @@ Process Citations and References as separate direct children of body flow. Withi
 References, open Bibliography entries as its one direct child, then close the
 parent against placement, heading, ordering, and page flow.
 
+For numeric citations, read [citation-number presentation](typst-tip-csl-citation-number.md).
+Before selecting or writing a CSL style, read [CSL default language](typst-tip-csl-default-locale.md).
+Read [publication-specific term overrides](typst-tip-csl-term-overrides.md) only when the
+correct default language still emits a word that differs from the target.
+
 - **Citations [T]** — citation key/target semantics; numeric/author-year
   form; cluster ordering and ranges; prefix/suffix, locator, brackets,
   punctuation, spacing, links, and line breaking.
