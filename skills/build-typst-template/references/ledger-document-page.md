@@ -26,6 +26,9 @@ coordinate system.
 
 - **Document [C]** — document metadata and language; authoring boundary;
   section/page sequence; global counters, outlines, labels, links, and color.
+  When visible title or author values also populate `document` metadata, read
+  [display content and PDF metadata](typst-tip-display-content-metadata.md)
+  before selecting their record and metadata-field types.
   - **Page [C]** — paper size and orientation; margins/content box; background;
     first/odd/even page variants; numbering and page counter resets.
     - **Header [C,T]** — semantic content, fields, running-title rules, rule or

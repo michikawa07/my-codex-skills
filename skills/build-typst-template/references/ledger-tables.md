@@ -18,6 +18,8 @@ captions, then Table references. Open Cells as Rows children. Close
 the reference route against the already observed caption supplement and
 counter, then close the table after child composition preserves widths,
 strokes, numbering, caption attachment, and downstream flow.
+When a table-caption prefix and body share the first line, read [run-in labels
+with aligned continuation lines](typst-tip-run-in-label-continuation.md).
 
 - **Tables [C]** — semantic kind; total width; column count and width
   policy; grid/stroke sides, thickness, style and color; header repetition;

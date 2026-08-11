@@ -432,10 +432,14 @@ guidance; the Element Completion Loop owns artifact choice and acceptance.
 
 Load each short Typst or CSL tip when its named issue becomes active:
 
+- [preserving a standard element's natural size, flow, counters, labels, and links when adding a wrapper, helper, or manual rendering](references/typst-tip-preserve-built-in-behavior.md);
 - [natural width versus wrapped extent](references/typst-tip-natural-width.md);
 - [source baseline pitch versus Typst leading](references/typst-tip-line-pitch.md);
 - [font resolution for text and math](references/typst-tip-font-resolution.md);
 - [combined math accents](references/typst-tip-combined-accents.md);
+- [run-in labels and continuation-line alignment](references/typst-tip-run-in-label-continuation.md);
+- [stable author and affiliation identifiers](references/typst-tip-author-affiliation-identifiers.md);
+- [display content and PDF metadata types](references/typst-tip-display-content-metadata.md);
 - [localized standard references and CJK lexical boundaries](references/typst-tip-localized-references.md);
 - [numeric citation brackets and vertical position](references/typst-tip-csl-citation-number.md);
 - [CSL default language](references/typst-tip-csl-default-locale.md);

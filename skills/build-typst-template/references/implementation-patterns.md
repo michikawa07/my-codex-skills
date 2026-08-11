@@ -71,6 +71,12 @@ Create a helper when the source contains a concrete additional manuscript
 semantic beyond standard syntax. Treat source-language convenience macros as
 evidence for output policy and test the corresponding standard Typst route.
 
+Before a wrapper, helper, or manual rendering route replaces or encloses a
+standard element, read [preserving Typst's built-in
+behavior](typst-tip-preserve-built-in-behavior.md). Identify the behavior that
+the wrapper, helper, or manual rendering can change and exercise that behavior
+through an author input.
+
 ## 3. Measure at the Local Width
 
 Content can wrap differently inside a grid, column, or narrowed block. Measure

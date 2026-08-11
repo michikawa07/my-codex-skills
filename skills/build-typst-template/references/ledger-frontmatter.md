@@ -18,6 +18,14 @@ opened as an Authors child. Close each child against its immediate siblings;
 close the container after the composition preserves optional collapse and the
 body transition.
 
+For linked author and affiliation records, read [stable author and affiliation
+identifiers](typst-tip-author-affiliation-identifiers.md). When the same title
+or author record supplies visible content and PDF metadata, read [display
+content and PDF metadata](typst-tip-display-content-metadata.md). For an
+Abstract or Keywords label that shares the first line with its body, read
+[run-in labels with aligned continuation
+lines](typst-tip-run-in-label-continuation.md).
+
 - **Frontmatter container [C]** — reading order; optional-field collapse;
   atomic versus growing behavior; transition into body.
   - **Title [T]** — semantic/localized variants; grouping; prominence;

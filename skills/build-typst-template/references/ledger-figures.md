@@ -17,6 +17,8 @@ Process one direct child at a time after establishing Figures: Images, Captions,
 then Figure references. The reference route is closed against the already
 observed caption supplement and counter. Close the figure after their
 composition preserves numbering, attachment, placement, and downstream flow.
+When a caption prefix and body share the first line, read [run-in labels with
+aligned continuation lines](typst-tip-run-in-label-continuation.md).
 
 - **Figures [C]** — semantic kind, placement/float policy, counter/reset,
   label/reference semantics, keep with caption, page/column span.
