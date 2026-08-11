@@ -101,7 +101,7 @@ Use these workflow terms throughout this file and its linked references:
 | **packet** | Linked reference for one element type; `Requires` lists prerequisites, `Owns` its rules/relations, `Emits` outputs, and `Recheck` later observations. |
 | **router** | Ordered element list and packet links in `component-property-ledger.md`. |
 | **target element list / inventory** | Router-defined target-specific list of default and discovered elements, occurrences, planned checks, and its completeness status. |
-| **router cursor** | YAML record of inventory status, the target element list, `open_parents` (a last-in-first-out stack holding each waiting composite ancestor's complete open `active` record), `active`, `closures`, `suspended` (ordered complete open records paused during earlier repair), and critic state. |
+| **router cursor** | YAML record of inventory status, the target element list, `open_parents` (a last-in-first-out stack holding each waiting composite ancestor's complete open `active` record), `active`, `closures`, `suspended` (ordered complete open records paused during earlier repair), and critic state and closure count. |
 | **branch / active branch** | One element type or structural role whose shared layout/semantic rule is checked across all named occurrences / the only branch currently edited. |
 | **first affected branch** | Earliest branch in router dependency order whose owned rule or recorded relation must change to remove the observed failure. |
 | **composite branch** | Branch whose direct children each require a branch record before the parent completes. |
@@ -149,9 +149,9 @@ Keep the task active until the Finish conditions hold. Use critic findings only 
    relations, and the last page.
 7. **Repair from a prediction.** For a step 9 mismatch, state the source-backed rule and exact direction/amount of the
    predicted correction. Test it, then record the affected parent, child, internal-formation, and downstream observations.
-8. **Critique and refactor the author usage.** Each time step 9 closes an element
-   and advances the router cursor, trigger the Author-Usage Critic Loop on the
-   complete current authoring system. Pass only current author sources,
+8. **Critique and refactor the author usage.** Each time step 9 closes an element,
+   increment the critic's closure count. Trigger the Author-Usage Critic Loop on
+   the complete current authoring system when that count reaches two. Pass only current author sources,
    dependencies, assets, and the PDF compiled from each source after its latest
    edit; the builder retains the router cursor, branch/packet names, closure
    entries, and prior diagnosis. Start the
@@ -296,7 +296,7 @@ suspended: []
 critic:
   state: idle
   last_result: ""
-  refresh_pending: false
+  closures_since_last_input_load: 0
   unresolved_findings: []
 ```
 
@@ -311,7 +311,7 @@ critic:
 | An active child contradicts a relation owned by an entry in `open_parents` | Move every parent above the affected parent, then the child, to `suspended` in parent-to-child order. Make the affected parent active, repair and recompile it, then push it back onto `open_parents` without closing it. Restore each moved parent from oldest ancestor to youngest, repair and recompile it, and push it back without closing it. Finally restore the moved child as active; the normal child-to-parent closures then resume. |
 | An edit can affect a branch's official or variation result | Apply the router's edit-invalidation rule before compiling, set `active.last_change_recompiled` false, and invalidate dependent closures. |
 | Any applicable branch-completion condition in the router fails; `last_change_recompiled` is false; or `unresolved_mismatches` is nonempty | Keep `active.status: open`; continue this branch. |
-| Every applicable branch-completion condition in the router holds and `last_change_recompiled` is true | Close and append `active`, then restore the last complete parent record from `open_parents` or create the next branch in dependency and reading order; trigger the critic. |
+| Every applicable branch-completion condition in the router holds and `last_change_recompiled` is true | Close and append `active`; increment `critic.closures_since_last_input_load`; then restore the last complete parent record from `open_parents` or create the next branch in dependency and reading order. |
 | A later observation contradicts a closure outside the active ancestor chain | Move any complete records in `open_parents`, then `active`, to `suspended` in parent-to-child order and clear `open_parents`; move the first affected entry in dependency order from `closures` to `active` and set it open. After the repaired branch closes, restore all but the last suspended record to `open_parents` and the last to `active`; if none existed, continue with the next required branch or final review. |
 | A later pass finds an omitted occurrence or element with a different shared rule | Add the occurrence to its existing branch or add the new branch path; activate the affected branch and invalidate each closure whose direct-child placement or downstream relation depends on it. |
 | Source authority or acceptance is missing | Keep the branch open and request the user's decision. |
@@ -331,7 +331,7 @@ entries.
 
 ## Author-Usage Critic Loop
 
-Every branch closure triggers a review. Compile the official usage and every
+Start a review when `closures_since_last_input_load` reaches two. Compile the official usage and every
 current case in `variation.typ` with the current dependency files first. Start a fresh
 maximum-reasoning subagent without conversation history. Pass the current
 authoring sources, dependencies, assets, the PDF compiled from each source after
@@ -342,14 +342,14 @@ builder diagnosis, intended answer, prior reports, notes, and rejected outputs.
 
 | Critic state and event | Required transition |
 | --- | --- |
-| `idle` + branch closure | Set `loading`; start one fresh critic of all supplied current authoring files and PDFs. |
-| `loading` + `INPUTS_LOADED` | Set `running`; begin the next element and compare every reference page with the PDF compiled from its source after the latest edit. |
-| `loading` or `running` + another closure | Set `refresh_pending: true`; keep one critic. |
-| `running` + completed report + `refresh_pending: false` | Store `CLEAR`, `REVISE`, or `BLOCKED` in `last_result`; set `idle`; process the completed `critic-findings.md`. |
-| `running` + completed report + `refresh_pending: true` | Store its result and findings, clear `refresh_pending`, set `loading`, and immediately start one fresh critic on the current files. Keep those files unchanged until `INPUTS_LOADED`, then process the prior findings while the fresh critic runs. |
+| `idle` + a closure raises `closures_since_last_input_load` to one | Keep `idle`; begin the next branch. |
+| `idle` + a closure raises `closures_since_last_input_load` to two or more | Set `loading`; start one fresh critic of all supplied current authoring files and PDFs; keep those files unchanged until `INPUTS_LOADED`. |
+| `loading` + `INPUTS_LOADED` | Set `running`; reset `closures_since_last_input_load` to zero; begin the next element and compare every reference page with the PDF compiled from its source after the latest edit. |
+| `running` + another closure | Keep the current critic; step 9 has already incremented `closures_since_last_input_load`. |
+| `running` + completed report + fewer than two later closures | Store `CLEAR`, `REVISE`, or `BLOCKED` in `last_result`; set `idle`; process the completed `critic-findings.md`. |
+| `running` + completed report + two or more later closures | Store its result and findings, set `loading`, and immediately start one fresh critic on the current files. Keep those files unchanged until `INPUTS_LOADED`, then process the prior findings while the fresh critic runs. |
 | No fresh subagent slot | Preserve builder state, consult the user immediately, and await the decision. |
-
-Use only `idle`, `loading`, or `running` in `critic.state`; record the report's `CLEAR`, `REVISE`, or `BLOCKED` value in `critic.last_result`.
+Use only `idle`, `loading`, or `running` in `critic.state`; keep `closures_since_last_input_load` as a nonnegative integer; record the report's `CLEAR`, `REVISE`, or `BLOCKED` value in `critic.last_result`.
 
 For each returned cause/location, repeat its retest against the current authoring files and mark a finding resolved only from that observation. Route every repair through the step 9 transition table: repair an active-branch rule there; use its active-ancestor transition for a waiting parent; otherwise use its closed-branch transition for an earlier element or shared template rule.
 
@@ -368,9 +368,8 @@ In scratch, record each critic finding ID, its current unresolved/resolved state
 and the retest observation; use a new fresh critic for each review. Intermediate
 `CLEAR` is repair input. After all closure entries remain valid and earlier findings are resolved, finish and process any running critic using the transition table above. Compile the
 official usage and all retained variation cases, then leave the current inputs
-unchanged. Run the final fresh
-critic and builder's raw-source, every-reference-page, and every-variation-page
-audit concurrently. Finish
+unchanged. Regardless of the closure count, run the final fresh critic and the
+builder's raw-source, every-reference-page, and every-variation-page audit concurrently. Finish
 only with final `CLEAR`, no unaccepted builder mismatch, and no unresolved critic
 finding; otherwise reopen the first affected branch in dependency order.
 
