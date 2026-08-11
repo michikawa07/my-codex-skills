@@ -39,6 +39,24 @@ separately:
 Combine the complementary signals that expose the element's content, geometry,
 formation, and flow.
 
+## Preview One Page During Repeated Edits
+
+When repeatedly editing one occurrence in `template.typ`, `usage.typ`, or `variation.typ`, set `<source.typ>` to the
+current official or variation source whose output contains that occurrence. Set `<page-number>` to its 1-based physical
+page number. Copy `<project-options>` from the established PDF compile command, including its root, font paths, inputs,
+and package options. Then render only that page after each edit:
+
+```bash
+typst compile <project-options> --format png --ppi 200 \
+  --pages <page-number> <source.typ> <scratch>/preview.png
+```
+
+Inspect `<scratch>/preview.png` beside `<scratch>/scan/pages/NNN/reference.png`, where `NNN` is the same page number padded
+to three digits. Use that pair to choose the next edit. When the pair no longer shows the difference being repaired,
+compile every current official and variation source to PDF, rerun the `scan` command above, and run `detail` below for
+each affected region. Use those PDF comparison results for the observations required by step 9 and for the final
+judgment; this renders the reference and candidate with the same PDF rasterizer.
+
 ## Focus on a Semantic Region
 
 Choose a title block, heading, equation number, image, caption, table rule,

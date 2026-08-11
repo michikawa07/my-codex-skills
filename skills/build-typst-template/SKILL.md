@@ -146,7 +146,10 @@ Keep the task active until the Finish conditions hold. Use critic findings only 
    distinguishing content or flow, then apply the observed rule and activating case to the primary documents.
 6. **Compare hierarchically.** Run the all-page comparison, then use the
    [visual comparison playbook](references/validation-playbook.md) on named regions, internal formation, downstream
-   relations, and the last page.
+   relations, and the last page. During repeated edits to the active branch, use the playbook command to render the one
+   page of `usage.typ` or `variation.typ` that contains the occurrence being adjusted. For step 9 observations and the
+   final judgment, compile every current official and variation source to PDF and run the playbook's `scan` command and
+   any required `detail` command on those PDFs.
 7. **Repair from a prediction.** For a step 9 mismatch, state the source-backed rule and exact direction/amount of the
    predicted correction. Test it, then record the affected parent, child, internal-formation, and downstream observations.
 8. **Critique and refactor the author usage.** Each time step 9 closes an element,
