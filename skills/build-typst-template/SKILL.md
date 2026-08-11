@@ -296,6 +296,7 @@ closures: []
 suspended: []
 critic:
   state: idle
+  last_result: ""
   refresh_pending: false
   unresolved_findings: []
 ```
@@ -340,12 +341,13 @@ builder diagnosis, intended answer, prior reports, notes, and rejected outputs.
 | `idle` + branch closure | Set `loading`; start one fresh critic of all supplied current authoring files and PDFs. |
 | `loading` + `INPUTS_LOADED` | Set `running`; begin the next element and compare every reference page with the PDF compiled from its source after the latest edit. |
 | `loading` or `running` + another closure | Set `refresh_pending: true`; keep one critic. |
-| `running` + completed report | Set `idle` and process the completed `critic-findings.md`. |
-| `idle` + pending refresh at the next transition | Clear `refresh_pending`; start a fresh review. |
+| `running` + completed report + `refresh_pending: false` | Store `CLEAR`, `REVISE`, or `BLOCKED` in `last_result`; set `idle`; process the completed `critic-findings.md`. |
+| `running` + completed report + `refresh_pending: true` | Store its result and findings, clear `refresh_pending`, set `loading`, and immediately start one fresh critic on the current files. Keep those files unchanged until `INPUTS_LOADED`, then process the prior findings while the fresh critic runs. |
 | No fresh subagent slot | Preserve builder state, consult the user immediately, and await the decision. |
 
-For each returned cause/location, repeat its retest against the current authoring
-files. Mark a finding resolved only from that observation. If its source rule is
+Use only `idle`, `loading`, or `running` in `critic.state`; record the report's `CLEAR`, `REVISE`, or `BLOCKED` value in `critic.last_result`.
+
+For each returned cause/location, repeat its retest against the current authoring files. Mark a finding resolved only from that observation. If its source rule is
 in a parent, earlier element, or shared template path, put the current `active`
 record in `suspended` and reopen the first affected branch in dependency order;
 resume the suspended record after that branch closes again. If the source rule
@@ -364,9 +366,7 @@ directly to CRITIC_FINDINGS_PATH and return its path and status.
 
 In scratch, record each critic finding ID, its current unresolved/resolved state,
 and the retest observation; use a new fresh critic for each review. Intermediate
-`CLEAR` is repair input. After all closure entries remain valid and earlier
-findings are resolved, finish and process any running critic; when
-`refresh_pending` is true, clear it and run one updated review. Compile the
+`CLEAR` is repair input. After all closure entries remain valid and earlier findings are resolved, finish and process any running critic using the transition table above. Compile the
 official usage and all retained variation cases, then leave the current inputs
 unchanged. Run the final fresh
 critic and builder's raw-source, every-reference-page, and every-variation-page
