@@ -245,10 +245,11 @@ next. Revisit an earlier element when later evidence invalidates its record:
    endpoints, then map it to the Typst control that governs the same relation.
    Verify that relation at two repeated instances, or record the unique
    element's actual endpoints. Use those endpoints as the calibration target.
-   Resolve evidenced font faces through the final compile environment and
-   compare the source-backed candidates; if none works, record why the evidenced
-   font is unavailable. Load the Typst tips for consistent font paths and separate
-   text/math font configurations.
+   Resolve the exact font face established by the governing source evidence through the final compile environment; do
+   not replace it with a visually or metrically similar face. If Typst cannot load or use that exact face, keep every
+   affected branch open, record the exact failure, and request the user's decision. Accept a substitute only for the
+   explicit scope approved by the user. Load the Typst tips for consistent font paths and separate text/math font
+   configurations.
 6. **Shared implementation.** Use the same ordinary Typst syntax and
    template-owned rules for the official and varied instances, with
    `set`/`show` rules, and natural flow. Use contextual measurement when local
