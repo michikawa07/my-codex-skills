@@ -96,6 +96,10 @@ Use these workflow terms throughout this file and its linked references:
 | --- | --- |
 | **builder** | Agent that reads publication evidence and edits the current Typst authoring files. |
 | **current authoring system** | Current author sources, template dependencies, assets, and PDFs compiled after the latest source edit. |
+| **font face** | The complete resolved face name reported by the compiler that renders the source; if that report is unavailable, use the exact face name in the structural source; if neither is available, use the normalized PDF face name. The name includes family, weight, and style. A visually or metrically similar name is a different face. When reading a PDF face name, remove only a six-uppercase-letter subset prefix such as `ABCDEF+`. |
+| **font role** | A coarse use that has one source-assigned font face, such as body text, heading text, captions, bibliography text, or display math. Split a role only when the source assigns a different face. |
+| **font requirement** | One font role with its source evidence, expected face, actual candidate face, current observation, and optional user-approved substitution. The observation names one source location, one candidate source location, the candidate PDF page or region or text run, and the extraction command and unedited output that identifies the actual face. |
+| **font gate** | Check performed after inventory and before the first branch. It is complete only when every required font role uses the expected face or has a user-approved substitution for that role, and every missing or extra PDF face name reported by the comparator is assigned to a font role or a user-confirmed comparison-only exclusion. While it is open, do not tune or close rules for font size, tracking, wrapping, spacing, geometry, or downstream flow. |
 | **semantic / semantics** | Document meaning encoded by element type, structured content/order, counters, labels, and references rather than appearance alone. |
 | **element** | One source container or content unit: page, title block, paragraph, list, equation, figure, table, etc. |
 | **packet** | Linked reference for one element type; `Requires` lists prerequisites, `Owns` its rules/relations, `Emits` outputs, and `Recheck` later observations. |
@@ -116,7 +120,7 @@ Use these workflow terms throughout this file and its linked references:
 | **governing cause** | Exact source construct or template rule whose change removes an observed failure without extra author-side layout code. |
 | **critic finding** | Demonstrated author action/failure/harm, its governing cause, a repair or user decision, and the action/observation to repeat afterward. |
 | **critic result** | `REVISE` for changed meaning, a second helper for the same concept, or wrong/overlapping/missing content or flow; otherwise `BLOCKED` if evidence/authority is missing; otherwise `CLEAR`. |
-| **Finish conditions** | Inventory is complete; every present or variation-required branch has a valid closure entry; every absent branch has absence evidence; final critic is `CLEAR`; builder has no unaccepted mismatch; and every critic finding has a resolving retest. |
+| **Finish conditions** | Inventory and the font gate are complete; every present or variation-required branch has a valid closure entry; every absent branch has absence evidence; final critic is `CLEAR`; builder has no unaccepted mismatch; and every critic finding has a resolving retest. |
 
 Keep the task active until the Finish conditions hold. Use critic findings only as repair input. Maintain `<scratch>/router-cursor.yaml` with the exact record and transitions in step 9.
 1. **Collect mechanical evidence.** Inventory files, formats, page
@@ -127,17 +131,25 @@ Keep the task active until the Finish conditions hold. Use critic findings only 
    defaults, discovered elements, every official occurrence, and required numeric relations. Then load the packet linked by the router for the single active branch; apply its detailed prompts only after the packet's required parent observations exist.
 3. **Build and compile the skeleton.** Prefer a user-named target-adjacent Typst template/document over the bundled
    [`template.typ` + `usage.typ`](assets/scaffold/) pair as evidence for file division, imports, wrapper calls, and
-   body-flow hooks; copy the best available pair into the authoring root. The scaffold has one positional-body public
-   wrapper and private `_render_body(body) = body` hook. Replace that hook from target evidence when flow differs, such
-   as `columns(...)`; keep page, column, gutter, break, and flow policy private in the template.
-   From structural and rendered evidence, derive author API slots, publication policy, content-dependent rules, and
-   calibration values. Preserve free-form author content. Start with the template, official `usage.typ`, and one
-   `variation.typ` containing a realistic author action. Add realistic additions, omissions, reordering, length changes,
-   and page/column crossings early to expose duplicate author paths, misplaced policy, and fixed-flow assumptions; an
-   early case does not close an unexamined element. Select cases from this one variation source. Use a scratch-only
-   focused source to distinguish two plausible rules, then move any lasting case into the consolidated variation.
-   Establish page setup, major containers, and rough natural flow; compile and render the official instance plus the
-   smallest public-API change that distinguishes the current page/container/wrapper behavior before geometry tuning.
+   body-flow hooks; copy the best available pair into the authoring root. Before the font gate completes, derive only
+   author API slots, semantic element roles, exact content needed to exercise fonts, and font requirements from structural
+   and rendered evidence. Preserve free-form author content. Create only enough template rules and official or consolidated
+   variation content to exercise every font requirement, then complete the font gate. A scratch-only focused source may
+   identify which face a font-selection rule loads, but it does not satisfy a font requirement. While the gate is open,
+   inspect sources; add the author fields and standard elements needed to render the required text or math; change font
+   search paths and compiler options; and check font faces. Do not set or adjust font size, tracking, wrapping, spacing,
+   page or container geometry, or downstream positions. Do not compensate for a wrong face with size, tracking, scaling,
+   spacing, or positioning.
+   After the gate completes, derive publication and content-dependent layout rules. The scaffold has one positional-body
+   public wrapper and private `_render_body(body) = body` hook; replace that hook when target evidence requires different
+   flow such as `columns(...)`, while keeping page, column, gutter, break, and flow policy private in the template.
+   Establish page setup, major containers, rough natural flow, and one `variation.typ` containing a realistic author
+   action. Add realistic additions, omissions, reordering, length changes, and page/column
+   crossings early to expose duplicate author paths, misplaced policy, and fixed-flow assumptions; an early case does
+   not close an unexamined element. Select cases from this one variation source. Use a scratch-only focused source to
+   distinguish two plausible rules, then move any lasting case into the consolidated variation. Compile and render the
+   official instance plus the smallest public-API change that distinguishes the current page/container/wrapper behavior
+   before geometry tuning.
 4. **Complete elements in dependency order.** Keep one branch active; open its packet after `Requires` observations
    exist and close it through `Emits` and `Recheck`. In a composite branch, complete one direct child at a time in
    reading order. Before geometry tuning, establish exact official content, author syntax/API, and one activating
@@ -246,10 +258,11 @@ next. Revisit an earlier element when later evidence invalidates its record:
    Verify that relation at two repeated instances, or record the unique
    element's actual endpoints. Use those endpoints as the calibration target.
    Resolve the exact font face established by the governing source evidence through the final compile environment; do
-   not replace it with a visually or metrically similar face. If Typst cannot load or use that exact face, keep every
-   affected branch open, record the exact failure, and request the user's decision. Accept a substitute only for the
-   explicit scope approved by the user. Load the Typst tips for consistent font paths and separate text/math font
-   configurations.
+   not replace it with a visually or metrically similar face. If Typst cannot load or use that exact face, keep the font
+   gate open, record the exact failure, and request the user's decision. If the failure is discovered after branch work,
+   apply the font-gate reset transition before continuing. Accept a substitute only for the exact `font_role`,
+   `expected_face`, and `actual_face` approved by the user. Load the Typst tips for
+   consistent font paths and separate text/math font configurations.
 6. **Shared implementation.** Use the same ordinary Typst syntax and
    template-owned rules for the official and varied instances, with
    `set`/`show` rules, and natural flow. Use contextual measurement when local
@@ -279,6 +292,25 @@ next. Revisit an earlier element when later evidence invalidates its record:
 inventory:
   status: open
   target_elements: []
+font_gate:
+  status: open
+  reference_inventory_complete: false
+  no_font_requirements_reason: "" # fill only under the no-font condition defined below
+  requirements:
+    - font_role: ""
+      source_evidence: ""
+      expected_face: ""
+      actual_face: ""
+      observation: ""
+      observed_after_last_change: false
+      approved_substitution: "" # exact user decision, or empty
+  comparisons:
+    - reference_pdf: ""
+      candidate_pdf: ""
+      comparator_index: ""
+      unexplained_face_names: [] # entries: {pdf_side, face_name, reason_not_assigned}
+      observed_after_last_change: false
+  comparison_only_font_exclusions: [] # existing exclusion records that explain a PDF face name
 open_parents: []
 active:
   branch: ""
@@ -312,21 +344,48 @@ critic:
    relation. Use `not_applicable: <reason>` only where justified; each accepted
    mismatch records the exact item and user decision. Apply these transitions:
 
+   Set `reference_inventory_complete: true` only after every present or `variation_required` target branch containing
+   text or math for which the structural source or PDF extractor reports a font face is assigned to every applicable
+   font role, every such role has one requirement, and every normalized face
+   name extracted from every reference PDF is assigned to a role or an existing user-confirmed comparison-only
+   exclusion. Fill `no_font_requirements_reason` only when no present or `variation_required` target branch contains a
+   structural font assignment or PDF text or math associated with an extracted font face. Rasterized or outlined
+   lettering is checked with its containing figure, table, or drawing branch instead.
+
+   Complete the font gate only when `reference_inventory_complete` is true; `requirements` is nonempty or
+   `no_font_requirements_reason` is filled; every requirement has nonempty `font_role`, `source_evidence`,
+   `expected_face`, `actual_face`, and an `observation` made after the latest change covered by the font-change transition below; every requirement has
+   identical expected and actual faces or an exact user decision approving its recorded role and faces; and every
+   corresponding official PDF pair has nonempty `reference_pdf`, `candidate_pdf`, and `comparator_index`, was observed
+   after the latest change to either PDF's source or compile environment, and has an empty `unexplained_face_names` list. A corresponding official PDF pair is
+   the reference rendering and candidate rendering of the same official instance. `unexplained_face_names` lists every
+   face name present on only one side that cannot be assigned to a recorded role or comparison-only exclusion.
+
 | Guard or event | Required transition |
 | --- | --- |
-| `inventory.status` is `open` | Keep `active` empty and finish the target element list; set it `complete` only under the inventory rules in the router, then create the first required `active` branch. |
+| `inventory.status` is `open` | Keep `active` empty and finish the target element list; set it `complete` only under the inventory rules in the router, then evaluate the font gate before creating the first branch. |
+| `inventory.status` is `complete` and `font_gate.status` is `open` | Add one requirement for each font role used by a present or `variation_required` target branch; do not add dormant source styles. Exercise each role in official or consolidated variation content. For every corresponding official PDF pair, run the font-only scan. Use its whole-document face-name lists to find missing or extra names, and use the requirement observation to verify which face the candidate uses for that role. Set `font_gate.status: complete` only when the completion test above passes; otherwise request the user's decision and keep it open. |
+| `inventory.status` and `font_gate.status` are both `complete`, and `active` is empty before element work begins | Create the first required `active` branch. |
+| After the font gate completed, a governing structural source or rendered reference is added or removed, or a source-side font assignment or governing reference file changes | Set `inventory.status: open`, `font_gate.status: open`, and `reference_inventory_complete: false`; rebuild the target element list, font requirements, and comparison-only font exclusions from the current evidence. Clear the comparisons, every candidate image/numeric observation, every closure, `open_parents`, `suspended`, and `critic.completed_groups_since_last_input_load`; leave `active` empty. Complete the inventory and font gate again before recreating the first required branch. |
+| After the font gate completed, font-selection code, a font file or package, the compiler version, an ordered font-search directory, or a system/embedded-font setting changes, or source content first uses a writing system (for example Latin, Japanese, or Greek), mathematical alphabet, font weight, font style, or font role absent from the completed observations | Apply ordinary branch invalidation for the changed source, set `font_gate.status: open`, and set `observed_after_last_change: false` on every affected requirement and official PDF comparison. If the change introduces a font role absent from `requirements`, set `reference_inventory_complete: false` and add its requirement. Do not tune or close layout rules during this recheck. Recompile the changed official and variation sources, re-observe the affected roles, and repeat the affected official-pair font scans. Set the gate complete again only when `reference_inventory_complete` is true, each expected and actual face agrees or the recorded role, expected face, and actual face exactly match its approved substitution, and no scan has an unexplained face name. If the recheck fails, clear `active`, `open_parents`, `closures`, `suspended`, and `critic.completed_groups_since_last_input_load`, and resolve the gate before recreating the first required branch. |
 | An active composite has a present or variation-required direct child without a valid closure | Push the complete current `active` record onto `open_parents` and create the child's `active` record; after the child closes, restore the last parent record as `active` and add that child's branch path to `child_closures`. |
 | An active child contradicts a relation owned by an entry in `open_parents` | Move every parent above the affected parent, then the child, to `suspended` in parent-to-child order. Make the affected parent active, repair and recompile it, then push it back onto `open_parents` without closing it. Restore each moved parent from oldest ancestor to youngest, repair and recompile it, and push it back without closing it. Finally restore the moved child as active; the normal child-to-parent closures then resume. |
 | An edit can affect a branch's official or variation result | Apply the router's edit-invalidation rule before compiling, set `active.last_change_recompiled` false, and invalidate dependent closures. Remove from `critic.completed_groups_since_last_input_load` every group made incomplete by that invalidation. |
 | Any applicable branch-completion condition in the router fails; `last_change_recompiled` is false; or `unresolved_mismatches` is nonempty | Keep `active.status: open`; continue this branch. |
-| Every applicable branch-completion condition in the router holds and `last_change_recompiled` is true | Close and append `active`. If this closure makes every present or variation-required branch with the same `critic_group` valid, append that group name to `critic.completed_groups_since_last_input_load` unless it is already present; `final_only` never appends. Then restore the last complete parent record from `open_parents` or create the next branch in dependency and reading order. |
+| `font_gate.status` is `complete`, every applicable branch-completion condition in the router holds, and `last_change_recompiled` is true | Close and append `active`. If this closure makes every present or variation-required branch with the same `critic_group` valid, append that group name to `critic.completed_groups_since_last_input_load` unless it is already present; `final_only` never appends. Then restore the last complete parent record from `open_parents` or create the next branch in dependency and reading order. |
 | A later observation contradicts a closure outside the active ancestor chain | Move any complete records in `open_parents`, then `active`, to `suspended` in parent-to-child order and clear `open_parents`; move the first affected entry in dependency order from `closures` to `active` and set it open. After the repaired branch closes, restore all but the last suspended record to `open_parents` and the last to `active`; if none existed, continue with the next required branch or final review. |
-| A later pass finds an omitted occurrence or element with a different shared rule | Add the occurrence to its existing branch or add the new branch path; activate the affected branch and invalidate each closure whose direct-child placement or downstream relation depends on it. |
+| A later pass finds an omitted occurrence or element with a different shared rule | Add the occurrence to its existing branch or add the new branch path. If it changes the font inventory or adds a role absent from `requirements`, first apply the structural-source/font-inventory reset above. Otherwise activate the affected branch and invalidate each closure whose direct-child placement or downstream relation depends on it. |
 | Source authority or acceptance is missing | Keep the branch open and request the user's decision. |
 
    Compilation, warnings, page count, visited files, and aggregate pixel
    scores cannot populate the relation fields. Resume a suspended branch at its
    first empty or contradicted field after the reopened branch closes again.
+
+Do not enter `result` as an independent judgment. Derive it from the fields beside it: an image `match` requires no
+visible difference in its named regions; a numeric `match` requires the recorded `expected_relation` to produce `true`
+from the current measured values; and a variation or recheck `match` requires
+every predicted event and every relation predicted not to change to be named and observed. Use `mismatch` whenever those
+fields contradict `match`, and correct the label before evaluating a closure.
 
 Request the user's decision when source authority or acceptance leaves a closure
 field unresolved. Classify a difference as renderer-origin only after recording
@@ -440,7 +499,9 @@ Load each short Typst or CSL tip when its named issue becomes active:
 - [preserving a standard element's natural size, flow, counters, labels, and links when adding a wrapper, helper, or manual rendering](references/typst-tip-preserve-built-in-behavior.md);
 - [natural width versus wrapped extent](references/typst-tip-natural-width.md);
 - [source baseline pitch versus Typst leading](references/typst-tip-line-pitch.md);
-- [font resolution for text and math](references/typst-tip-font-resolution.md);
+- [Word-origin font sources under WSL](references/typst-tip-word-font-sources.md);
+- [TeX-rendered font sources and Type 1 limitations](references/typst-tip-tex-font-sources.md);
+- [reusing the same Typst font environment](references/typst-tip-font-resolution.md);
 - [combined math accents](references/typst-tip-combined-accents.md);
 - [run-in labels and continuation-line alignment](references/typst-tip-run-in-label-continuation.md);
 - [stable author and affiliation identifiers](references/typst-tip-author-affiliation-identifiers.md);
@@ -490,7 +551,8 @@ critic conditions below to decide whether Finish conditions hold.
 
 After the last change to the template, usage, asset, bibliography data, or style,
 compile the official instance and every variation case recorded in valid closure
-entries from the current source. Enter the final iteration of the Author-Usage
+entries from the current source. Recheck every font requirement and font comparison against those compiled PDFs and
+mark them observed only after that compile; do not enter final review while the font gate is open. Enter the final iteration of the Author-Usage
 Critic Loop: run the fresh
 critic and the builder's raw-source, all-reference-page, all-varied-page, public
 API, ownership, and render audit concurrently while those current files remain

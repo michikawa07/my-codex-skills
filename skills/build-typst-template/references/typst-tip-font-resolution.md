@@ -1,20 +1,23 @@
-# Font Resolution in the Final Compile Environment
+# Reusing the Same Typst Font Environment
 
-Use the same font directories for discovery, calibration, every variation, and
-the accepted final compile:
+Past builds avoided font fallback and unintended changes in line wrapping by
+using the same font directories for discovery, official usage, variations, and
+the final compile:
 
 ```sh
-typst fonts --font-path <font-dir>
+typst fonts --variants --font-path <font-dir>
 typst compile --font-path <font-dir> input.typ output.pdf
 ```
 
-`--font-path` adds a search directory to the active system and embedded font
-sources. Record the full command and environment. Use `--ignore-system-fonts`
-when the target requires resolution from the named directories, and
-`--ignore-embedded-fonts` when the target evidence also excludes Typst's
-embedded faces.
+`--font-path` adds a directory that Typst recursively searches for fonts,
+alongside enabled system and embedded font sources. Pass
+`--ignore-system-fonts` and/or `--ignore-embedded-fonts` consistently to
+discovery and compilation when excluding those sources.
 
-Resolve body text and math as separate font configurations. Apply the evidenced
-math face in equation styling when needed, for example with
-`show math.equation: set text(font: "...")`. Inspect the embedded PDF faces and
-focused glyphs before calibrating wrapping or spacing.
+A font file found on disk or reported by `fc-match` is not necessarily loadable
+by Typst; `typst fonts` reports what Typst recognizes with the selected font
+paths and font-source options. Keep text and math font assignments separate
+when the source does.
+
+The exact-face requirement, substitution decision, and PDF comparison are
+defined in `SKILL.md`.

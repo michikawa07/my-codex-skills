@@ -100,10 +100,15 @@ then add discovered branches under their real parents. Store the list under
       case: "page-1-title"
       sample_roles: [ordinary] # ordinary | longest | wrapped | split | boundary
       endpoints_and_coordinates: ""
-      expected_relation: "match reference"
+      expected_relation: "candidate_value == reference_value after conversion to unit"
       reference_value: ""
-      candidate_value: ""
+      candidate_value: "" # scalar, or a keyed map for predicate
       unit: ""
+      comparison:
+        method: exact # exact | explicit_tolerance | predicate
+        maximum_allowed_difference: 0
+        rule_evidence: ""
+        calculation_evidence: ""
       result: "" # match | mismatch | accepted_mismatch
       observed_after_last_change: false
 ```
@@ -123,12 +128,24 @@ page/column boundary; the other role names mean the longest relevant content, a
 wrapped case, one occurrence split across regions, or a case at that boundary.
 One case may satisfy multiple roles. The two values
 and unit contain the actual official and latest-candidate measurements.
-`expected_relation` is `match reference` for an official case. For a variation
+`expected_relation` is `candidate_value == reference_value after conversion to unit` for an official exact case. For a variation
 without an official value, set `reference_value` to reasoned `not_applicable`,
 put the numeric condition required by source evidence in `expected_relation`, and
 judge `candidate_value` against it. Its `result` uses the same three outcomes as
 `image_result`. `observed_after_last_change` is true only after observing the
 latest PDF compiled after the most recent edit that can affect that result.
+The `comparison` block makes that judgment reproducible. Before measuring the candidate, write `expected_relation` as
+the true-or-false expression that will decide the result and record `method`. For `exact`, compare values produced by the
+same measurement command in `unit` with `candidate_value == reference_value`. Use `explicit_tolerance` only when the
+governing source states a tolerance or the user changes the required relation before candidate measurement; put the same
+maximum absolute difference in `expected_relation` and `maximum_allowed_difference`, and record its evidence in
+`rule_evidence`. Use `predicate` only for a variation without a reference value. Set `reference_value` to
+`not_applicable`; name each candidate measurement in `endpoints_and_coordinates`; store `candidate_value` as a keyed map
+using those names; write the source-backed inequality or non-overlap expression in `expected_relation`; and record its
+evidence in `rule_evidence`. After measurement, record the substituted expression and its `true` or `false` output in `calculation_evidence`; include
+the exact command and its unedited standard output rather than a prose verdict. `result: match` is valid only when that
+output is true and `observed_after_last_change` is true. False output requires `mismatch`; a user-approved deviation from the source-required value or relation remains
+`accepted_mismatch`, not `match`.
 For a variation, `expected_event` also names relations expected not to change,
 while `observed_event` includes downstream behavior; its `result` uses the same
 three outcomes. A recheck result uses them as well.
@@ -163,9 +180,11 @@ variation-required branch has its variation cases, required direct children,
 and every applicable minimum relation and sample case from the table below selected.
 `numeric_selection: none` always needs `numeric_none_reason`;
 `required` needs every applicable record, not merely one. At this stage a record
-is selected when `relation`, `case`, `sample_roles`,
-`endpoints_and_coordinates`, `expected_relation`, and `unit` are filled;
-candidate fields, `result`, and `observed_after_last_change` remain empty/false
+is selected when `relation`, `case`, `sample_roles`, `endpoints_and_coordinates`, `expected_relation`, `unit`, and
+`comparison.method` are filled. Before candidate measurement, `explicit_tolerance` also requires
+`maximum_allowed_difference` and `rule_evidence`, while `predicate` requires `rule_evidence`.
+Candidate values, `calculation_evidence`, `result`, and `observed_after_last_change` remain empty
+or false
 until implementation and the latest compile. Only then create the first active
 branch. Expand `Heading level N` into one branch path for each level found.
 When a branch becomes active, read its packet and, before editing that branch,
@@ -221,13 +240,18 @@ all-occurrence image inspection covers them.
 After an edit to a branch, ancestor, or shared rule, clear every affected
 `official` observation and `rechecks` entry in the complete records held by `active` or `open_parents`,
 candidate region/value/result in the target element list, and variation
-`call_path`/`observed_event`/`result`; set `last_change_recompiled: false` on every affected open record and each affected
+`call_path`/`observed_event`/`result`; clear each affected numeric record's `calculation_evidence`; set
+`last_change_recompiled: false` on every affected open record and each affected
 record in the target element list and `rechecks` to `observed_after_last_change: false`. Invalidate dependent closures and fill
 these fields again only after the latest compile. Preserve a prior user decision
 as source evidence, but do not treat its accepted mismatch as current until that
 exact difference is observed again. The closure's `rechecks` records one keyed
 observation for every `required_rechecks[].check` and case; it does not duplicate
 image or numeric values.
+
+If `expected_relation`, `comparison.method`, `maximum_allowed_difference`, or `rule_evidence` changes after
+candidate measurement, clear that numeric record's `candidate_value`, `calculation_evidence`, `result`, and
+`observed_after_last_change`, then measure it again after the next compile.
 
 A branch may close only when all applicable conditions below hold:
 
@@ -238,9 +262,10 @@ A branch may close only when all applicable conditions below hold:
 - each present branch has at least one official occurrence; every occurrence
   has nonempty reference/candidate regions, current `match` or
   `accepted_mismatch`, and no `mismatch`;
-- `numeric_selection: none` has its reason, or every selected numeric record has
-  applicable reference/candidate values, current `match` or
-  `accepted_mismatch`, and no `mismatch`; reasoned `not_applicable` is a value
+- `numeric_selection: none` has its reason, or every selected numeric record has applicable reference/candidate values,
+  a `method` and concrete `expected_relation` recorded before candidate measurement, `rule_evidence` when required, and current calculation output; `match`
+  requires true output and `observed_after_last_change: true`, while false output is permitted only with `accepted_mismatch` and
+  its exact user decision; no record may remain `mismatch`; reasoned `not_applicable` is a value
   only in the variation case defined above;
 - every variation case has a call path, observed event, and current `match` or
   `accepted_mismatch`, with no `mismatch`;
