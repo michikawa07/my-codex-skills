@@ -10,7 +10,8 @@ instance matches, and justified content changes remain coherent.
 
 First inspect the source structure and rendered pages. Establish a parent
 enough to define its children's coordinate and flow context, then complete its
-children in reading order. Open one packet at a time:
+children in reading order. Open one packet at a time. The eight numbered entries are also the eight **critic groups**
+defined in `SKILL.md`:
 
 1. [Document and page](ledger-document-page.md)
 2. [Frontmatter](ledger-frontmatter.md)
@@ -20,6 +21,26 @@ children in reading order. Open one packet at a time:
 6. [Figures](ledger-figures.md)
 7. [Tables](ledger-tables.md)
 8. [Citations and references](ledger-citations-references.md)
+
+Assign every target element to exactly one of these groups with `critic_group`; assign the root `Document` branch the
+literal value `final_only`. Default branch paths use this mapping:
+
+| `critic_group` | Assigned branch paths |
+| --- | --- |
+| `Document and page` | `Document/Page`, `Document/Page/Header`, and `Document/Page/Footer` |
+| `Frontmatter` | `Frontmatter` and all its descendants |
+| `Body flow` | `Body`, `Body/Columns`, `Body/Columns/Paragraphs`, and every `Body/Columns/Heading level N` branch |
+| `Lists` | `Lists` and `Lists/Items` |
+| `Equations` | `Equations` and `Equations/Equation references` |
+| `Figures` | `Figures`, `Figures/Images`, `Figures/Captions`, and `Figures/Figure references` |
+| `Tables` | `Tables`, `Tables/Rows`, `Tables/Rows/Cells`, `Tables/Table captions`, and `Tables/Table references` |
+| `Citations and references` | `Citations`, `References`, and `References/Bibliography entries` |
+
+Assign a discovered branch to the numbered packet that owns its rule. A critic group completes only when it has at
+least one present or variation-required branch and every such branch assigned to it has a valid closure. Closing two
+children of one group still completes no more than one group. Reopening any assigned branch makes the group incomplete
+until that branch closes again. `final_only` is checked by the unconditional final critic and never contributes to the
+intermediate critic trigger.
 
 Use the `router-cursor.yaml` schema in `SKILL.md`; it records the active branch,
 active direct child, observed parent coordinate/width/inheritance/flow, and
@@ -47,6 +68,7 @@ then add discovered branches under their real parents. Store the list under
 ```yaml
 - branch: "Frontmatter/Title"
   parent: "Frontmatter"
+  critic_group: "Frontmatter" # one of the eight names above, or "final_only" for Document
   origin: default # default | discovered
   official_presence: present # present | absent
   variation_required: false
@@ -134,7 +156,7 @@ waives the activating variation required later for a present branch.
 
 Set `inventory.status: complete` only after every default has one presence
 result, every absent branch has completed `absence_evidence` and a nonempty
-`variation_requirement_reason`, every discovered
+`variation_requirement_reason`, every target element has a valid `critic_group`, every discovered
 branch and official occurrence is listed, every present branch has at least one
 official occurrence, and every present or
 variation-required branch has its variation cases, required direct children,
