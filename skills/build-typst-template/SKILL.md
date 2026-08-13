@@ -98,19 +98,22 @@ Use these workflow terms throughout this file and its linked references:
 | **current authoring system** | Current author sources, template dependencies, assets, and PDFs compiled after the latest source edit. |
 | **font face** | The complete resolved face name reported by the compiler that renders the source; if that report is unavailable, use the exact face name in the structural source; if neither is available, use the normalized PDF face name. The name includes family, weight, and style. A visually or metrically similar name is a different face. When reading a PDF face name, remove only a six-uppercase-letter subset prefix such as `ABCDEF+`. |
 | **font role** | A coarse use that has one source-assigned font face, such as body text, heading text, captions, bibliography text, or display math. Split a role only when the source assigns a different face. |
-| **font requirement** | One font role with its source evidence, expected face, actual candidate face, current observation, and optional user-approved substitution. The observation names one source location, one candidate source location, the candidate PDF page or region or text run, and the extraction command and unedited output that identifies the actual face. When the faces differ, it also records why Typst did not use the expected face, which alternatives were examined, the recommended face or the reason none is recommended, and the observed differences. |
+| **font requirement** | One font role with its source evidence, expected face, actual candidate face, current observation, and optional user-approved substitution. The observation summary names one source location, one candidate source location, the candidate PDF page or region or text run, and an evidence ID whose fenced block stores the extraction command and unedited output identifying the actual face. When the faces differ, it also records why Typst did not use the expected face, which alternatives were examined, the recommended face or the reason none is recommended, and the observed differences. |
 | **font gate** | Check performed after inventory and before the first branch. It is complete only when every required font role uses the expected face or has a user-approved substitution for that role, and every missing or extra PDF face name reported by the comparator is assigned to a font role or a user-confirmed comparison-only exclusion. While it is open, do not tune or close rules for font size, tracking, wrapping, spacing, geometry, or downstream flow. |
 | **semantic / semantics** | Document meaning encoded by element type, structured content/order, counters, labels, and references rather than appearance alone. |
 | **element** | One source container or content unit: page, title block, paragraph, list, equation, figure, table, etc. |
 | **packet** | Linked reference for one element type; `Requires` lists prerequisites, `Owns` its rules/relations, `Emits` outputs, and `Recheck` later observations. |
 | **router** | Ordered element list and packet links in `component-property-ledger.md`. |
-| **target element list / inventory** | Router-defined target-specific list of default and discovered elements, occurrences, planned checks, and its completeness status. |
-| **router cursor** | YAML record of inventory status, the target element list, `open_parents` (a last-in-first-out stack holding each waiting composite ancestor's complete open `active` record), `active`, `closures`, `suspended` (ordered complete open records paused during earlier repair), and critic state and completed critic groups since the critic last loaded its inputs. |
+| **target element list / inventory** | Target-specific Markdown list of default and discovered elements, occurrences, planned checks, and its completeness status. Store it at `<scratch>/target-elements.md`. |
+| **branch property** | One named semantic or layout relation that the branch must reproduce. A layout relation determines placement, size, child arrangement, text formation, or effects on neighboring and later content; examples are author-block alignment, the gap between two author groups, continuation-line indent, and whether a figure stays with its caption. |
+| **branch record** | One Markdown file under `<scratch>/branch-records/` containing an open, closed, or invalidated branch's source locations, required branch properties, Typst controls, official and variation observations, numeric checks, rechecks, children, and mismatches. |
+| **valid prerequisite record** | An open or closed branch record, never an invalidated one, whose cited prerequisite relation has `Observed after last change: true` and is satisfying. A relation with a `Result` field is satisfying only with `match`, `accepted_mismatch` plus its exact user decision, or explicitly permitted `not_applicable`; a relation without a `Result` field is satisfying only when its observation establishes the prerequisite and no unresolved mismatch contradicts it. The whole record need not be closed when it supplies a current direct-parent relation to its active child. |
+| **router cursor** | Small YAML record at `<scratch>/router-cursor.yaml`. It stores only inventory and font-gate status and record paths, the active branch and its branch-record path, waiting or suspended branch paths, closure summaries and branch-record paths, and critic state. Detailed element, font, measurement, and closure evidence stays in the referenced Markdown files. |
 | **branch / active branch** | One element type or structural role whose shared layout/semantic rule is checked across all named occurrences / the only branch currently edited. |
 | **critic group** | One of the eight numbered router groups in `component-property-ledger.md`. All target branches assigned to one group collectively count as one completed unit for intermediate critic scheduling. The root `Document` branch is final-only and is not a critic group. |
 | **first affected branch** | Earliest branch in router dependency order whose owned rule or recorded relation must change to remove the observed failure. |
 | **composite branch** | Branch whose direct children each require a branch record before the parent completes. |
-| **closure entry / branch closure** | Step 9 observations made after the latest edit / the event that appends a valid entry and advances the cursor. An entry remains valid only until contradicted. |
+| **closure entry / branch closure** | A completed branch record whose required observations were repeated after the latest edit that can affect that branch / the event that appends its branch path and record path to the cursor and advances it. An entry remains valid only until contradicted. |
 | **author action** | One edit or call made through author-facing syntax. |
 | **author route / call path** | That syntax plus its ordered wrapper, imported function, and template-rule sequence to output. |
 | **activating variation** | Author action whose output exhibits the predicted element type/content or visible event that distinguishes the inferred rule. |
@@ -122,13 +125,16 @@ Use these workflow terms throughout this file and its linked references:
 | **critic result** | `REVISE` for changed meaning, a second helper for the same concept, or wrong/overlapping/missing content or flow; otherwise `BLOCKED` if evidence/authority is missing; otherwise `CLEAR`. |
 | **Finish conditions** | Inventory and the font gate are complete; every present or variation-required branch has a valid closure entry; every absent branch has absence evidence; final critic is `CLEAR`; builder has no unaccepted mismatch; and every critic finding has a resolving retest. |
 
-Keep the task active until the Finish conditions hold. Use critic findings only as repair input. Maintain `<scratch>/router-cursor.yaml` with the exact record and transitions in step 9.
+Keep the task active until the Finish conditions hold. Use critic findings only as repair input. Maintain the cursor and the files it references with the exact records and transitions in step 9.
 1. **Collect mechanical evidence.** Inventory files, formats, page
    geometry, embedded fonts, and images; render editable sources with their
    established application or compiler to expose appearance and pagination.
 2. **Map the top level.** Read [the element router](references/component-property-ledger.md) once. Before implementation,
-   complete its target element list from the structural source and every rendered reference page, including present/absent
-   defaults, discovered elements, every official occurrence, and required numeric relations. Then load the packet linked by the router for the single active branch; apply its detailed prompts only after the packet's required parent observations exist.
+   complete `<scratch>/target-elements.md` from the structural source and every rendered reference page, including
+   present/absent defaults, discovered elements, every official occurrence, and required numeric relations. Create
+   `<scratch>/font-requirements.md` for the font-gate records. Then load the packet linked by the router for the single
+   active branch; apply its detailed prompts only after every item in the packet's `Requires` section has a current
+   Prerequisites row as specified by the router.
 3. **Build and compile the skeleton.** Prefer a user-named target-adjacent Typst template/document over the bundled
    [`template.typ` + `usage.typ`](assets/scaffold/) pair as evidence for file division, imports, wrapper calls, and
    body-flow hooks; copy the best available pair into the authoring root. Before the font gate completes, derive only
@@ -172,8 +178,8 @@ Keep the task active until the Finish conditions hold. Use critic findings only 
    current authoring system when two distinct critic groups have completed since the critic last loaded its inputs. Pass
    only current author sources,
    dependencies, assets, and the PDF compiled from each source after its latest
-   edit; the builder retains the router cursor, branch/packet names, closure
-   entries, and prior diagnosis. Start the
+   edit; the builder retains the router cursor, active packet, branch records,
+   and prior diagnosis. Start the
    next element while the critic runs. From each returned file/location and
    governing cause, the builder identifies the first affected branch in
    dependency order, reopens it when needed, and performs the stated retest.
@@ -182,9 +188,14 @@ Request a user decision when the evidence does not determine which source
 governs, what a source item means, whether a file outside the named inputs may be
 edited, or whether a named remaining mismatch may be accepted.
 
-After a context compaction or resumed run, restore the Goal, router cursor, active packet, and roughly the five most
-recent mismatches, predicted changes, observed outcomes, and affected relations. Resume the open branch at the first
-closure field lacking a post-last-change observation or containing an unaccepted mismatch. Advance only from step 9.
+After a context compaction or resumed run, restore the Goal and read, in order,
+the router cursor, the active branch record, that record's one target entry in
+`<scratch>/target-elements.md`, the active packet, and only the prerequisite
+branch records named by the active record. Read other target entries only when
+inventory or dependency routing is needed, and read
+`<scratch>/font-requirements.md` only when the font gate is active or rechecked.
+Resume at the first unmet branch-completion condition in the order listed by
+the router. Advance only from step 9.
 
 Record elapsed time only after obtaining every closure entry, successful
 activating variations, final critic `CLEAR`, and no unaccepted builder mismatch.
@@ -196,18 +207,23 @@ Apply this loop to the active branch selected by the router. Attach each rule to
 one of the four owner categories and close the branch through its packet
 relations.
 
-Before changing the active branch, identify the author action or publication
-rule it supports, its parent/earlier constraints, and the later content it can
-move. After changing it, record its internal formation and the observed effects
-on those named relations.
+When a branch becomes active, create or reopen its branch record. Read the active
+packet and add its required starter branch properties to that record. Before
+changing the branch, inspect the governing structural source and rendered
+occurrences and add a branch property for every additional semantic or layout relation found by the extraction
+rules in the router. Identify the author action or publication rule it supports,
+its parent/earlier constraints, and the later content it can move. After changing
+it, record its internal formation and the observed effects on those named
+relations in the same branch record.
 Treat pixel scores, elapsed time, compiled fixtures, and visited elements only
 as auxiliary observations.
 
-For each element, connect five concrete facts: its author syntax/content, the
-file that owns its formatting rule, the Typst control implementing that rule,
-its official rendered relations, and its observed activating variation. Use the
-current packet to enumerate those relations; use the router only for the full
-element list and dependency order.
+For each element, connect five concrete facts in its branch record: its author
+syntax/content, the file that owns its formatting rule, the Typst control
+implementing that rule, its official rendered relations, and its observed
+activating variation. Use the current packet for its starter properties and
+rechecks; use the router for the full element list, dependency order, common
+starter properties, and target-specific property extraction.
 
 The parent container establishes the child's coordinate system, available
 width, inherited rules, and flow context. Interpret and tune child parameters
@@ -249,9 +265,20 @@ next. Revisit an earlier element when later evidence invalidates its record:
    column, table-row identifiers around a boundary and its repeated header, or
    the next normal anchor after optional-field omission. Record how the result
    affects the parent, neighbors, and downstream flow.
-5. **Formatting controls and owner.** List the governing controls inferred from
-   structural and rendered evidence. Assign each rule to the element role it
-   formats, covering applicable typography, alignment, width/wrap,
+5. **Branch properties, controls, and owner.** Before editing, put the common
+   layout starter properties for the branch's `[C]` or `[T]` markers and the
+   packet's branch-specific starter properties into its branch record. Inspect the source
+   rules that apply directly or by inheritance, the source containers that group
+   and order direct children, every official rendered occurrence, and the
+   selected author variation. Add a separate property row for every additional
+   content identity, order, counter, label, link, placement, size,
+   child-arrangement, text-formation, neighbor, or downstream relation found
+   there. Record a source location and target relation for each
+   row; `not_applicable` requires a source- or structure-based reason. Complete
+   this property list before tuning the branch.
+
+   Map every property to its governing Typst file and control and one of the four
+   owner categories. Cover the applicable typography, alignment, width/wrap,
    spacing, breaks, numbering, strokes, padding, markers, and asset treatment.
    When a source names a geometric relation, record its definition and
    endpoints, then map it to the Typst control that governs the same relation.
@@ -302,51 +329,21 @@ next. Revisit an earlier element when later evidence invalidates its record:
    the observed element type/content or rendered event, and downstream behavior.
 9. **Branch closure and transition.** After the last branch edit, rerender the
    official case and its activating variation through the public author workflow.
-   Update `<scratch>/router-cursor.yaml` in this shape:
+   Update the active branch record using the Markdown format in the router, then
+   update `<scratch>/router-cursor.yaml` in this compact shape:
 
 ```yaml
 inventory:
   status: open
-  target_elements: []
+  record_file: "<scratch>/target-elements.md"
 font_gate:
   status: open
-  reference_inventory_complete: false
-  no_font_requirements_reason: "" # fill only under the no-font condition defined below
-  requirements:
-    - font_role: ""
-      source_evidence: ""
-      expected_face: ""
-      actual_face: ""
-      observation: ""
-      observed_after_last_change: false
-      approved_substitution: "" # exact user decision, or empty
-  comparisons:
-    - reference_pdf: ""
-      candidate_pdf: ""
-      comparator_index: ""
-      unexplained_face_names: [] # entries: {pdf_side, face_name, reason_not_assigned}
-      observed_after_last_change: false
-  comparison_only_font_exclusions: [] # existing exclusion records that explain a PDF face name
+  record_file: "<scratch>/font-requirements.md"
 open_parents: []
 active:
   branch: ""
-  packet: ""
+  record_file: ""
   status: open
-  last_change_recompiled: false
-  official:
-    container: {observation: "", result: "", observed_after_last_change: false}
-    direct_children: {observation: "", result: "", observed_after_last_change: false}
-    internal_formation: {observation: "", result: "", observed_after_last_change: false}
-    downstream: {observation: "", result: "", observed_after_last_change: false}
-  rechecks:
-    - check: ""
-      case: ""
-      observation: ""
-      result: "" # match | mismatch | accepted_mismatch
-      observed_after_last_change: false
-  child_closures: []
-  unresolved_mismatches: []
-  accepted_mismatches: []
 closures: []
 suspended: []
 critic:
@@ -356,42 +353,80 @@ critic:
   unresolved_findings: []
 ```
 
-   Every observation names both locations and the visible, extracted, or measured
-   relation. Use `not_applicable: <reason>` only where justified; each accepted
-   mismatch records the exact item and user decision. Apply these transitions:
+   Store font details in `<scratch>/font-requirements.md`:
 
-   Set `reference_inventory_complete: true` only after every present or `variation_required` target branch containing
+```markdown
+# Font requirements
+reference_inventory_complete: false
+no_font_requirements_reason:
+
+## Requirements
+| font_role | source_evidence | expected_face | actual_face | observation_summary_and_evidence_id | observed_after_last_change | approved_substitution |
+| --- | --- | --- | --- | --- | --- | --- |
+
+## PDF comparisons
+| reference_pdf | candidate_pdf | comparator_index | unexplained_faces | observed_after_last_change |
+| --- | --- | --- | --- | --- |
+
+## Comparison-only font exclusions
+| pdf_side_and_face_name | user_confirmed_exclusion |
+| --- | --- |
+
+## Evidence
+### F-001
+Command and unedited output:
+~~~text
+...
+~~~
+```
+
+   Each `open_parents`, `closures`, or `suspended` entry contains `branch` and
+   `record_file`; a closure entry also contains `critic_group`. Detailed state
+   belongs in the referenced file, not in the cursor. Every observation names
+   both locations and the visible, extracted, or measured relation. A table cell
+   stores a short observation and an evidence ID; the same file's Evidence
+   section stores multiline commands and unedited output in fenced blocks. Use
+   `not_applicable: <reason>` only where justified; each accepted mismatch
+   records the exact item and user decision. Apply these transitions:
+
+   Store `reference_inventory_complete`, `no_font_requirements_reason`, requirements, PDF comparisons, and
+   comparison-only font exclusions in `<scratch>/font-requirements.md` using the schema above. Each
+   `unexplained_faces` entry contains `pdf_side`, `face_name`, and
+   `reason_not_assigned`. Set `reference_inventory_complete: true` only after every present or
+   `Variation required: true` target branch containing
    text or math for which the structural source or PDF extractor reports a font face is assigned to every applicable
    font role, every such role has one requirement, and every normalized face
    name extracted from every reference PDF is assigned to a role or an existing user-confirmed comparison-only
-   exclusion. Fill `no_font_requirements_reason` only when no present or `variation_required` target branch contains a
+   exclusion. Fill `no_font_requirements_reason` only when no present or `Variation required: true` target branch contains a
    structural font assignment or PDF text or math associated with an extracted font face. Rasterized or outlined
    lettering is checked with its containing figure, table, or drawing branch instead.
 
    Complete the font gate only when `reference_inventory_complete` is true; `requirements` is nonempty or
    `no_font_requirements_reason` is filled; every requirement has nonempty `font_role`, `source_evidence`,
-   `expected_face`, `actual_face`, and an `observation` made after the most recent source, font, compiler, or font-search
+   `expected_face`, `actual_face`, and an `observation_summary_and_evidence_id` made after the most recent source, font, compiler, or font-search
    change described in the two `After the font gate completed` rows below; every requirement has
    identical expected and actual faces or an exact user decision approving its recorded role and faces; when those faces
-   differ, the observation also contains the alternative assessment required by the `font requirement` definition; and every
+   differ, that observation and evidence also contain the alternative assessment required by the `font requirement` definition; and every
    corresponding official PDF pair has nonempty `reference_pdf`, `candidate_pdf`, and `comparator_index`, was observed
-   after the latest change to either PDF's source or compile environment, and has an empty `unexplained_face_names` list. A corresponding official PDF pair is
-   the reference rendering and candidate rendering of the same official instance. `unexplained_face_names` lists every
-   face name present on only one side that cannot be assigned to a recorded role or comparison-only exclusion.
+   after the latest change to either PDF's source or compile environment, and has an empty `unexplained_faces` list. Every
+   font-requirement evidence ID resolves to a nonempty block in that same font record containing its command and unedited
+   output. A corresponding official PDF pair is the reference rendering and candidate rendering of the same official
+   instance. `unexplained_faces` lists every face name present on only one side that cannot be assigned to a recorded role
+   or comparison-only exclusion, together with that PDF side and the reason it remains unassigned.
 
 | Guard or event | Required transition |
 | --- | --- |
-| `inventory.status` is `open` | Keep `active` empty and finish the target element list; set it `complete` only under the inventory rules in the router, then evaluate the font gate before creating the first branch. |
-| `inventory.status` is `complete` and `font_gate.status` is `open` | Add one requirement for each font role used by a present or `variation_required` target branch; do not add dormant source styles. Exercise each role in official or consolidated variation content. For every corresponding official PDF pair, run the font-only scan. Use its whole-document face-name lists to find missing or extra names, and use the requirement observation to verify which face the candidate uses for that role. For every requirement where Typst does not list `expected_face` or the compiled candidate does not use it for the named occurrence, perform and record the alternative search and comparison required in step 5. Ask one consolidated question that requests a separate decision for each affected requirement and lists its `font_role`, `expected_face`, recommended substitute or reason none is recommended, affected source locations, reason Typst did not use the expected face, and observed differences. Record each decision in that requirement's `approved_substitution`. Set `font_gate.status: complete` only when the completion test above passes; otherwise keep it open. |
-| `inventory.status` and `font_gate.status` are both `complete`, and `active` is empty before element work begins | Create the first required `active` branch. |
-| After the font gate completed, a governing structural source or rendered reference is added or removed, or a source-side font assignment or governing reference file changes | Set `inventory.status: open`, `font_gate.status: open`, and `reference_inventory_complete: false`; rebuild the target element list, font requirements, and comparison-only font exclusions from the current evidence. Clear the comparisons, every candidate image/numeric observation, every closure, `open_parents`, `suspended`, and `critic.completed_groups_since_last_input_load`; leave `active` empty. Complete the inventory and font gate again before recreating the first required branch. |
-| After the font gate completed, font-selection code, a font file or package, the compiler version, an ordered font-search directory, or a system/embedded-font setting changes; a previously unobserved failure to list or use an expected face is discovered; or source content first uses a writing system (for example Latin, Japanese, or Greek), mathematical alphabet, font weight, font style, or font role absent from the completed observations | Apply ordinary branch invalidation for any changed source, set `font_gate.status: open`, and set `observed_after_last_change: false` on every affected requirement and official PDF comparison. If the change introduces a font role absent from `requirements`, set `reference_inventory_complete: false` and add its requirement. Do not tune or close layout rules during this recheck. Recompile the changed official and variation sources, re-observe the affected roles, and repeat the affected official-pair font scans. Set the gate complete again only when `reference_inventory_complete` is true, each requirement's `expected_face` and `actual_face` agree or its `font_role`, `expected_face`, and `actual_face` exactly match its `approved_substitution`, every differing requirement has a current alternative assessment in its observation, and no scan has an unexplained face name. If the recheck fails, clear `active`, `open_parents`, `closures`, `suspended`, and `critic.completed_groups_since_last_input_load`, and resolve the gate before recreating the first required branch. |
-| An active composite has a present or variation-required direct child without a valid closure | Push the complete current `active` record onto `open_parents` and create the child's `active` record; after the child closes, restore the last parent record as `active` and add that child's branch path to `child_closures`. |
-| An active child contradicts a relation owned by an entry in `open_parents` | Move every parent above the affected parent, then the child, to `suspended` in parent-to-child order. Make the affected parent active, repair and recompile it, then push it back onto `open_parents` without closing it. Restore each moved parent from oldest ancestor to youngest, repair and recompile it, and push it back without closing it. Finally restore the moved child as active; the normal child-to-parent closures then resume. |
-| An edit can affect a branch's official or variation result | Apply the router's edit-invalidation rule before compiling, set `active.last_change_recompiled` false, and invalidate dependent closures. Remove from `critic.completed_groups_since_last_input_load` every group made incomplete by that invalidation. |
-| Any applicable branch-completion condition in the router fails; `last_change_recompiled` is false; or `unresolved_mismatches` is nonempty | Keep `active.status: open`; continue this branch. |
-| `font_gate.status` is `complete`, every applicable branch-completion condition in the router holds, and `last_change_recompiled` is true | Close and append `active`. If this closure makes every present or variation-required branch with the same `critic_group` valid, append that group name to `critic.completed_groups_since_last_input_load` unless it is already present; `final_only` never appends. Then restore the last complete parent record from `open_parents` or create the next branch in dependency and reading order. |
-| A later observation contradicts a closure outside the active ancestor chain | Move any complete records in `open_parents`, then `active`, to `suspended` in parent-to-child order and clear `open_parents`; move the first affected entry in dependency order from `closures` to `active` and set it open. After the repaired branch closes, restore all but the last suspended record to `open_parents` and the last to `active`; if none existed, continue with the next required branch or final review. |
+| `inventory.status` is `open` | Keep `active` empty and finish the target element file; set it `complete` only under the inventory rules in the router, then evaluate the font gate before creating the first branch. |
+| `inventory.status` is `complete` and `font_gate.status` is `open` | Add one requirement to the font record for each font role used by a present or `Variation required: true` target branch; do not add dormant source styles. Exercise each role in official or consolidated variation content. For every corresponding official PDF pair, run the font-only scan. Use its whole-document face-name lists to find missing or extra names, and use the requirement observation and evidence block to verify which face the candidate uses for that role. For every requirement where Typst does not list `expected_face` or the compiled candidate does not use it for the named occurrence, perform and record the alternative search and comparison required in step 5. Ask one consolidated question that requests a separate decision for each affected requirement and lists its `font_role`, `expected_face`, recommended substitute or reason none is recommended, affected source locations, reason Typst did not use the expected face, and observed differences. Record each decision in that requirement's `approved_substitution`. Set `font_gate.status: complete` only when the completion test above passes; otherwise keep it open. |
+| `inventory.status` and `font_gate.status` are both `complete`, and `active` is empty before element work begins | Create the first required active branch and its branch record. |
+| After the font gate completed, a governing structural source or rendered reference is added or removed, or a source-side font assignment or governing reference file changes | Set `inventory.status: open`, `font_gate.status: open`, and `reference_inventory_complete: false` in the font record. Mark every existing branch record `Status: invalidated`; clear `active`, `open_parents`, `closures`, `suspended`, font comparisons, and `critic.completed_groups_since_last_input_load`. Rebuild the target element and font records from the current evidence. Preserve an explicit user decision only as source evidence; do not preserve its prior observation or result. Create new blank branch records when branch work restarts, and complete the inventory and font gate before recreating the first required branch. |
+| After the font gate completed, font-selection code, a font file or package, the compiler version, an ordered font-search directory, or a system/embedded-font setting changes; a previously unobserved failure to list or use an expected face is discovered; or source content first uses a writing system (for example Latin, Japanese, or Greek), mathematical alphabet, font weight, font style, or font role absent from the completed observations | Apply ordinary branch invalidation for any changed source, set `font_gate.status: open`, and set `observed_after_last_change: false` on every affected requirement and official PDF comparison. If the change introduces a font role absent from `requirements`, set `reference_inventory_complete: false` and add its requirement. Do not tune or close layout rules during this recheck. Recompile the changed official and variation sources, re-observe the affected roles, and repeat the affected official-pair font scans. Set the gate complete again only when `reference_inventory_complete` is true, each requirement's `expected_face` and `actual_face` agree or its `font_role`, `expected_face`, and `actual_face` exactly match its `approved_substitution`, every differing requirement has a current alternative assessment in its observation summary and evidence block, and no scan has an unexplained face name. If the recheck fails, mark every branch record `Status: invalidated`, clear `active`, `open_parents`, `closures`, `suspended`, and `critic.completed_groups_since_last_input_load`, and resolve the gate before creating new branch records. |
+| An active composite has a present or variation-required direct child without a valid closure | Push the current branch and branch-record path onto `open_parents` and create the child's branch record; after the child closes, restore the last parent pointer as `active` and add the child's branch path to the parent record's child-closure section. |
+| An active child contradicts a relation owned by an entry in `open_parents` | Move every parent pointer above the affected parent, then the child pointer, to `suspended` in parent-to-child order. Make the affected parent active, repair its record and source, and recompile it, then push it back onto `open_parents` without closing it. Restore each moved parent from oldest ancestor to youngest, repair and recompile it, and push it back without closing it. Finally restore the moved child as active; the normal child-to-parent closures then resume. |
+| An edit can affect a branch's official or variation result | Apply the router's edit-invalidation rule before compiling. Remove from `critic.completed_groups_since_last_input_load` every group made incomplete by that invalidation. |
+| Any applicable branch-completion condition in the router fails; the active branch record has `Last change recompiled: false`; or its Unresolved mismatches section is nonempty | Keep `active.status: open`; continue this branch. |
+| `font_gate.status` is `complete`, every applicable branch-completion condition in the router holds, and the active branch record has `Last change recompiled: true` | Mark the branch record closed and append its branch, record path, and `critic_group` to `closures`. If this closure makes every present or variation-required branch with the same `critic_group` valid, append that group name to `critic.completed_groups_since_last_input_load` unless it is already present; `final_only` never appends. Then restore the last parent pointer from `open_parents` or create the next branch in dependency and reading order. |
+| A later observation contradicts a closure outside the active ancestor chain | Move any branch pointers in `open_parents`, then the `active` pointer, to `suspended` in parent-to-child order and clear `open_parents`; move the first affected closure pointer in dependency order to `active`, set it open, and reopen its branch record. After the repaired branch closes, restore all but the last suspended pointer to `open_parents` and the last to `active`; if none existed, continue with the next required branch or final review. |
 | A later pass finds an omitted occurrence or element with a different shared rule | Add the occurrence to its existing branch or add the new branch path. If it changes the font inventory or adds a role absent from `requirements`, first apply the structural-source/font-inventory reset above. Otherwise activate the affected branch and invalidate each closure whose direct-child placement or downstream relation depends on it. |
 | Source authority or acceptance is missing | Keep the branch open and request the user's decision. |
 
@@ -399,11 +434,14 @@ critic:
    scores cannot populate the relation fields. Resume a suspended branch at its
    first empty or contradicted field after the reopened branch closes again.
 
-Do not enter `result` as an independent judgment. Derive it from the fields beside it: an image `match` requires no
-visible difference in its named regions; a numeric `match` requires the recorded `expected_relation` to produce `true`
-from the current measured values; and a variation or recheck `match` requires
-every predicted event and every relation predicted not to change to be named and observed. Use `mismatch` whenever those
-fields contradict `match`, and correct the label before evaluating a closure.
+Except for a branch-property row that satisfies the router's explicit
+`not_applicable` rule, do not enter `Result` as an independent judgment. Derive
+it from the fields beside it: an image `match` requires no visible difference
+in its named regions; a numeric `match` requires the recorded `Expected
+relation` to produce `true` from the current measured values; and a variation
+or recheck `match` requires every predicted event and every relation predicted
+not to change to be named and observed. Use `mismatch` whenever those fields
+contradict `match`, and correct the label before evaluating a closure.
 
 Request the user's decision when source authority or acceptance leaves a closure
 field unresolved. Classify a difference as renderer-origin only after recording
