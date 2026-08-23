@@ -30,7 +30,9 @@ Before editing Julia code:
 
 ## Editing Rules
 
-- Match local style over generic Julia advice.
+- Match local style over generic Julia advice. When existing code provides a reference, follow its structure and syntax instead of substituting a preferred personal style.
+- Treat whitespace as intentional formatting. Preserve tabs versus spaces, relative indentation depth, blank lines, and horizontal spacing used to align related expressions or arguments vertically.
+- When moving or inserting code, reproduce the surrounding block's relative indentation and column alignment. Before finalizing, inspect the diff and remove unintended whitespace-only or style-only changes outside the requested edit.
 - Complete existing functions before considering refactors.
 - Do not turn a narrow script fix into a reusable framework.
 - Preserve existing Unicode/math notation such as `𝕢`, `τ`, `∂L∂q`, and `@SVector`.
