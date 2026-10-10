@@ -327,17 +327,29 @@ records, overlay ink, occupied extent, and natural reflow separately.
 **Observed pattern.** Candidates exposed `comparison-table`, `data-table`,
 `long-data-table`, `official-number-table`, `official-math-table`, and
 `official-property-table` as different syntax/call paths for ordinary tables.
+Another candidate exposed one native `table` call but applied its rule padding
+only when the first top-level child was `table.hline`; placing the same rule
+inside `table.header` bypassed that formatting rule.
 
 **Why it looked successful.** Each sample grid and one long-table probe could be
 tuned independently.
+The single-call variant also retained every native cell and row, so semantic
+counts did not reveal the skipped spacing policy.
 
 **Authoring harm.** Authors had to switch helpers when row count, column count,
 or cell content changed, while caption, rule, counter, and reference policy
 diverged.
+In the single-call variant, equivalent short-table content acquired different
+rule-to-cell clearance solely because of its input structure.
 
 **Probe.** Send two-column, eight-column, wrapped, mathematical, and boundary-
 crossing tables through one author syntax and call path without helper switching. Inspect
 header repetition, captions, rules, labels, and following flow.
+Also compare the same one-page table with rules inside/outside its header, or
+with equivalent explicit cell coordinates. Hold text, resolved positions, and
+stroke values fixed; measure spacing within the table. Keep header-repetition
+changes separate, since moving a rule into a repeated header can legitimately
+change later pages. See the [table flow and rule-spacing examples](typst-tip-table-flow-and-rules.md).
 
 ### F09 — Caption, counter, label, or reference detached from its object
 
@@ -373,6 +385,25 @@ the displayed page and a location marker inside the body beside the ordinary
 page reference, outline page, and PDF link. Distinguish the physical sheet index
 from the printed page counter, including front matter and resets. See the
 [placed-page diagnostic](typst-tip-float-page-references.md).
+
+#### Caption separation despite native figure association
+
+**Observed pattern.** Making a captioned table breakable retained one native
+figure/table and correct numbers, but allowed a caption to occupy a different
+page from the corresponding table start or end.
+
+**Why it looked successful.** A short table away from a page boundary looked
+correct, and all rows and caption text remained present in extraction.
+
+**Authoring harm.** A top caption remained at the end of one page while the
+table began on the next. A bottom caption could occupy a page by itself after
+the last table row.
+
+**Probe.** For a top caption, vary preceding prose until the caption alone fits
+but the first rows do not. For a bottom caption, grow the rows until the final
+row approaches the page bottom. Inspect the actual caption/row relationship,
+header repetition, and following prose; native association alone cannot show
+that they remain visually attached. Use the source-required caption position.
 
 ### F10 — Editable semantics replaced by literal text or image previews
 
