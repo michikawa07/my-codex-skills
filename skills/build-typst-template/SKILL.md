@@ -134,9 +134,9 @@ review records at their authoring-root or scratch paths.
 Keep the task active until the Finish conditions hold. Use critic findings only as repair input. Maintain the cursor and the files it references with the exact records and transitions in step 9.
 1. **Collect mechanical evidence.** First identify the user's actual Typst
    host/compiler and font settings from user or project evidence; ask if unclear.
-   Apply [font resolution](references/typst-tip-font-resolution.md). Inventory files,
-   formats, page geometry, embedded fonts, and images; render editable sources
-   with their established application or compiler to expose appearance and pagination.
+   Inventory files, formats, page geometry, embedded fonts, and images; render
+   editable sources with their established application or compiler to expose
+   appearance and pagination.
 2. **Map the top level.** Read [the element router](references/component-property-ledger.md) once. Before implementation,
    complete `<scratch>/target-elements.md` from the structural source and every rendered reference page, including
    present/absent defaults, discovered elements, every official occurrence, and required numeric relations. Create
@@ -294,8 +294,12 @@ next. Revisit an earlier element when later evidence invalidates its record:
    endpoints, then map it to the Typst control that governs the same relation.
    Verify that relation at two repeated instances, or record the unique
    element's actual endpoints. Use those endpoints as the calibration target.
-   Wrong font metrics invalidate later layout calibration. Before layout, resolve each source-assigned face through the final Typst compile environment, using project, source-application,
-   operating-system, and compiler font locations. If the exact face is unavailable, compare alternatives that contain
+   Wrong font metrics invalidate later layout calibration. Before layout, check each source-assigned face in the user's actual Typst workflow first.
+   If missing, search project, source-application, operating-system, and compiler font locations for the same face.
+   Before copying/installing fonts or changing font settings, identify the files or
+   settings, destination, and effect; obtain any authorization not already granted.
+   Keep text and math font assignments separate when the source does.
+   If the exact face is unavailable, compare alternatives that contain
    every character used by that font role and retain the source-assigned serif, sans-serif, Mincho, or Gothic class,
    weight, and style.
    For each alternative, use one horizontal and one vertical scale factor for that font role across every official
@@ -304,8 +308,8 @@ next. Revisit an earlier element when later evidence invalidates its record:
    inserted spaces, and positional compensation. An alternative is eligible only when the shared factors make rendered
    text width and top-to-bottom ink extent equal to the reference at every compared occurrence; among eligible alternatives, recommend
    the one with the smallest total differing ink-pixel count. Ask the user to approve the face and both factors. If none
-   is eligible, request another font or the user's decision on an allowed non-identical rendering before layout work. Record the comparison and
-   load the Typst font-resolution tips.
+   is eligible, request another font or the user's decision on an allowed non-identical rendering before layout work. Record the comparison.
+   Consult [font discovery examples](references/typst-tip-font-resolution.md) when diagnosing font discovery.
 6. **Shared implementation.** Use the same ordinary Typst syntax and
    template-owned rules for the official and varied instances, with
    `set`/`show` rules, and natural flow. Use contextual measurement when local
@@ -409,6 +413,9 @@ Command and unedited output:
    its required fields and evidence block; every scan has no unexplained face; and each role either uses the exact face
    with factors `1,1`, or has the recorded user-approved face and factors and equal text width and top-to-bottom ink
    extent to the reference at every compared occurrence.
+   Verify the normal preview/export routes in scope, including any required reload,
+   and record evidence in the existing font record. Keep the font gate open until
+   those checks pass; a build in another environment does not establish completion.
 
 | Guard or event | Required transition |
 | --- | --- |
@@ -532,7 +539,8 @@ the user names it. Invoke the inspector with the resulting files, read extracted
 text page by page beside the page render, and inspect the original source to
 recover semantics and reading order.
 
-Render Typst with the project's established command and font paths. Render DOCX
+Render Typst through the user's actual workflow, using the same font settings
+for discovery, official usage, variations, and final checks. Render DOCX
 or other editable formats with the application that produced or officially
 exports them when available. Record tool versions when renderer differences
 might explain a remaining difference.
@@ -579,7 +587,7 @@ Load each short Typst or CSL tip when its named issue becomes active:
 - [source baseline pitch versus Typst leading](references/typst-tip-line-pitch.md);
 - [Word-origin font sources under WSL](references/typst-tip-word-font-sources.md);
 - [TeX-rendered font sources and Type 1 limitations](references/typst-tip-tex-font-sources.md);
-- [reusing the same Typst font environment](references/typst-tip-font-resolution.md);
+- [diagnosing CLI font discovery](references/typst-tip-font-resolution.md);
 - [combined math accents](references/typst-tip-combined-accents.md);
 - [run-in labels and continuation-line alignment](references/typst-tip-run-in-label-continuation.md);
 - [stable author and affiliation identifiers](references/typst-tip-author-affiliation-identifiers.md);
