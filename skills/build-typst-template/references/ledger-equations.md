@@ -18,8 +18,9 @@ Close reference prose against the established counter, label, and display
 number before closing Equations.
 
 - **Equations [C,T]** — inline/display semantics; math font and glyph
-  treatment; alignment and indent; counter/reset, number format and
-  prefix/suffix; number position; label/reference semantics; keep/break.
+  treatment; alignment and indent; space above and below display equations;
+  counter/reset, number format and prefix/suffix; number position;
+  label/reference semantics; keep/break.
   - **Equation references [T]** — actual author syntax; localized prose
     prefix; parentheses and number format; spacing, link target, and the
     observed inline result.
@@ -27,3 +28,8 @@ number before closing Equations.
 Trace each claimed author syntax to its expected semantic output and its
 observed extracted or rendered output. Confirm inline math retains its own
 evidenced policy after display-equation styling.
+
+In Typst, the block spacing settings `above` and `below` inherit paragraph spacing
+when `auto`. If the inherited spacing differs from the source's display-equation
+spacing, set explicit values in a show rule that applies only to display equations.
+Verify the resulting gaps in the rendered output.
