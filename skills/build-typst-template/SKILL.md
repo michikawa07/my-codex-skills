@@ -127,6 +127,10 @@ source edits, and completed `critic-findings.md`. The scratch root contains tool
 logs, and intermediate builds; reuse it and make an empty subdirectory only when a tool requires one. At completion, copy
 only evidence supporting the verified result or a user-accepted exception into one authoring-root `evidence/` directory.
 
+Assemble the final ready-to-use project in `<authoring-root>/template/` through
+the finishing steps below. Keep validation sources, comparison evidence, and
+review records at their authoring-root or scratch paths.
+
 Keep the task active until the Finish conditions hold. Use critic findings only as repair input. Maintain the cursor and the files it references with the exact records and transitions in step 9.
 1. **Collect mechanical evidence.** First identify the user's actual Typst
    host/compiler and font settings from user or project evidence; ask if unclear.
@@ -618,7 +622,8 @@ while the template owns publication policy. The
 official instance and justified variations must render robustly, every reference
 page must be inspected, and each recorded mismatch must be repaired and retested
 or individually accepted by the user. Apply the step 9 closure records and final
-critic conditions below to decide whether Finish conditions hold.
+critic conditions below to decide whether Finish conditions hold. Complete the
+ready-to-use project and its checks below before the final handoff.
 
 After the last change to the template, usage, asset, bibliography data, or style,
 compile the official instance and every variation case recorded in valid closure
@@ -635,9 +640,24 @@ its source rule, reopen the first affected component in dependency order, repair
 retest it, replace its closure entry, and run a new final review.
 
 After every required component has a valid closure and every branch's visual review or no-official-occurrence result passes, the final critic reports `CLEAR`, the final builder audit records no
-unaccepted mismatch, and every critic finding has a resolving retest observation, return the generated template, usage,
-variation, and PDF paths with one sentence naming the compiled documents, inspected pages, activated variations, and final
-critic status. Leave regenerable bulk renders and superseded iterations in the system-temporary
+unaccepted mismatch, and every critic finding has a resolving retest observation, prepare the ready-to-use project:
+
+1. Place the completed `usage.typ` and `usage.pdf` at its root, `template.typ`
+   and any required CSL in `header/`, and required example images and bibliography
+   files at project-relative paths. Follow source directory conventions such as
+   `figures/` and preserve the generated files' existing granularity.
+2. Update imports and asset paths for that structure. Make `usage.typ` the editing
+   entry point so the user can begin with title, author, and body edits.
+3. Limit project contents to those files and actual compilation dependencies.
+   Use the verified existing font environment. Consult the user before bundling
+   additional material such as instructions or fonts.
+4. Compile from the project directory and confirm that the rendered PDF matches
+   the validated example before reorganization.
+5. Return the project directory, editing entry point, example PDF, and the
+   actual compilation command. Include one sentence naming the compiled
+   documents, inspected pages, activated variations, and final critic status.
+
+Leave regenerable bulk renders and superseded iterations in the system-temporary
 scratch root. When unavailable source authority or a required user choice leaves
 a closure field unresolved, consult the user and keep that component active until
 the decision is available.
