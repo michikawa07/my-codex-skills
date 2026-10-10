@@ -572,6 +572,7 @@ guidance; the Element Completion Loop owns artifact choice and acceptance.
 Load each short Typst or CSL tip when its named issue becomes active:
 
 - [preserving a standard element's natural size, flow, counters, labels, and links when adding a wrapper, helper, or manual rendering](references/typst-tip-preserve-built-in-behavior.md);
+- [page references and links after a floating object moves](references/typst-tip-float-page-references.md);
 - [natural width versus wrapped extent](references/typst-tip-natural-width.md);
 - [source baseline pitch versus Typst leading](references/typst-tip-line-pitch.md);
 - [Word-origin font sources under WSL](references/typst-tip-word-font-sources.md);

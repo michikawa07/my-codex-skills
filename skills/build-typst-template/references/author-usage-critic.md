@@ -355,6 +355,25 @@ or prose references, and semantic queries no longer saw one object.
 remaining objects. Verify the caption, counter, label, `@label` or `#ref`, query
 structure, and rendered reference together.
 
+#### Floating page reference despite correct object numbering
+
+**Observed pattern.** A native floating figure's declaration location supplied
+its page reference and outline page, although its displayed body moved to a
+different page. The figure counter still agreed with its caption and prose.
+
+**Why it looked successful.** The original short example kept declaration and
+body on one page. References and outline entries could also agree with each
+other because both used the same wrong location.
+
+**Authoring harm.** A figure displayed on printed page 2 was referenced as being
+on page 1; its link could lead to the declaration rather than the illustration.
+
+**Probe.** Vary preceding prose until the object actually changes pages. Inspect
+the displayed page and a location marker inside the body beside the ordinary
+page reference, outline page, and PDF link. Distinguish the physical sheet index
+from the printed page counter, including front matter and resets. See the
+[placed-page diagnostic](typst-tip-float-page-references.md).
+
 ### F10 — Editable semantics replaced by literal text or image previews
 
 **Observed pattern.** Citations were written as superscript literal numbers,
