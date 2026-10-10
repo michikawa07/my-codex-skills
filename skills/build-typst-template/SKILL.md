@@ -98,8 +98,9 @@ Use these workflow terms throughout this file and its linked references:
 | **current authoring system** | Current author sources, template dependencies, assets, and PDFs compiled after the latest source edit. |
 | **font face** | The complete resolved face name reported by the compiler that renders the source; if that report is unavailable, use the exact face name in the structural source; if neither is available, use the normalized PDF face name. The name includes family, weight, and style. A visually or metrically similar name is a different face. When reading a PDF face name, remove only a six-uppercase-letter subset prefix such as `ABCDEF+`. |
 | **font role** | A coarse use that has one source-assigned font face, such as body text, heading text, captions, bibliography text, or display math. Split a role only when the source assigns a different face. |
-| **font requirement** | One font role with its source evidence, expected face, actual candidate face, current observation, and optional user-approved substitution. The observation summary names one source location, one candidate source location, the candidate PDF page or region or text run, and an evidence ID whose fenced block stores the extraction command and unedited output identifying the actual face. When the faces differ, it also records why Typst did not use the expected face, which alternatives were examined, the recommended face or the reason none is recommended, and the observed differences. |
-| **font gate** | Check performed after inventory and before the first branch. It is complete only when every required font role uses the expected face or has a user-approved substitution for that role, and every missing or extra PDF face name reported by the comparator is assigned to a font role or a user-confirmed comparison-only exclusion. While it is open, do not tune or close rules for font size, tracking, wrapping, spacing, geometry, or downstream flow. |
+| **font metric normalization** | One horizontal and one vertical scale factor shared by every occurrence of one substitute-font role. The scaled dimensions participate in Typst wrapping and flow; per-string factors are forbidden. |
+| **font requirement** | One font role with its source evidence, expected and actual faces, current observation, optional font metric normalization, and optional user approval. When faces differ, record the alternatives, their shared factors, post-normalization differing ink-pixel count, text-width difference, top-to-bottom ink-extent difference, and the user decision. |
+| **font gate** | Pre-layout check that every font role uses its expected face or a user-approved substitute whose shared factors make rendered text width and top-to-bottom ink extent equal to the reference at every compared occurrence. Every PDF face belongs to a role or a user-confirmed comparison-only exclusion. |
 | **semantic / semantics** | Document meaning encoded by element type, structured content/order, counters, labels, and references rather than appearance alone. |
 | **element** | One source container or content unit: page, title block, paragraph, list, equation, figure, table, etc. |
 | **packet** | Linked reference for one element type; `Requires` lists prerequisites, `Owns` its rules/relations, `Emits` outputs, and `Recheck` later observations. |
@@ -144,10 +145,9 @@ Keep the task active until the Finish conditions hold. Use critic findings only 
    and rendered evidence. Preserve free-form author content. Create only enough template rules and official or consolidated
    variation content to exercise every font requirement, then complete the font gate. A scratch-only focused source may
    identify which face a font-selection rule loads, but it does not satisfy a font requirement. While the gate is open,
-   inspect sources; add the author fields and standard elements needed to render the required text or math; change font
-   search paths and compiler options; and check font faces. Do not set or adjust font size, tracking, wrapping, spacing,
-   page or container geometry, or downstream positions. Do not compensate for a wrong face with size, tracking, scaling,
-   spacing, or positioning.
+   inspect sources; add content needed to exercise the roles; configure font discovery; and apply the font-resolution
+   rules in Element Completion Loop item 5. Do not tune
+   wrapping, spacing, page/container geometry, or downstream positions while the gate is open.
    After the gate completes, derive publication and content-dependent layout rules. The scaffold has one positional-body
    public wrapper and private `_render_body(body) = body` hook; replace that hook when target evidence requires different
    flow such as `columns(...)`, while keeping page, column, gutter, break, and flow policy private in the template.
@@ -286,28 +286,18 @@ next. Revisit an earlier element when later evidence invalidates its record:
    endpoints, then map it to the Typst control that governs the same relation.
    Verify that relation at two repeated instances, or record the unique
    element's actual endpoints. Use those endpoints as the calibration target.
-   Resolve the exact font face established by the governing source evidence through the final compile environment. Search
-   font files supplied by the project, bundled with the source application, installed by the operating system, supplied
-   by the compiler that produced the reference, and configured for the final Typst compile. Verify both whether Typst
-   lists the face and whether the compiled candidate uses it for the named occurrence. If Typst does not list the exact
-   face, or the compiled candidate does not use it for the named occurrence, find alternatives that contain every
-   character used by that font role. Retain the source-assigned family
-   classification, such as serif, sans-serif, Mincho, or Gothic, plus its weight and style; for a math role, examine math
-   fonts. Prefer an alternative with the same optical design size when available. Rasterize the reference occurrence and
-   each alternative at one recorded point size with the same rasterizer, resolution, baseline, and origin, without
-   changing the authoring sources or rescaling. For each alternative, record relative to the reference the differing
-   ink-pixel count, absolute rendered-text-width difference, and absolute top-to-bottom ink-extent difference. With one
-   alternative, state that the comparison cannot rank it. With two or more, recommend one only when it is no worse than
-   every other alternative on all three values and better than at least one other alternative on at least one value; if
-   none meets that condition, state that the comparisons do not select one. If no alternative has the required
-   characters, state that none was found. Keep the font gate open and ask
-   the user whether to approve one of the examined alternatives for each affected font role, identifying the
-   recommendation or stating that none was selected. For each affected font role, state the expected face, the
-   recommended face or absence of one, why Typst did not use the expected face, affected source locations, and observed
-   differences. Accept only the substitute approved by the user for that font role, expected face, and actual face. If
-   the failure is discovered after branch work, follow the step 9 transition whose event includes a previously unobserved
-   failure to list or use an expected face. Load the Typst tips for consistent font paths and separate text/math font
-   configurations.
+   Wrong font metrics invalidate later layout calibration. Before layout, resolve each source-assigned face through the final Typst compile environment, using project, source-application,
+   operating-system, and compiler font locations. If the exact face is unavailable, compare alternatives that contain
+   every character used by that font role and retain the source-assigned serif, sans-serif, Mincho, or Gothic class,
+   weight, and style.
+   For each alternative, use one horizontal and one vertical scale factor for that font role across every official
+   occurrence that uses the role, or every variation occurrence when the official
+   instance lacks the role. The scaled box must govern Typst wrapping and flow. Reject per-string scaling, tracking,
+   inserted spaces, and positional compensation. An alternative is eligible only when the shared factors make rendered
+   text width and top-to-bottom ink extent equal to the reference at every compared occurrence; among eligible alternatives, recommend
+   the one with the smallest total differing ink-pixel count. Ask the user to approve the face and both factors. If none
+   is eligible, request another font or the user's decision on an allowed non-identical rendering before layout work. Record the comparison and
+   load the Typst font-resolution tips.
 6. **Shared implementation.** Use the same ordinary Typst syntax and
    template-owned rules for the official and varied instances, with
    `set`/`show` rules, and natural flow. Use contextual measurement when local
@@ -363,8 +353,8 @@ reference_inventory_complete: false
 no_font_requirements_reason:
 
 ## Requirements
-| font_role | source_evidence | expected_face | actual_face | observation_summary_and_evidence_id | observed_after_last_change | approved_substitution |
-| --- | --- | --- | --- | --- | --- | --- |
+| font_role | source_evidence | expected_face | actual_face | font_metric_normalization | observation_summary_and_evidence_id | observed_after_last_change | approved_substitution |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 
 ## PDF comparisons
 | reference_pdf | candidate_pdf | comparator_index | unexplained_faces | observed_after_last_change |
@@ -401,28 +391,20 @@ Command and unedited output:
    name extracted from every reference PDF is assigned to a role or an existing user-confirmed comparison-only
    exclusion. Fill `no_font_requirements_reason` only when no present or `Variation required: true` target branch contains a
    structural font assignment or PDF text or math associated with an extracted font face. Rasterized or outlined
-   lettering is checked with its containing figure, table, or drawing branch instead.
+   lettering is checked with its containing figure, table, or drawing component instead.
 
-   Complete the font gate only when `reference_inventory_complete` is true; `requirements` is nonempty or
-   `no_font_requirements_reason` is filled; every requirement has nonempty `font_role`, `source_evidence`,
-   `expected_face`, `actual_face`, and an `observation_summary_and_evidence_id` made after the most recent source, font, compiler, or font-search
-   change described in the two `After the font gate completed` rows below; every requirement has
-   identical expected and actual faces or an exact user decision approving its recorded role and faces; when those faces
-   differ, that observation and evidence also contain the alternative assessment required by the `font requirement` definition; and every
-   corresponding official PDF pair has nonempty `reference_pdf`, `candidate_pdf`, and `comparator_index`, was observed
-   after the latest change to either PDF's source or compile environment, and has an empty `unexplained_faces` list. Every
-   font-requirement evidence ID resolves to a nonempty block in that same font record containing its command and unedited
-   output. A corresponding official PDF pair is the reference rendering and candidate rendering of the same official
-   instance. `unexplained_faces` lists every face name present on only one side that cannot be assigned to a recorded role
-   or comparison-only exclusion, together with that PDF side and the reason it remains unassigned.
+   Complete the font gate only when the inventory is complete; every requirement and PDF comparison is current and has
+   its required fields and evidence block; every scan has no unexplained face; and each role either uses the exact face
+   with factors `1,1`, or has the recorded user-approved face and factors and equal text width and top-to-bottom ink
+   extent to the reference at every compared occurrence.
 
 | Guard or event | Required transition |
 | --- | --- |
 | `inventory.status` is `open` | Keep `active` empty and finish the target element file; set it `complete` only under the inventory rules in the router, then evaluate the font gate before creating the first branch. |
-| `inventory.status` is `complete` and `font_gate.status` is `open` | Add one requirement to the font record for each font role used by a present or `Variation required: true` target branch; do not add dormant source styles. Exercise each role in official or consolidated variation content. For every corresponding official PDF pair, run the font-only scan. Use its whole-document face-name lists to find missing or extra names, and use the requirement observation and evidence block to verify which face the candidate uses for that role. For every requirement where Typst does not list `expected_face` or the compiled candidate does not use it for the named occurrence, perform and record the alternative search and comparison required in step 5. When a substitute choice still requires a user decision, ask one consolidated question that requests a separate decision for each affected requirement and lists its `font_role`, `expected_face`, recommended substitute or reason none is recommended, affected source locations, reason Typst did not use the expected face, and observed differences. Record each decision in that requirement's `approved_substitution`. Set `font_gate.status: complete` only when the completion test above passes; otherwise keep it open. |
+| `inventory.status` is `complete` and `font_gate.status` is `open` | Exercise every required role, run the font scan for each official PDF pair, and follow the font-resolution rules in Element Completion Loop item 5 for unavailable faces. When a substitute choice still requires a user decision, ask one consolidated question for the eligible face-and-factor choices and record the decision. Complete the gate only when the test above passes. |
 | `inventory.status` and `font_gate.status` are both `complete`, and `active` is empty before element work begins | Create the first required active branch and its branch record. |
 | After the font gate completed, a governing structural source or rendered reference is added or removed, or a source-side font assignment or governing reference file changes | Set `inventory.status: open`, `font_gate.status: open`, and `reference_inventory_complete: false` in the font record. Mark every existing branch record `Status: invalidated`; clear `active`, `open_parents`, `closures`, `suspended`, font comparisons, and `critic.completed_groups_since_last_input_load`. Rebuild the target element and font records from the current evidence. Preserve an explicit user decision only as source evidence; do not preserve its prior observation or result. Create new blank branch records when branch work restarts, and complete the inventory and font gate before recreating the first required branch. |
-| After the font gate completed, font-selection code, a font file or package, the compiler version, an ordered font-search directory, or a system/embedded-font setting changes; a previously unobserved failure to list or use an expected face is discovered; or source content first uses a writing system (for example Latin, Japanese, or Greek), mathematical alphabet, font weight, font style, or font role absent from the completed observations | Apply ordinary branch invalidation for any changed source, set `font_gate.status: open`, and set `observed_after_last_change: false` on every affected requirement and official PDF comparison. If the change introduces a font role absent from `requirements`, set `reference_inventory_complete: false` and add its requirement. Do not tune or close layout rules during this recheck. Recompile the changed official and variation sources, re-observe the affected roles, and repeat the affected official-pair font scans. Set the gate complete again only when `reference_inventory_complete` is true, each requirement's `expected_face` and `actual_face` agree or its `font_role`, `expected_face`, and `actual_face` exactly match its `approved_substitution`, every differing requirement has a current alternative assessment in its observation summary and evidence block, and no scan has an unexplained face name. If the recheck fails, mark every branch record `Status: invalidated`, clear `active`, `open_parents`, `closures`, `suspended`, and `critic.completed_groups_since_last_input_load`, and resolve the gate before creating new branch records. |
+| After the font gate completed, font selection, normalization, available fonts, compile environment, or exercised font roles change | Reopen the gate, mark affected font observations and branch closures stale, recompile and rescan them, and apply the completion test above. If it fails, invalidate branch records and resolve the gate before layout work resumes. |
 | An active composite has a present or variation-required direct child without a valid closure | Push the current branch and branch-record path onto `open_parents` and create the child's branch record; after the child closes, restore the last parent pointer as `active` and add the child's branch path to the parent record's child-closure section. |
 | An active child contradicts a relation owned by an entry in `open_parents` | Move every parent pointer above the affected parent, then the child pointer, to `suspended` in parent-to-child order. Make the affected parent active, repair its record and source, and recompile it, then push it back onto `open_parents` without closing it. Restore each moved parent from oldest ancestor to youngest, repair and recompile it, and push it back without closing it. Finally restore the moved child as active; the normal child-to-parent closures then resume. |
 | An edit can affect a branch's official or variation result | Apply the router's edit-invalidation rule before compiling. Remove from `critic.completed_groups_since_last_input_load` every group made incomplete by that invalidation. |
