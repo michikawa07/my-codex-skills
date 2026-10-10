@@ -501,6 +501,28 @@ crop for glyph formation. Reorder the marked author and verify that the same
 character follows that record. If the supplied files do not determine the
 intended character, report `BLOCKED` instead of choosing one character.
 
+### F19 — First-line spacing mistaken for multiline heading layout
+
+**Observed pattern.** A numbered heading rule emitted the number, a horizontal
+space, and title as an ordinary paragraph. Longer titles returned to the
+number's left edge instead of the required title edge. Heading font sizes also
+changed while leading inherited from body text remained in use.
+
+**Why it looked successful.** The section examples occupied one line; wrapping
+a chapter title exercised a different rule. First-line number spacing and font
+size could look correct while continuation layout was wrong.
+
+**Authoring harm.** A TeX-derived section lost its hanging continuation and used
+a smaller line pitch than the source prescribed when the title grew.
+
+**Probe.** Make ordinary headings wrap through each distinct level-specific
+rule. Inspect the number edge, first title word, continuation edges, baseline
+intervals, and following body. Compare against the alignment/pitch established
+by supplied evidence; do not assume every publication wants hanging headings or
+treat font substitution as proof that line pitch may change. Leave raw-source
+format comparisons with the builder when that evidence is outside the review
+inputs. See [wrapped numbered headings](typst-tip-run-in-label-continuation.md#numbered-headings-that-wrap).
+
 ## Evidence and severity
 
 For every candidate `MATERIAL` or `BLOCKED` cause, keep a full evidence record
