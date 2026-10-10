@@ -4,7 +4,7 @@
 page roles, major regions, reading order, and repeated regions.
 
 **Owns** — The coordinate system, document-wide semantics, page sequence, and
-page regions inherited by every later branch.
+page regions inherited by every later component.
 
 **Emits** — Page geometry and variants, global semantic services, and the
 available regions into which frontmatter and body flow render.

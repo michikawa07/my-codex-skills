@@ -84,12 +84,6 @@ evidence assigns that space to publication policy.
 
 ## Core Workflow
 
-For generated artifacts, use one authoring root and one system-temporary scratch root. The authoring root contains current
-`template.typ`, official `usage.typ`, consolidated `variation.typ`, dependencies, assets, PDFs compiled after the latest
-source edits, and completed `critic-findings.md`. The scratch root contains tool output, probe copies, focused sources,
-logs, and intermediate builds; reuse it and make an empty subdirectory only when a tool requires one. At completion, copy
-only evidence supporting the verified result or a user-accepted exception into one authoring-root `evidence/` directory.
-
 Use these workflow terms throughout this file and its linked references:
 
 | Term | Meaning in this workflow |
@@ -106,15 +100,16 @@ Use these workflow terms throughout this file and its linked references:
 | **packet** | Linked reference for one element type; `Requires` lists prerequisites, `Owns` its rules/relations, `Emits` outputs, and `Recheck` later observations. |
 | **router** | Ordered element list and packet links in `component-property-ledger.md`. |
 | **target element list / inventory** | Target-specific Markdown list of default and discovered elements, occurrences, planned checks, and its completeness status. Store it at `<scratch>/target-elements.md`. |
-| **branch property** | One named semantic or layout relation that the branch must reproduce. A layout relation determines placement, size, child arrangement, text formation, or effects on neighboring and later content; examples are author-block alignment, the gap between two author groups, continuation-line indent, and whether a figure stays with its caption. |
-| **branch record** | One Markdown file under `<scratch>/branch-records/` containing an open, closed, or invalidated branch's source locations, required branch properties, Typst controls, official and variation observations, numeric checks, rechecks, children, and mismatches. |
-| **valid prerequisite record** | An open or closed branch record, never an invalidated one, whose cited prerequisite relation has `Observed after last change: true` and is satisfying. A relation with a `Result` field is satisfying only with `match`, `accepted_mismatch` plus its exact user decision, or explicitly permitted `not_applicable`; a relation without a `Result` field is satisfying only when its observation establishes the prerequisite and no unresolved mismatch contradicts it. The whole record need not be closed when it supplies a current direct-parent relation to its active child. |
-| **router cursor** | Small YAML record at `<scratch>/router-cursor.yaml`. It stores only inventory and font-gate status and record paths, the active branch and its branch-record path, waiting or suspended branch paths, closure summaries and branch-record paths, and critic state. Detailed element, font, measurement, and closure evidence stays in the referenced Markdown files. |
-| **branch / active branch** | One element type or structural role whose shared layout/semantic rule is checked across all named occurrences / the only branch currently edited. |
-| **critic group** | One of the eight numbered router groups in `component-property-ledger.md`. All target branches assigned to one group collectively count as one completed unit for intermediate critic scheduling. The root `Document` branch is final-only and is not a critic group. |
-| **first affected branch** | Earliest branch in router dependency order whose owned rule or recorded relation must change to remove the observed failure. |
-| **composite branch** | Branch whose direct children each require a branch record before the parent completes. |
-| **closure entry / branch closure** | A completed branch record whose required observations were repeated after the latest edit that can affect that branch / the event that appends its branch path and record path to the cursor and advances it. An entry remains valid only until contradicted. |
+| **component branch / component / active component branch** | One element type or structural role whose shared layout/semantic rule is checked across all named occurrences / shorthand for component branch / the only component currently edited. Components may be nested. |
+| **component property** | One named semantic or layout relation that a component branch must reproduce. A layout relation determines placement, size, child arrangement, text formation, or effects on neighboring and later content; examples are author-block alignment, the gap between two author groups, continuation-line indent, and whether a figure stays with its caption. |
+| **component record** | One Markdown file under `<scratch>/component-records/` containing an open, closed, or invalidated component branch's source locations, required component properties, Typst controls, official and variation observations, numeric checks, rechecks, children, and mismatches. |
+| **valid prerequisite record** | An open or closed component record, never an invalidated one, whose cited prerequisite relation has `Observed after last change: true` and is satisfying. A relation with a `Result` field is satisfying only with `match`, `accepted_mismatch` plus its exact user decision, or explicitly permitted `not_applicable`; a relation without a `Result` field is satisfying only when its observation establishes the prerequisite and no unresolved mismatch contradicts it. The whole record need not be closed when it supplies a current direct-parent relation to its active child. |
+| **closure entry / component closure** | A completed component record whose required observations were repeated after the latest edit that can affect that component / the event that records the component path and record path as closed and advances to the next component. An entry remains valid only until contradicted. |
+| **router cursor** | Small YAML record at `<scratch>/router-cursor.yaml`. It stores only inventory and font-gate status and record paths, the active component branch and its record path, waiting or suspended component paths, closure summaries and record paths, and critic state. Detailed element, font, measurement, and closure evidence stays in the referenced Markdown files. |
+| **branch** | One of the eight numbered router entries in `component-property-ledger.md`: Document and page, Frontmatter, Body flow, Lists, Equations, Figures, Tables, or Citations and references. It closes after all assigned components close and an independent review of its comparison images passes; current absence evidence and passing variation results replace the review when it has no official occurrence. An individual component closure alone does not count as a completed branch. Nested components never count as branches. Root `Document` is reserved for the final review. |
+| **branch visual review** | One fresh `gpt-5.6-terra` medium-effort review of reference/candidate/difference images after all required components in a branch have valid closures. It reports `MATCH` (no visible difference), `ACCEPTED_MISMATCH` (every difference explicitly accepted by the user), or `MISMATCH` (unaccepted differences) for every official occurrence; root `Document` receives one final full-page review. |
+| **first affected component** | Earliest component branch in router dependency order whose owned rule or recorded relation must change to remove the observed failure. |
+| **composite component** | Component branch whose direct children each require a component record before the parent completes. |
 | **author action** | One edit or call made through author-facing syntax. |
 | **author route / call path** | That syntax plus its ordered wrapper, imported function, and template-rule sequence to output. |
 | **activating variation** | Author action whose output exhibits the predicted element type/content or visible event that distinguishes the inferred rule. |
@@ -124,7 +119,13 @@ Use these workflow terms throughout this file and its linked references:
 | **governing cause** | Exact source construct or template rule whose change removes an observed failure without extra author-side layout code. |
 | **critic finding** | Demonstrated author action/failure/harm, its governing cause, a repair or user decision, and the action/observation to repeat afterward. |
 | **critic result** | `REVISE` for changed meaning, a second helper for the same concept, or wrong/overlapping/missing content or flow; otherwise `BLOCKED` if evidence/authority is missing; otherwise `CLEAR`. |
-| **Finish conditions** | Inventory and the font gate are complete; every present or variation-required branch has a valid closure entry; every absent branch has absence evidence; final critic is `CLEAR`; builder has no unaccepted mismatch; and every critic finding has a resolving retest. |
+| **Finish conditions** | Inventory and font gate are complete; every required component is closed; every branch with an official occurrence and root `Document` has a current visual review with no `MISMATCH`; a branch without one has current absence evidence and passing variation results; every absent component has evidence; final critic is `CLEAR`; and every other mismatch or finding is repaired or covered by its exact user decision. |
+
+Keep the current authoring system distinct from disposable probes: use one authoring root and one system-temporary scratch root. The authoring root contains current
+`template.typ`, official `usage.typ`, consolidated `variation.typ`, dependencies, assets, PDFs compiled after the latest
+source edits, and completed `critic-findings.md`. The scratch root contains tool output, probe copies, focused sources,
+logs, and intermediate builds; reuse it and make an empty subdirectory only when a tool requires one. At completion, copy
+only evidence supporting the verified result or a user-accepted exception into one authoring-root `evidence/` directory.
 
 Keep the task active until the Finish conditions hold. Use critic findings only as repair input. Maintain the cursor and the files it references with the exact records and transitions in step 9.
 1. **Collect mechanical evidence.** First identify the user's actual Typst
@@ -136,7 +137,7 @@ Keep the task active until the Finish conditions hold. Use critic findings only 
    complete `<scratch>/target-elements.md` from the structural source and every rendered reference page, including
    present/absent defaults, discovered elements, every official occurrence, and required numeric relations. Create
    `<scratch>/font-requirements.md` for the font-gate records. Then load the packet linked by the router for the single
-   active branch; apply its detailed prompts only after every item in the packet's `Requires` section has a current
+   active component branch; apply its detailed prompts only after every item in the packet's `Requires` section has a current
    Prerequisites row as specified by the router.
 3. **Build and compile the skeleton.** Prefer a user-named target-adjacent Typst template/document over the bundled
    [`template.typ` + `usage.typ`](assets/scaffold/) pair as evidence for file division, imports, wrapper calls, and
@@ -158,32 +159,35 @@ Keep the task active until the Finish conditions hold. Use critic findings only 
    distinguish two plausible rules, then move any lasting case into the consolidated variation. Compile and render the
    official instance plus the smallest public-API change that distinguishes the current page/container/wrapper behavior
    before geometry tuning.
-4. **Complete elements in dependency order.** Keep one branch active; open its packet after `Requires` observations
-   exist and close it through `Emits` and `Recheck`. In a composite branch, complete one direct child at a time in
+4. **Complete elements in dependency order.** Keep one component branch active; open its packet after `Requires` observations
+   exist and close it through `Emits` and `Recheck`. In a composite component, complete one direct child at a time in
    reading order. Before geometry tuning, establish exact official content, author syntax/API, and one activating
    variation. Advance only after step 9 records all required official, variation, and `Recheck` observations. Reopen the
-   first affected branch when later evidence contradicts a recorded relation.
+   first affected component when later evidence contradicts a recorded relation.
 5. **Deepen uncertain rules.** When the first official/varied pair leaves two plausible rules, isolate the minimum
    distinguishing content or flow, then apply the observed rule and activating case to the primary documents.
 6. **Compare hierarchically.** Run the all-page comparison, then use the
    [visual comparison playbook](references/validation-playbook.md) on named regions, internal formation, downstream
-   relations, and the last page. During repeated edits to the active branch, use the playbook command to render the one
+   relations, and the last page. During repeated edits to the active component branch, use the playbook command to render the one
    page of `usage.typ` or `variation.typ` that contains the occurrence being adjusted. For step 9 observations and the
    final judgment, compile every current official and variation source to PDF and run the playbook's `scan` command and
-   any required `detail` command on those PDFs.
+   any required `detail` command on those PDFs. The builder performs this image comparison before closing each present
+   component branch. After all required components in a branch have valid closures, run its branch visual review below.
+   Run one reviewer per branch, never per component. Record candidate-to-candidate
+   comparisons as auxiliary regression evidence.
 7. **Repair from a prediction.** For a step 9 mismatch, state the source-backed rule and exact direction/amount of the
    predicted correction. Test it, then record the affected parent, child, internal-formation, and downstream observations.
-8. **Critique and refactor the author usage.** Each time step 9 closes an element,
-   evaluate the critic group assigned to that branch in the target element list. Add the group name once only when every
-   present or variation-required branch assigned to that group has a valid closure. Closing a child branch or a parent
-   branch before the whole group is complete does not add a name. Trigger the Author-Usage Critic Loop on the complete
-   current authoring system when two distinct critic groups have completed since the critic last loaded its inputs. Pass
+8. **Critique and refactor the author usage.** Each time step 9 closes a component branch,
+   evaluate the branch assigned to that component in the target element list. Count it once only after every assigned
+   required component closes and its visual review or no-official-occurrence result passes. An individual
+   component closure alone does not count as a completed branch. Trigger the Author-Usage Critic Loop on the complete current authoring system
+   when two distinct branches have completed since the critic last loaded its inputs. Pass
    only current author sources,
    dependencies, assets, and the PDF compiled from each source after its latest
-   edit; the builder retains the router cursor, active packet, branch records,
+   edit; the builder retains the router cursor, active packet, component records,
    and prior diagnosis. Start the
    next element while the critic runs. From each returned file/location and
-   governing cause, the builder identifies the first affected branch in
+   governing cause, the builder identifies the first affected component in
    dependency order, reopens it when needed, and performs the stated retest.
 
 Request a user decision when the evidence does not determine which source
@@ -191,12 +195,12 @@ governs, what a source item means, whether a file outside the named inputs may b
 edited, or whether a named remaining mismatch may be accepted.
 
 After a context compaction or resumed run, restore the Goal and read, in order,
-the router cursor, the active branch record, that record's one target entry in
+the router cursor, the active component's component record, that record's one target entry in
 `<scratch>/target-elements.md`, the active packet, and only the prerequisite
-branch records named by the active record. Read other target entries only when
+component records named by the active record. Read other target entries only when
 inventory or dependency routing is needed, and read
 `<scratch>/font-requirements.md` only when the font gate is active or rechecked.
-Resume at the first unmet branch-completion condition in the order listed by
+Resume at the first unmet component-completion condition in the order listed by
 the router. Advance only from step 9.
 
 Record elapsed time only after obtaining every closure entry, successful
@@ -205,22 +209,22 @@ Then shorten the same verified path toward roughly 30 minutes.
 
 ## Element Completion Loop
 
-Apply this loop to the active branch selected by the router. Attach each rule to
-one of the four owner categories and close the branch through its packet
+Apply this loop to the active component branch selected by the router. Attach each rule to
+one of the four owner categories and close the component through its packet
 relations.
 
-When a branch becomes active, create or reopen its branch record. Read the active
-packet and add its required starter branch properties to that record. Before
-changing the branch, inspect the governing structural source and rendered
-occurrences and add a branch property for every additional semantic or layout relation found by the extraction
+When a component branch becomes active, create or reopen its component record. Read the active
+packet and add its required starter component properties to that record. Before
+changing the component, inspect the governing structural source and rendered
+occurrences and add a component property for every additional semantic or layout relation found by the extraction
 rules in the router. Identify the author action or publication rule it supports,
 its parent/earlier constraints, and the later content it can move. After changing
 it, record its internal formation and the observed effects on those named
-relations in the same branch record.
+relations in the same component record.
 Treat pixel scores, elapsed time, compiled fixtures, and visited elements only
 as auxiliary observations.
 
-For each element, connect five concrete facts in its branch record: its author
+For each element, connect five concrete facts in its component record: its author
 syntax/content, the file that owns its formatting rule, the Typst control
 implementing that rule, its official rendered relations, and its observed
 activating variation. Use the current packet for its starter properties and
@@ -267,9 +271,9 @@ next. Revisit an earlier element when later evidence invalidates its record:
    column, table-row identifiers around a boundary and its repeated header, or
    the next normal anchor after optional-field omission. Record how the result
    affects the parent, neighbors, and downstream flow.
-5. **Branch properties, controls, and owner.** Before editing, put the common
-   layout starter properties for the branch's `[C]` or `[T]` markers and the
-   packet's branch-specific starter properties into its branch record. Inspect the source
+5. **Component properties, controls, and owner.** Before editing, put the common
+   layout starter properties for the component's `[C]` or `[T]` markers and the
+   packet's component-specific starter properties into its component record. Inspect the source
    rules that apply directly or by inheritance, the source containers that group
    and order direct children, every official rendered occurrence, and the
    selected author variation. Add a separate property row for every additional
@@ -277,7 +281,7 @@ next. Revisit an earlier element when later evidence invalidates its record:
    child-arrangement, text-formation, neighbor, or downstream relation found
    there. Record a source location and target relation for each
    row; `not_applicable` requires a source- or structure-based reason. Complete
-   this property list before tuning the branch.
+   this property list before tuning the component.
 
    Map every property to its governing Typst file and control and one of the four
    owner categories. Cover the applicable typography, alignment, width/wrap,
@@ -304,7 +308,7 @@ next. Revisit an earlier element when later evidence invalidates its record:
    available space governs the result. Place reusable constants in the file
    assigned by the owner category; keep sample text, equations, figures, and
    tables as ordinary content in `usage.typ`.
-7. **Official local confirmation.** Compare the active official element against
+7. **Official local confirmation.** Compare the active official component against
    its source through exact text and symbols, math form, glyphs/fonts,
    widths/heights, padding, strokes/borders, and its relations to parent,
    neighbors, and following flow. Compare three relations separately: the
@@ -314,14 +318,17 @@ next. Revisit an earlier element when later evidence invalidates its record:
    final line edges, alignment, wrapping, line pitch, and indents. For structured
    children, observe shared edges, row/cell alignment, padding, wrapping, rules,
    and boundaries. Record a match or the exact mismatch for every applicable
-   relation; a missing observation or unaccepted mismatch leaves the branch
-   active.
+   relation. For a present component branch, generate and inspect the current
+   reference, candidate, and absolute-difference images before its closure. Keep
+   the component active until every uncovered difference is repaired or cites
+   its exact user decision. This builder check remains required even though the
+   separate reviewer runs later for the containing branch.
 8. **Variation call-path confirmation.** Record the author input changed, its actual
    call path, the predicted visible event and relations expected not to change,
    the observed element type/content or rendered event, and downstream behavior.
-9. **Branch closure and transition.** After the last branch edit, rerender the
+9. **Component closure and transition.** After the last component edit, rerender the
    official case and its activating variation through the public author workflow.
-   Update the active branch record using the Markdown format in the router, then
+   Update the active component record using the Markdown format in the router, then
    update `<scratch>/router-cursor.yaml` in this compact shape:
 
 ```yaml
@@ -333,7 +340,7 @@ font_gate:
   record_file: "<scratch>/font-requirements.md"
 open_parents: []
 active:
-  branch: ""
+  component: ""
   record_file: ""
   status: open
 closures: []
@@ -341,7 +348,7 @@ suspended: []
 critic:
   state: idle
   last_result: ""
-  completed_groups_since_last_input_load: []
+  completed_branches_since_last_input_load: []
   unresolved_findings: []
 ```
 
@@ -372,8 +379,9 @@ Command and unedited output:
 ~~~
 ```
 
-   Each `open_parents`, `closures`, or `suspended` entry contains `branch` and
-   `record_file`; a closure entry also contains `critic_group`. Detailed state
+   Each `open_parents`, `closures`, or `suspended` entry contains the component
+   path under `component` and its `record_file`; a closure entry also contains
+   `containing_branch`, whose value is one of the eight branch names. Detailed state
    belongs in the referenced file, not in the cursor. Every observation names
    both locations and the visible, extracted, or measured relation. A table cell
    stores a short observation and an evidence ID; the same file's Evidence
@@ -385,11 +393,11 @@ Command and unedited output:
    comparison-only font exclusions in `<scratch>/font-requirements.md` using the schema above. Each
    `unexplained_faces` entry contains `pdf_side`, `face_name`, and
    `reason_not_assigned`. Set `reference_inventory_complete: true` only after every present or
-   `Variation required: true` target branch containing
+   `Variation required: true` target component branch containing
    text or math for which the structural source or PDF extractor reports a font face is assigned to every applicable
    font role, every such role has one requirement, and every normalized face
    name extracted from every reference PDF is assigned to a role or an existing user-confirmed comparison-only
-   exclusion. Fill `no_font_requirements_reason` only when no present or `Variation required: true` target branch contains a
+   exclusion. Fill `no_font_requirements_reason` only when no present or `Variation required: true` target component branch contains a
    structural font assignment or PDF text or math associated with an extracted font face. Rasterized or outlined
    lettering is checked with its containing figure, table, or drawing component instead.
 
@@ -400,25 +408,26 @@ Command and unedited output:
 
 | Guard or event | Required transition |
 | --- | --- |
-| `inventory.status` is `open` | Keep `active` empty and finish the target element file; set it `complete` only under the inventory rules in the router, then evaluate the font gate before creating the first branch. |
+| `inventory.status` is `open` | Keep `active` empty and finish the target element file; set it `complete` only under the inventory rules in the router, then evaluate the font gate before creating the first component branch. |
 | `inventory.status` is `complete` and `font_gate.status` is `open` | Exercise every required role, run the font scan for each official PDF pair, and follow the font-resolution rules in Element Completion Loop item 5 for unavailable faces. When a substitute choice still requires a user decision, ask one consolidated question for the eligible face-and-factor choices and record the decision. Complete the gate only when the test above passes. |
-| `inventory.status` and `font_gate.status` are both `complete`, and `active` is empty before element work begins | Create the first required active branch and its branch record. |
-| After the font gate completed, a governing structural source or rendered reference is added or removed, or a source-side font assignment or governing reference file changes | Set `inventory.status: open`, `font_gate.status: open`, and `reference_inventory_complete: false` in the font record. Mark every existing branch record `Status: invalidated`; clear `active`, `open_parents`, `closures`, `suspended`, font comparisons, and `critic.completed_groups_since_last_input_load`. Rebuild the target element and font records from the current evidence. Preserve an explicit user decision only as source evidence; do not preserve its prior observation or result. Create new blank branch records when branch work restarts, and complete the inventory and font gate before recreating the first required branch. |
-| After the font gate completed, font selection, normalization, available fonts, compile environment, or exercised font roles change | Reopen the gate, mark affected font observations and branch closures stale, recompile and rescan them, and apply the completion test above. If it fails, invalidate branch records and resolve the gate before layout work resumes. |
-| An active composite has a present or variation-required direct child without a valid closure | Push the current branch and branch-record path onto `open_parents` and create the child's branch record; after the child closes, restore the last parent pointer as `active` and add the child's branch path to the parent record's child-closure section. |
+| `inventory.status` and `font_gate.status` are both `complete`, and `active` is empty before element work begins | Create root `Document` as the first active component branch and create its record. Establish its parent-independent document context, then immediately apply the composite-child transition: move `Document` to `open_parents` and activate its first present or variation-required direct child. Continue recursively in dependency and reading order. Root `Document` becomes active only after every other required component closes and every branch's visual review or no-official-occurrence result passes. |
+| After the font gate completed, a governing structural source or rendered reference is added or removed, or a source-side font assignment or governing reference file changes | Set `inventory.status: open`, `font_gate.status: open`, and `reference_inventory_complete: false` in the font record. Mark every existing component record `Status: invalidated`; clear `active`, `open_parents`, `closures`, `suspended`, font comparisons, and `critic.completed_branches_since_last_input_load`. Rebuild the target element and font records from the current evidence. Preserve an explicit user decision only as source evidence; do not preserve its prior observation or result. Create new blank component records when component work restarts, and complete the inventory and font gate before recreating the first required component branch. |
+| After the font gate completed, font selection, normalization, available fonts, compile environment, or exercised font roles change | Reopen the gate, mark affected font observations and component closures stale, recompile and rescan them, and apply the completion test above. If it fails, invalidate component records and resolve the gate before layout work resumes. |
+| An active composite component has a present or variation-required direct child without a valid closure | Push the current component and component-record path onto `open_parents` and create the child's component record; after the child closes, restore the last parent pointer as `active` and add the child's component path to the parent record's child-closure section. |
 | An active child contradicts a relation owned by an entry in `open_parents` | Move every parent pointer above the affected parent, then the child pointer, to `suspended` in parent-to-child order. Make the affected parent active, repair its record and source, and recompile it, then push it back onto `open_parents` without closing it. Restore each moved parent from oldest ancestor to youngest, repair and recompile it, and push it back without closing it. Finally restore the moved child as active; the normal child-to-parent closures then resume. |
-| An edit can affect a branch's official or variation result | Apply the router's edit-invalidation rule before compiling. Remove from `critic.completed_groups_since_last_input_load` every group made incomplete by that invalidation. |
-| Any applicable branch-completion condition in the router fails; the active branch record has `Last change recompiled: false`; or its Unresolved mismatches section is nonempty | Keep `active.status: open`; continue this branch. |
-| `font_gate.status` is `complete`, every applicable branch-completion condition in the router holds, and the active branch record has `Last change recompiled: true` | Mark the branch record closed and append its branch, record path, and `critic_group` to `closures`. If this closure makes every present or variation-required branch with the same `critic_group` valid, append that group name to `critic.completed_groups_since_last_input_load` unless it is already present; `final_only` never appends. Then restore the last parent pointer from `open_parents` or create the next branch in dependency and reading order. |
-| A later observation contradicts a closure outside the active ancestor chain | Move any branch pointers in `open_parents`, then the `active` pointer, to `suspended` in parent-to-child order and clear `open_parents`; move the first affected closure pointer in dependency order to `active`, set it open, and reopen its branch record. After the repaired branch closes, restore all but the last suspended pointer to `open_parents` and the last to `active`; if none existed, continue with the next required branch or final review. |
-| A later pass finds an omitted occurrence or element with a different shared rule | Add the occurrence to its existing branch or add the new branch path. If it changes the font inventory or adds a role absent from `requirements`, first apply the structural-source/font-inventory reset above. Otherwise activate the affected branch and invalidate each closure whose direct-child placement or downstream relation depends on it. |
-| Source authority or acceptance is missing | Keep the branch open and request the user's decision. |
+| An edit can affect a component branch's official or variation result | Apply the router's edit-invalidation rule before compiling. Remove from `critic.completed_branches_since_last_input_load` every containing branch made incomplete by that invalidation. |
+| Any applicable component-completion condition in the router fails; the active component record has `Last change recompiled: false`; or its Unresolved mismatches section is nonempty | Keep `active.status: open`; continue this component branch. |
+| `font_gate.status` is `complete`, every applicable component-completion condition in the router holds, and the active component record has `Last change recompiled: true` | Mark the component record closed and append its component path, record path, and `containing_branch` to `closures`. If other components remain in that branch, restore the last parent pointer or create the next component in dependency and reading order. When the branch's components all close, obtain its visual review; if it has no official occurrence, record its current absence evidence and passing variation results instead. Only then append the branch name to `critic.completed_branches_since_last_input_load`; root `Document` is final-only and never appends. |
+| A later observation contradicts a closure outside the active ancestor chain | Move any component pointers in `open_parents`, then the `active` pointer, to `suspended` in parent-to-child order and clear `open_parents`; move the first affected closure pointer in dependency order to `active`, set it open, and reopen its component record. After the repaired component closes, restore all but the last suspended pointer to `open_parents` and the last to `active`; if none existed, continue with the next required component or final review. |
+| A later pass finds an omitted occurrence or element with a different shared rule | Add the occurrence to its existing component or add the new component path. If it changes the font inventory or adds a role absent from `requirements`, first apply the structural-source/font-inventory reset above. Otherwise activate the affected component and invalidate each closure whose direct-child placement or downstream relation depends on it. |
+| A current official visual result is `MISMATCH` | Treat the measured difference as repair input: locate and reopen the first affected component in dependency order, repair it, and obtain a new current visual result. |
+| Source authority or acceptance is missing | Keep the affected component open and request the user's decision when recorded governing sources prescribe conflicting outcomes, or when a recorded compiler or processor limitation leaves distinct publication policies. A measured reference/candidate difference by itself follows the `MISMATCH` repair transition above. |
 
    Compilation, warnings, page count, visited files, and aggregate pixel
-   scores cannot populate the relation fields. Resume a suspended branch at its
-   first empty or contradicted field after the reopened branch closes again.
+   scores cannot populate the relation fields. Resume a suspended component at its
+   first empty or contradicted field after the reopened component closes again.
 
-Except for a branch-property row that satisfies the router's explicit
+Except for a component-property row that satisfies the router's explicit
 `not_applicable` rule, do not enter `Result` as an independent judgment. Derive
 it from the fields beside it: an image `match` requires no visible difference
 in its named regions; a numeric `match` requires the recorded `Expected
@@ -436,9 +445,31 @@ policy and its observed extracted or rendered output. Do this for standard
 Typst syntax as well as wrapper fields, including references and bibliography
 entries.
 
+## Independent Branch Visual Review
+
+Builder self-review can miss visible drift. After all required components in a branch have valid closures, rerender the official PDF and
+run `compare_pdfs.py scan` against the governing reference. Generate a `detail`
+comparison for every official occurrence; its crop contains the whole occurrence,
+recorded parent edges, and the nearest visible sibling or boundary on each side.
+Root `Document` uses every full page and requires equal page counts.
+
+If the branch has no official occurrence, do not start a reviewer. Record its
+current absence evidence and passing variation results as the branch result.
+
+Start one fresh `gpt-5.6-terra` reviewer at medium effort with no conversation
+history. Give it the branch name, both PDF paths, current crop/image paths, and
+applicable exact user decisions. It inspects every image without editing files
+and writes one row per occurrence to
+`<scratch>/visual-reviews/<branch-name>.visual.md`. `MATCH` means no visible
+difference; `ACCEPTED_MISMATCH` requires an exact decision for each difference;
+otherwise use `MISMATCH` and report the first three differences in reading order.
+A font decision covers glyph outlines only unless it says otherwise. Any
+`MISMATCH` reopens the affected component and requires new images and a new
+reviewer. Run one reviewer per branch, never per component.
+
 ## Author-Usage Critic Loop
 
-Start a review when `completed_groups_since_last_input_load` contains two distinct group names. Compile the official usage and every
+Official-fixture matching does not prove reusable author behavior. Start a review when `completed_branches_since_last_input_load` contains two distinct branch names. Compile the official usage and every
 current case in `variation.typ` with the current dependency files first. Start a fresh
 maximum-reasoning subagent without conversation history. Pass the current
 authoring sources, dependencies, assets, the PDF compiled from each source after
@@ -449,16 +480,16 @@ builder diagnosis, intended answer, prior reports, notes, and rejected outputs.
 
 | Critic state and event | Required transition |
 | --- | --- |
-| `idle` + a closure completes the first distinct critic group | Keep `idle`; begin the next branch. |
-| `idle` + a closure completes the second distinct critic group | Set `loading`; start one fresh critic of all supplied current authoring files and PDFs; keep those files unchanged until `INPUTS_LOADED`. |
-| `loading` + `INPUTS_LOADED` | Set `running`; reset `completed_groups_since_last_input_load` to `[]`; begin the next element and compare every reference page with the PDF compiled from its source after the latest edit. |
-| `running` + another branch closure | Keep the current critic; append a group name only when that closure completes a critic group under step 9. |
-| `running` + completed report + fewer than two later completed critic groups | Store `CLEAR`, `REVISE`, or `BLOCKED` in `last_result`; set `idle`; process the completed `critic-findings.md`. |
-| `running` + completed report + two or more later completed critic groups | Store its result and findings, set `loading`, and immediately start one fresh critic on the current files. Keep those files unchanged until `INPUTS_LOADED`, then process the prior findings while the fresh critic runs. |
+| `idle` + the first distinct branch completes | Keep `idle`; begin the next branch. |
+| `idle` + the second distinct branch completes | Set `loading`; start one fresh critic of all supplied current authoring files and PDFs; keep those files unchanged until `INPUTS_LOADED`. |
+| `loading` + `INPUTS_LOADED` | Set `running`; reset `completed_branches_since_last_input_load` to `[]`; begin the next component and compare every reference page with the PDF compiled from its source after the latest edit. |
+| `running` + another component closure | Keep the current critic; append a branch name only when every required component in it closes and its visual review or no-official-occurrence result passes under step 9. |
+| `running` + completed report + fewer than two later completed branches | Store `CLEAR`, `REVISE`, or `BLOCKED` in `last_result`; set `idle`; process the completed `critic-findings.md`. |
+| `running` + completed report + two or more later completed branches | Store its result and findings, set `loading`, and immediately start one fresh critic on the current files. Keep those files unchanged until `INPUTS_LOADED`, then process the prior findings while the fresh critic runs. |
 | No fresh subagent slot | Preserve builder state, consult the user immediately, and await the decision. |
-Use only `idle`, `loading`, or `running` in `critic.state`. Keep `completed_groups_since_last_input_load` as a list with no duplicate names. Record the report's `CLEAR`, `REVISE`, or `BLOCKED` value in `critic.last_result`.
+Use only `idle`, `loading`, or `running` in `critic.state`. Keep `completed_branches_since_last_input_load` as a list with no duplicate branch names. Record the report's `CLEAR`, `REVISE`, or `BLOCKED` value in `critic.last_result`.
 
-For each returned cause/location, repeat its retest against the current authoring files and mark a finding resolved only from that observation. Route every repair through the step 9 transition table: repair an active-branch rule there; use its active-ancestor transition for a waiting parent; otherwise use its closed-branch transition for an earlier element or shared template rule.
+For each returned cause/location, repeat its retest against the current authoring files and mark a finding resolved only from that observation. Route every repair through the step 9 transition table: repair an active-component rule there; use its active-ancestor transition for a waiting parent; otherwise use its closed-component transition for an earlier element or shared template rule.
 
 Use this handoff with the current paths:
 
@@ -475,10 +506,10 @@ In scratch, record each critic finding ID, its current unresolved/resolved state
 and the retest observation; use a new fresh critic for each review. Intermediate
 `CLEAR` is repair input. After all closure entries remain valid and earlier findings are resolved, finish and process any running critic using the transition table above. Compile the
 official usage and all retained variation cases, then leave the current inputs
-unchanged. Regardless of `completed_groups_since_last_input_load`, run the final fresh critic and the
+unchanged. Regardless of `completed_branches_since_last_input_load`, run the final fresh critic and the
 builder's raw-source, every-reference-page, and every-variation-page audit concurrently. Finish
 only with final `CLEAR`, no unaccepted builder mismatch, and no unresolved critic
-finding; otherwise reopen the first affected branch in dependency order.
+finding; otherwise reopen the first affected component in dependency order.
 
 ## Mechanical Evidence Helpers
 
@@ -600,13 +631,13 @@ unchanged.
 The Finish conditions require all step 9 official relations, activating
 variations, and owner assignments together. For any unaccepted mismatch or
 critic finding, locate
-its source rule, reopen the first affected branch in dependency order, repair and
+its source rule, reopen the first affected component in dependency order, repair and
 retest it, replace its closure entry, and run a new final review.
 
-After every required branch has a valid closure entry, the final critic reports `CLEAR`, the final builder audit records no
+After every required component has a valid closure and every branch's visual review or no-official-occurrence result passes, the final critic reports `CLEAR`, the final builder audit records no
 unaccepted mismatch, and every critic finding has a resolving retest observation, return the generated template, usage,
 variation, and PDF paths with one sentence naming the compiled documents, inspected pages, activated variations, and final
 critic status. Leave regenerable bulk renders and superseded iterations in the system-temporary
 scratch root. When unavailable source authority or a required user choice leaves
-a closure field unresolved, consult the user and keep that branch active until
+a closure field unresolved, consult the user and keep that component active until
 the decision is available.
