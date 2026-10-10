@@ -3,7 +3,7 @@
 **Requires** — Established body/column insertion context, page flow, inherited
 typography, and the semantic structure of the official table content.
 
-**Owns** — Table width allocation, row/cell geometry, strokes, captions,
+**Owns** — Table placement/float policy, width allocation, row/cell geometry, strokes, captions,
 numbering, labels, and table-reference rendering.
 
 **Emits** — A standard table route whose dimensions derive from content,
@@ -20,8 +20,9 @@ counter, then close the table after child composition preserves widths,
 strokes, numbering, caption attachment, and downstream flow.
 When a table-caption prefix and body share the first line, read [run-in labels
 with aligned continuation lines](typst-tip-run-in-label-continuation.md).
+For TeX sources, read [figure/table defaults and explicit placement choices](typst-tip-tex-float-placement.md).
 
-- **Tables [C]** — semantic kind; total width; column count and width
+- **Tables [C]** — semantic kind; placement/float policy; total width; column count and width
   policy; grid/stroke sides, thickness, style and color; header repetition;
   counter/reset, label/reference semantics; caption position; page/column
   span and break behavior.

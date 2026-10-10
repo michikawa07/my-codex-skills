@@ -572,6 +572,7 @@ guidance; the Element Completion Loop owns artifact choice and acceptance.
 Load each short Typst or CSL tip when its named issue becomes active:
 
 - [preserving a standard element's natural size, flow, counters, labels, and links when adding a wrapper, helper, or manual rendering](references/typst-tip-preserve-built-in-behavior.md);
+- [reproducing TeX figure/table placement defaults and explicit per-object author choices](references/typst-tip-tex-float-placement.md);
 - [page references and links after a floating object moves](references/typst-tip-float-page-references.md);
 - [table splitting, caption attachment, and spacing across equivalent rule syntax](references/typst-tip-table-flow-and-rules.md);
 - [natural width versus wrapped extent](references/typst-tip-natural-width.md);

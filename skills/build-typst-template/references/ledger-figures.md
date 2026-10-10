@@ -19,6 +19,7 @@ observed caption supplement and counter. Close the figure after their
 composition preserves numbering, attachment, placement, and downstream flow.
 When a caption prefix and body share the first line, read [run-in labels with
 aligned continuation lines](typst-tip-run-in-label-continuation.md).
+For TeX sources, read [figure/table defaults and explicit placement choices](typst-tip-tex-float-placement.md).
 
 - **Figures [C]** — semantic kind, placement/float policy, counter/reset,
   label/reference semantics, keep with caption, page/column span.
