@@ -1,6 +1,6 @@
 ---
 name: generate-ieee-response-letter
-description: Generate an IEEE-style LaTeX responseLetter.tex skeleton from an IEEE review_summary.md. Use when the user asks to convert, draft, or prepare an IEEE reviewer-response letter template from review_summary.md, especially when response fields should be left blank for authors to fill later; if an existing responseLetter.tex is present in the same directory, reuse its preamble, metadata, inputs, and opening title block.
+description: Generate an IEEE-style LaTeX responseLetter.tex skeleton from review_summary.md, leaving response fields blank. Reuse the project's existing response-letter style and known manuscript metadata, including prior review rounds when starting a new round.
 ---
 
 # Generate IEEE Response Letter
@@ -14,26 +14,16 @@ Do not generate answer prose. The output is a template: reviewer/editor comments
 ## Inputs and Output
 
 - Read the `review_summary.md` supplied by the user or found at the path they name.
-- If `responseLetter.tex` already exists in the same directory as the input summary, read it as the local formatting source.
 - Write the requested `responseLetter.tex` path. If no output path is specified, write next to the input summary as `responseLetter.tex`.
-- Do not require any additional inputs.
 
 ## Base LaTeX
 
-Prefer a same-directory existing `responseLetter.tex` when it exists.
-
-When using an existing `responseLetter.tex`:
-
-- Reuse everything from `\documentclass` through the opening block immediately before the first response section.
-- Preserve the existing document class, packages, macros, `\input{...}` lines, author declarations, affiliations, title, date, `\maketitle`, thank-you text, and revised/previous manuscript-title block.
-- Treat the first `\section{Response to Comments...}` or equivalent reviewer/editor response section as the start of old response content.
-- Discard old response sections and answer text. Rebuild all editor/reviewer comment sections from `review_summary.md`.
-
-When no same-directory `responseLetter.tex` exists:
-
-- Start from `assets/ieee-response-letter-template.tex`.
-- Keep its compile-safe placeholder text as ordinary LaTeX text.
-- Do not invent author names, affiliations, manuscript titles, paper IDs, or revisions.
+1. Select the formatting source: use a same-directory `responseLetter.tex`; otherwise use the most recent earlier response letter for the same manuscript. Identify the review round from the revision history. If neither is available, use `assets/ieee-response-letter-template.tex`.
+2. Copy the preamble and opening block up to the first `\section{Response to Comments...}` or equivalent response section. Preserve packages, macros, author declarations, dependencies, and layout. Adjust relative `\input` paths for the output location.
+3. Fill author information, titles, and paper IDs from explicit user updates and current manuscript/review sources, carrying forward applicable information from the previous letter. If a material conflict remains after checking the revision history, ask the user.
+4. If information remains unavailable after these checks, use compile-safe placeholders for required fields and omit optional fields. Identify any remaining placeholders in the completion message.
+5. Adapt the opening text to the current review round. Include a previous-title statement when a title change is established for this round.
+6. Replace the old response sections with comments from the current summary, leaving each response paragraph empty.
 
 ## Comment Selection
 
@@ -167,7 +157,7 @@ Before finishing, inspect the generated `.tex` and confirm:
 - Every included comment has an empty response paragraph.
 - Editor comments, if present, come before reviewer comments.
 - Comment numbering is sequential within each owner.
-- If an existing same-directory `responseLetter.tex` was present, its preamble, metadata, `\input` lines, and opening manuscript-title block were preserved.
-- If no existing same-directory `responseLetter.tex` was present, the output uses the compile-safe fallback placeholders from the asset.
+- The selected source's style and dependencies were preserved.
+- Manuscript information and opening text match the current round; placeholders correspond to unresolved required fields.
 - The skill directory still contains no generation scripts.
 - The file ends with `\end{document}`.
