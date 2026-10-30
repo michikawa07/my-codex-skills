@@ -30,14 +30,24 @@ Before editing Julia code:
 
 ## Editing Rules
 
-- Match local style over generic Julia advice.
+- Match local style over generic Julia advice. When existing code provides a reference, follow its structure and syntax instead of substituting a preferred personal style.
+- Before introducing or renaming an identifier, search analogous project code and follow the established convention. Preserve semantic distinctions carried by names, including the differentiation variable, scalar versus vector quantities, and callables versus computed values.
+- Treat whitespace as intentional formatting. Preserve tabs versus spaces, relative indentation depth, blank lines, and horizontal spacing used to align related expressions or arguments vertically.
+- When moving or inserting code, reproduce the surrounding block's relative indentation and column alignment. Before finalizing, inspect the diff and remove unintended whitespace-only or style-only changes outside the requested edit.
 - Complete existing functions before considering refactors.
 - Do not turn a narrow script fix into a reusable framework.
 - Preserve existing Unicode/math notation such as `𝕢`, `τ`, `∂L∂q`, and `@SVector`.
-- Preserve local abbreviations and conventions such as `cal...`, `mk...`, `!` suffixes, dotted calls, and broadcast style.
+- Preserve comments unless the corresponding code or explanation is no longer valid. In scientific code, write comments that explain mathematical or physical meaning, invariants, or non-obvious reasons rather than restating the syntax.
+- Add a local variable, helper, wrapper, container conversion, or reassignment only when it clarifies a distinct concept, matches an established structure, or has a verified correctness or performance purpose.
 - Prefer Base, stdlib, and existing project dependencies before adding anything new.
 - In package or library code, use multiple dispatch and small functions when they reduce real complexity.
 - In temporary scripts, notebooks, experiments, and user-provided skeletons, avoid new abstractions unless asked.
+
+## Type Stability and Closures
+
+- Treat type stability as a property of a concrete call path, not of an isolated expression or one observed input. Check the public or downstream call path with representative argument types from the supported API, using tools such as `@code_warntype` or `@inferred` when appropriate.
+- Use type conversions, assertions, and return annotations only when they express a real numerical or API contract. They must not conceal an inference problem by forcing the observed result into a convenient type.
+- A closure captures a binding when it uses a variable from an enclosing scope. Reassigning that captured binding can make Julia store it in `Core.Box`, a shared mutable container that can impede inference and add allocation. Prefer a closure-local binding with a distinct name when the values need not be shared; use an explicit state object when shared mutation is intentional.
 
 ## Julia Gotchas
 

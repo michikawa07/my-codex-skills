@@ -9,6 +9,7 @@ updates with `git pull`.
 ## Contents
 
 - `skills/amazon-paperwork`: Amazon Business paperwork retrieval and printing workflow
+- `skills/build-typst-template`: evidence-driven Word/PDF-to-Typst template reconstruction workflow
 - `skills/dynamixel-handler-release-notes`: DynamixelHandler_ release note workflow
 - `skills/empirical-prompt-tuning`: prompt and skill evaluation workflow
 - `skills/generate-ieee-response-letter`: IEEE response letter skeleton generation workflow

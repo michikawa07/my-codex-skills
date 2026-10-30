@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Typst Template"
+  short_description: "Derive and verify project-specific Typst templates"
+  default_prompt: "Use $build-typst-template to reconstruct this document template from the supplied structural and visual evidence."
