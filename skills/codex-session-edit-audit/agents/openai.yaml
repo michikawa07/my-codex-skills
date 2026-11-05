@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Session Edit Audit"
+  short_description: "Audit actual edits from Codex session logs"
+  default_prompt: "Use $codex-session-edit-audit to list every file edit made in this thread, including reverted changes."
