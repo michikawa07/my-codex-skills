@@ -1,0 +1,5 @@
+interface:
+  display_name: "Reader-Aware Writing"
+  short_description: "書き手の立場と読者の知識・目的から，情報と論理の順序を設計する"
+policy:
+  allow_implicit_invocation: true

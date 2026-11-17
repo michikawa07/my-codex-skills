@@ -1,0 +1,5 @@
+interface:
+  display_name: "Draft Reviewer Response"
+  short_description: "一般文章の原理を併用し，著者の立場と根拠に沿う査読回答を代筆する"
+policy:
+  allow_implicit_invocation: true
