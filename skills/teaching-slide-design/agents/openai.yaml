@@ -1,0 +1,5 @@
+interface:
+  display_name: "Teaching Slide Design"
+  short_description: "共通のスライド設計に，前提知識・到達目標・概念説明・演習の判断を加える"
+policy:
+  allow_implicit_invocation: true

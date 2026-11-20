@@ -1,0 +1,5 @@
+interface:
+  display_name: "Slide Design"
+  short_description: "主張候補の比較から，スライドの説明順・図・強調・編集方法を設計する"
+policy:
+  allow_implicit_invocation: true

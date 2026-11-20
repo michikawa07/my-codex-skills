@@ -1,0 +1,5 @@
+interface:
+  display_name: "Teaching Slide Review"
+  short_description: "学ぶべき概念と提示順の説明を照合し，講習スライドの不足を評価する"
+policy:
+  allow_implicit_invocation: true
