@@ -1,6 +1,6 @@
 ---
 name: teaching-slide-review
-description: Review lecture or training slides and handouts for conceptual accuracy, explanations in presentation order, learner prerequisites, and alignment with learning goals. Use for standalone reviews and independent reviews delegated by teaching-slide-design.
+description: Review lecture and hands-on training slides and handouts for conceptual accuracy, explanations in presentation order, task information, and alignment with learning goals. Use for standalone reviews and reviews delegated by teaching-slide-design.
 ---
 
 # Teaching Slide Review
@@ -16,9 +16,14 @@ description: Review lecture or training slides and handouts for conceptual accur
 
 参照資料の第1節を使い，到達目標と科目資料から，必要な概念・実体・関係・使う理由を整理する．用語，仕組み，仕様の正確性を信頼できる科目資料で確かめ，出典と，確認した事実・推論の区別を示す．
 
-第2節に沿って，最初のページから読む．その時点の既有知識と本文・図から，用語が指す対象，主題，重要な関係，直前からの接続を理解できるかを確かめる．学習に必要な説明と，下書きに書かれている内容を別々に捉える．
+第2節に沿って，最初のページから読む．その時点の既有知識と本文・図から，主題，用語・図の意味，直前からの接続を確かめ，共通スキルの観点も使う．学習に必要な説明と，下書きに書かれている内容を別々に捉える．
 
-各ページの説明の成立を確認したうえで，第3節を使い，目標・演習・理解を確かめる課題の対応を見る．視認性は実際の表示から，手順やコードの動作は確認した環境と結果から判断する．
+- **講義用ページ：** 概念が指す実体，定義と具体例の対応，重要な関係，仕組みや使う理由を理解できるかを見る．コード・データ構造の説明は，実際の記法との対応も確かめる．
+- **作業用ページ：** 課題に必要な前提・指示・材料と，学習者が考える範囲を，到達目標と既有知識から確かめる．操作を教える場合は，対象・場所，動作や入力，確認する状態を教材から判断でき，新しく教える操作に必要な情報がそのページに示されているかを見る．順次実行と選択の違い，継続して保つ状態も追う．
+
+これらの観点は，ページの活動と到達目標に合わせて使い，説明と課題を併用する場合は組み合わせる．
+
+各ページの説明の成立を確認したうえで，第3節を使い，目標・演習・理解を確かめる課題の対応を見る．課題の方法・手順自体が成立することと，学習者が教材から必要な判断・行動を行えることは分けて確かめる．視認性は実際の表示から，操作の成立は該当する環境・条件と結果から判断する．コードを実行する課題では，コードの動作も確認する．
 
 ## 根拠と影響から，優先する修正を伝える
 
