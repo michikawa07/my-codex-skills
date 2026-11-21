@@ -8,6 +8,15 @@ PowerPointの作成・編集時に使う．ファイルの生成・変換・表�
 
 提出するPPTXを保存してから，文字サイズの変更やコネクタの経路変更など，依頼者が行う操作を確かめる．表示で文字幅や重なりに差が出たら，閲覧環境のフォント・描画も調べる．
 
+**図形内での文字の折り返し．** 図形・テキストボックスを作る共通処理で折り返しをオンにする（python-pptxでは `text_frame.word_wrap = True`）．書き出したPPTXの明示設定は `wrap="square"` になる．検査では明示オン，明示オフ，未指定を区別する．手動改行や自動サイズの設定は別に扱う．行が増えたら，全対象ページを表示し，文字サイズを保って枠の幅・高さ・配置を整える．[PowerPointの折り返し設定](https://learn.microsoft.com/en-us/office/vba/api/powerpoint.textframe2.wordwrap)・[PPTXの属性仕様](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.bodyproperties.wrap?view=openxml-3.0.1)
+
+[折り返しの検査・設定](../scripts/pptx_text_wrap.py)は，保存済みの図形の文字枠を確認する．新規資料は全ページを検査する．作成したページにまとめて設定するときは，例えば次のようにコピーを書き出し，提出版で確認する．同じページの一部だけを編集する場合は，対象図形の作成処理で設定する．
+
+```sh
+python scripts/pptx_text_wrap.py draft.pptx
+python scripts/pptx_text_wrap.py draft.pptx --slides 2 5 --output wrapped.pptx
+```
+
 **図の部品を後でまとめて動かせるか．** 書き出し時に，普通の図形にもグループ化を禁止する設定が付くことがある．複数の部品からなる図を作成・編集したら，保存したPPTXを[検査スクリプト](../scripts/pptx_grouping.py)に渡す．禁止設定のある部品が，スライドの表示順・図形ID・名前で分かる．設定の意味は[Microsoftの仕様](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.shapelocks.nogrouping?view=openxml-3.0.1)を参照．
 
 ```sh

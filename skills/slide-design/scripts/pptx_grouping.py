@@ -9,6 +9,7 @@ from pathlib import Path
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 from xml.parsers import expat
+from xml.sax.saxutils import quoteattr
 from zipfile import BadZipFile, ZipFile
 
 
@@ -57,7 +58,8 @@ def target(value):
     return tuple(map(int, parts))
 
 
-def release_locks(data, doc, selected):
+def edit_attribute(data, doc, selected, name, value):
+    """Set an attribute on the selected DOM elements, or remove it when value is None."""
     # Expat gives the byte offset of each real start tag, also in DOM preorder.
     # Splice only the selected attribute. This preserves prefixes, character references and all other XML bytes.
     offsets = []
@@ -70,19 +72,26 @@ def release_locks(data, doc, selected):
         encoding = "utf-16-le"
     elif data.startswith((b"\xfe\xff", b"\0<")):
         encoding = "utf-16-be"
+    replacement = b"" if value is None else f" {name}={quoteattr(value)}".encode(encoding)
     pieces = []
     last = 0
     for node, start, end in zip(doc.getElementsByTagName("*"), offsets, offsets[1:]):
         if node not in selected:
             continue
         fragment = data[start:end].decode(encoding)
-        attr = next((m for m in ATTRIBUTE.finditer(fragment) if m[1] == "noGrp"), None)
-        if attr is None:
-            raise ValueError("cannot locate the selected noGrp attribute")
-        pieces.append(data[last:start + len(fragment[:attr.start()].encode(encoding))])
-        last = start + len(fragment[:attr.end()].encode(encoding))
+        if node.hasAttribute(name):
+            attr = next((m for m in ATTRIBUTE.finditer(fragment) if m[1] == name), None)
+            if attr is None:
+                raise ValueError(f"cannot locate the selected {name} attribute")
+            left, right = attr.span()
+        elif value is None:
+            raise ValueError(f"cannot locate the selected {name} attribute")
+        else:
+            left = right = re.match(r"<[^\s/>]+", fragment).end()
+        pieces.append(data[last:start + len(fragment[:left].encode(encoding))] + replacement)
+        last = start + len(fragment[:right].encode(encoding))
     if len(pieces) != len(selected):
-        raise ValueError("cannot locate all selected lock elements")
+        raise ValueError(f"cannot locate all selected elements for {name}")
     return b"".join([*pieces, data[last:]])
 
 
@@ -146,7 +155,7 @@ def main():
                         if placeholder or not locks:
                             raise ValueError(f"{page}:{shape_id} is a placeholder or has no explicit grouping lock")
                         selected.update(locks)
-                    changed[part] = release_locks(data, doc, selected)
+                    changed[part] = edit_attribute(data, doc, selected, "noGrp", None)
             if args.output:
                 write_copy(archive, args.output, changed)
                 print(f"Saved {args.output}")
