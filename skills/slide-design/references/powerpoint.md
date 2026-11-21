@@ -20,10 +20,11 @@ python scripts/pptx_grouping.py draft.pptx
 python scripts/pptx_grouping.py draft.pptx --allow 3:12 3:13 --output editable.pptx
 ```
 
-**用語がそろっているか．** [用語検索](../scripts/find_pptx_text.py)は各検索語の該当ページと原文を返す．例えば試験片を `specimen` と呼び，草稿では `test piece` とも書いていたなら，普通名詞の `piece` まで検索して単複・言い換えを拾う．同じ対象の別名と，別の部品や引用を文ごとに見分ける．画像に含まれる文字やグラフのラベルは表示したページで読む．
+**同じ対象を何と呼んでいるか．** [全文抽出・検索](../scripts/find_pptx_text.py)に提出用PPTXだけを渡すと，各ページの図形・表セルの全文を読める．画像の文字やグラフのラベルは表示したページで読む．例えば本文で試験片を `specimen`，図で同じ試験片を `test piece` と呼んでいれば，図のラベルを `specimen` にそろえる．`specimen holder` は支持具の名前として残す．見つかった旧表記は，修正後のファイルで原文と件数を調べられる．
 
 ```sh
-python scripts/find_pptx_text.py final.pptx specimen "test piece" piece
+python scripts/find_pptx_text.py final.pptx
+python scripts/find_pptx_text.py final.pptx "test piece"
 ```
 
 著者が手で直した図形を残して周辺を編集するときは，編集元と保存後のファイルから，位置・経路・塗り・線端などの設定を[比較スクリプト](../scripts/compare_pptx_shape.py)で照合できる．ページは表示順で指定し，選択ウィンドウの名前か `--id` で図形を特定する．

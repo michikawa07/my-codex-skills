@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Find terms in the saved text of PowerPoint shapes and table cells."""
+"""Read the saved text of PowerPoint shapes and table cells, or find selected terms."""
 
 import argparse
 import re
@@ -49,13 +49,14 @@ def context(text, match):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, epilog=(
+        "Omit terms to print each nonblank text block in slide thumbnail order with its original line breaks. "
         "Matches are case-insensitive substrings within each shape or cell, including grouped shapes. "
         "Each term has its own non-overlapping occurrence count. Original line breaks appear as \\n in context. "
         "Image pixels, separate chart parts, masters and notes are outside the search. "
         "Review each occurrence in context. A completed search returns 0, including zero matches."
     ))
     parser.add_argument("file", help="saved PPTX to inspect")
-    parser.add_argument("terms", metavar="TERM", nargs="+", help="literal text, with quotes around a phrase")
+    parser.add_argument("terms", metavar="TERM", nargs="*", help="literal text, with quotes around a phrase")
     args = parser.parse_args()
     if any(not term.strip() for term in args.terms):
         parser.error("each search term must contain text")
@@ -65,13 +66,16 @@ def main():
         with ZipFile(args.file) as archive:
             for page, part in enumerate(slide_parts(archive), 1):
                 for block in text_blocks(ET.fromstring(archive.read(part))):
+                    if not patterns and block.strip():
+                        print(f"p{page}\t{block}\n")
                     for term, pattern in patterns.items():
                         for match in pattern.finditer(block):
                             print(f"p{page}\t{term!r}\t{context(block, match)!r}")
                             counts[term] += 1
     except (OSError, BadZipFile, ET.ParseError, KeyError, RuntimeError, ValueError) as exc:
         parser.exit(2, f"{parser.prog}: {exc}\n")
-    print("Occurrences")
+    if counts:
+        print("Occurrences")
     for term, count in counts.items():
         print(f"{term!r}\t{count}")
     return 0
