@@ -95,12 +95,14 @@ def edit_attribute(data, doc, selected, name, value):
     return b"".join([*pieces, data[last:]])
 
 
-def write_copy(archive, output, changed):
+def write_copy(archive, output, changed, removed=()):
     stream = output.open("xb")
     try:
         with stream, ZipFile(stream, "w") as result:
             result.comment = archive.comment
             for part in archive.infolist():
+                if part.filename in removed:
+                    continue
                 payload = changed[part.filename] if part.filename in changed else archive.read(part)
                 result.writestr(part, payload)
     except BaseException:

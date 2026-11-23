@@ -1,12 +1,14 @@
 ---
 name: teaching-slide-design
-description: Create or revise slides and handouts for lectures, courses, workshops, or training, with criteria matched to explanations, activities, and learner decisions. Apply slide-design and delegate independent review with teaching-slide-review.
+description: Create or revise slides and handouts for lectures, courses, workshops, or training, with criteria matched to explanations, activities, and learner decisions. Apply specified local edits directly. Use slide-design and independent teaching-slide-review for instructional design and substantive revisions.
 ---
 
 # Teaching Slide Design
 
 講義・講習のスライドと配布物を，受講者の既有知識から，必要な概念・仕組み・判断・操作を身に付ける教材として作る．
-最初に[slide-design](../slide-design/SKILL.md)を読む．教材設計には，[講義設計と教材レビュー](../teaching-slide-review/references/teaching-review.md)の「参照先の使い方」と第1〜3節を使う．
+対象と仕上がりが指定された修正は，その箇所を直接編集し，保存後の状態と表示を確かめて提出する．ローカルPPTXはプロジェクトの指定編集手順から始める．呼び方は[共通の指定編集](../slide-design/references/powerpoint.md#指定どおりの修正)にある．単発の指定はその編集で完結する．
+
+教材の説明や実習を設計・改訂するときは，最初に[slide-design](../slide-design/SKILL.md)を読む．教材設計には，[講義設計と教材レビュー](../teaching-slide-review/references/teaching-review.md)の「参照先の使い方」と第1〜3節を使う．
 
 ## 学習者と科目を起点に，必要な説明を定める
 
@@ -23,11 +25,11 @@ description: Create or revise slides and handouts for lectures, courses, worksho
 
 ### 講義用：概念や仕組みを理解する
 
-定義のどの性質が具体例のどの対象に当たるかを対応付ける．既習内容は，新しい理解の手掛かりとして使う事実を選ぶ．独立ページとして残す，次の説明へ統合する，省く場合を比較する．
+受講者が見たものを出発点に，そのどの部分を新しい用語でどう説明できるかを示す．同じ対象を別の表し方で示す場合は，一つの値や部位を両方で追える例にする．例で何を変え，何をそろえたかを見直す．繰り返したときの変化を教えるなら同じ仕組みで結果を比べる．仕組みの違いを教えるなら，その違いが現れる例を選ぶ．読み手が選び分ける根拠を，実例の中に残す．
 
 ### 作業用：課題に取り組む
 
-課題で行う活動と，そこから何を観察・説明・判断するかを，到達目標に対応させる．受講者の既有知識と開始状態から，教材で与える前提・操作情報と，学習者が考える範囲を分ける．
+作業の結果から何を学ぶかを決める．例えば測定の演習では，表示された値のどこを見ると，設定の変更が結果に表れたと分かるかを示す．操作方法を書き換えるときも，その観察から次の判断へ進む説明を残す．前提と，受講者が自力で考える部分は到達目標に合わせる．
 
 - 操作を教える場合は，開始から結果の確認まで，対象・場所，行う動作や必要な入力，操作後に確認する状態を判断できるようにする．新しく教える操作に必要な情報は，その作業ページに示す．既習の操作を参照するときは，参照先と使う箇所を特定できるようにする．
 - 操作・方法の提示では，順次実行と選択を区別する．主手順と補足，条件分岐，選択肢と判断基準の並列提示などから，学習目標と習熟に合う形を選ぶ．
