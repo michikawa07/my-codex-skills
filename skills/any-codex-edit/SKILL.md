@@ -6,6 +6,7 @@ description: Use when creating or editing any file, including code, prose, and c
 # Any Codex Edit
 
 - Before creating or editing a file, read nearby content and existing examples serving a similar purpose.
+- Before choosing variable names, inspect nearby code to identify and follow its naming conventions.
 - Match local naming, structure, terminology, tone, and formatting; use established names for the same concepts and patterns for similar operations, unless the user requests otherwise.
 - When editing prose, design it around who will read it, what they already know, the role from which Codex is writing, and what information must be stated for the reader to understand, decide, or act; order the content accordingly.
 - Before finishing, compare the changed content with those examples and correct unjustified style differences.
